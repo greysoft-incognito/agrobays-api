@@ -1,5 +1,7 @@
 # AGROBAYS API
 
+> Designed to bridge the Agrobase web/mobile and desktop interface
+
 ## Installation
 
 ## Environment Variables
