@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
+use DeviceDetector\DeviceDetector;
 
 class RegisteredUserController extends Controller
 {
@@ -36,8 +37,15 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        Auth::login($user);
+        $dev = new DeviceDetector($request->userAgent());
+        $device = $dev->getBrandName()?($dev->getBrandName().$dev->getDeviceName()):$request->userAgent();
 
-        return response()->noContent();
+        return $this-> buildResponse([
+            'message' => 'Registration was successful',
+            'status' => 'success',
+            'response_code' => 201,
+            'token' => $user->createToken($device)->plainTextToken,
+            'user' => $user,
+        ]);
     }
 }

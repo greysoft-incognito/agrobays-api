@@ -1,11 +1,11 @@
 <?php
-
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use DeviceDetector\DeviceDetector;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -18,10 +18,16 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request)
     {
         $request->authenticate();
+        $dev = new DeviceDetector($request->userAgent());
+        $device = $dev->getBrandName()?($dev->getBrandName().$dev->getDeviceName()):$request->userAgent();
 
-        $request->session()->regenerate();
-
-        return response()->noContent();
+        return $this-> buildResponse([
+            'message' => 'Login was successful',
+            'status' => 'success',
+            'response_code' => 200,
+            'token' => $request->user()->createToken($device)->plainTextToken,
+            'user' => $request->user(),
+        ]);
     }
 
     /**
@@ -32,12 +38,12 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request)
     {
-        Auth::guard('web')->logout();
+        $request->user()->tokens()->delete();
 
-        $request->session()->invalidate();
-
-        $request->session()->regenerateToken();
-
-        return response()->noContent();
+        return $this-> buildResponse([
+            'message' => 'You have been successfully logged out',
+            'status' => 'success',
+            'response_code' => 200,
+        ]);
     }
 }
