@@ -4,7 +4,7 @@
 
 ## Installation
 
-## Environment Variables
+### Environment Variables
 
 Duplicate the .env.example file and modify the content to match your prefered deployment environment
 
