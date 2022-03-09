@@ -15,11 +15,12 @@ class Controller extends BaseController
     {
         $message = $data['message'] ?? 'Request was successful';
         $code   = $data['response_code'] ?? 200;
+        $resp   = $data['response_data'] ?? null;
         $status = $data['status'] ?? 'success';
         $errors = $data['errors'] ?? null;
         $token  = $data['token'] ?? null;
 
-        unset($data['message'], $data['response_code'], $data['status'], $data['errors'], $data['token']);
+        unset($data['message'], $data['response_code'], $data['status'], $data['errors'], $data['token'], $data['response_data']);
 
         $response = [
             'message' => $message,
@@ -36,6 +37,11 @@ class Controller extends BaseController
         if ($token)
         {
             $response['token'] = $token;
+        }
+
+        if ($resp)
+        {
+            $response['response_data'] = $resp;
         }
 
         return response($response, $code);

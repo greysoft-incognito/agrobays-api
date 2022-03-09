@@ -44,7 +44,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:sanctum'])->group(func
 
 Route::controller(FruitBayController::class)->prefix('fruitbay')->name('fruitbay.')->middleware(['auth:sanctum'])->group(function() {
     Route::get('/', 'index');
+    Route::get('/category/{category?}', 'index');
+    Route::get('/categories/{item?}', 'categories');
     Route::get('/{item}', 'getItem');
+    Route::post('/{item}/buy', 'buyItem');
 });
 
 require __DIR__.'/auth.php';

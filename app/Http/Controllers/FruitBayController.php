@@ -3,13 +3,43 @@
 namespace App\Http\Controllers;
 
 use App\Models\FruitBay;
+use App\Models\FruitBayCategory;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class FruitBayController extends Controller
 {
-    public function index(Request $request)
+    /**
+     * Get a list of all fruitbay items
+     *
+     * @param Request $request
+     * @param string|integer|null $category
+     * @return \Illuminate\Http\Response|\Illuminate\Contracts\Routing\ResponseFactory
+     */
+    public function index(Request $request, $category = null)
     {
-        $items = FruitBay::paginate(12);
+        $get_cat = (((request()->segment(1) !== 'api' && request()->segment(2) === 'category') ||
+                    request()->segment(3) === 'category')
+                    || $category);
+        if ($get_cat)
+        {
+            $getCategory = FruitBayCategory::where(['id' => $category])->orWhere(['slug' => $category])->first();
+            if (!$getCategory)
+            {
+                return $this-> buildResponse([
+                    'message' => 'This category does not exist',
+                    'status' => 'error',
+                    'response_code' => 404,
+                ]);
+            }
+            $items =  FruitBay::where(['fruit_bay_category_id' => $getCategory->id])->paginate(12);
+        }
+        else
+        {
+            $items = FruitBay::paginate(12);
+        }
 
         return $this-> buildResponse([
             'message' => $items->isEmpty() ? 'The fruit bay is empty for now' : '',
@@ -19,15 +49,91 @@ class FruitBayController extends Controller
         ]);
     }
 
+    /**
+     * Get a particular fruit bay item by it's {id}
+     *
+     * @param Request $request
+     * @param string|integer $item
+     * @return \Illuminate\Http\Response|\Illuminate\Contracts\Routing\ResponseFactory
+     */
     public function getItem(Request $request, $item)
     {
         $item = FruitBay::whereId($item)->orWhere(['slug' => $item])->first();
 
         return $this-> buildResponse([
             'message' => !$item ? 'The requested item no longer exists' : '',
-            'status' =>  !$item ? 'info' : 'success',
+            'status' =>  !$item ? 'error' : 'success',
             'response_code' => !$item ? 404 : 200,
             'item' => $item,
+        ]);
+    }
+
+    /**
+     * Process payment for the selected fruit bay item
+     *
+     * @param Request $request
+     * @param string|integer $item
+     * @return \Illuminate\Http\Response|\Illuminate\Contracts\Routing\ResponseFactory
+     */
+    public function buyItem(Request $request, $item)
+    {
+        $item = FruitBay::whereId($item)->orWhere(['slug' => $item])->first();
+
+        if (!$item)
+        {
+            return $this-> buildResponse([
+                'message' => 'The requested item no longer exists',
+                'status' => 'error',
+                'response_code' => 404,
+            ]);
+        }
+
+        $trans = $item->transaction();
+        $transaction = $trans->create([
+            'user_id' => Auth::id(),
+            'reference' => Str::random(12),
+            'method' => 'direct',
+            'amount' => $item->price,
+            'due' => $item->price,
+        ]);
+
+        return $this-> buildResponse([
+            'message' => 'Transaction successful',
+            'status' => 'success',
+            'response_code' => 200,
+            'response_data' => [[]],
+            'transaction' => $transaction,
+        ]);
+    }
+
+    /**
+     * Get a list of all fruitbay categories and optionally find a category by it's {id}
+     *
+     * @param Request $request
+     * @param string|integer|null $category
+     * @return \Illuminate\Http\Response|\Illuminate\Contracts\Routing\ResponseFactory
+     */
+    public function categories(Request $request, $category = null)
+    {
+        if ($category)
+        {
+            $item = FruitBayCategory::whereId($category)->orWhere(['slug' => $category])->first();
+
+            return $this-> buildResponse([
+                'message' => !$item ? 'The requested category no longer exists.' : '',
+                'status' =>  !$item ? 'info' : 'success',
+                'response_code' => !$item ? 404 : 200,
+                'item' => $item,
+            ]);
+        }
+
+        $items = FruitBayCategory::get();
+
+        return $this-> buildResponse([
+            'message' => $items->isEmpty() ? 'There are no categories for now.' : '',
+            'status' => $items->isEmpty() ? 'info' : 'success',
+            'response_code' => 200,
+            'items' => $items,
         ]);
     }
 }
