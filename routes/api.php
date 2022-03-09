@@ -24,7 +24,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:sanctum'])->group(func
     Route::controller(AdminFruitBayController::class)
     ->prefix('fruitbay')
     ->name('fruitbay.')
-    ->middleware(['auth:sanctum'])
     ->group(function() {
         Route::get('/', 'index');
         Route::get('/{item}', 'getItem');
@@ -34,7 +33,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:sanctum'])->group(func
     Route::controller(AdminFruitBayCategoryController::class)
     ->prefix('categories/fruitbay')
     ->name('categories.fruitbay.')
-    ->middleware(['auth:sanctum'])
     ->group(function() {
         Route::get('/', 'index');
         Route::get('/{item}', 'getItem');
@@ -42,7 +40,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:sanctum'])->group(func
     });
 });
 
-Route::controller(FruitBayController::class)->prefix('fruitbay')->name('fruitbay.')->middleware(['auth:sanctum'])->group(function() {
+Route::controller(FruitBayController::class)
+->prefix('fruitbay')->name('fruitbay.')
+->middleware(['auth:sanctum'])
+->group(function() {
     Route::get('/', 'index');
     Route::get('/category/{category?}', 'index');
     Route::get('/categories/{item?}', 'categories');
