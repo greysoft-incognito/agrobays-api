@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -11,6 +12,15 @@ class FruitBayCategory extends Model
 {
     use HasFactory;
 
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = [
+        'image_url',
+    ];
+
     public static function boot()
     {
         parent::boot();
@@ -18,6 +28,22 @@ class FruitBayCategory extends Model
             $slug = Str::of($category->title)->slug();
             $category->slug = (string) FruitBayCategory::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
         });
+    }
+
+    /**
+     * Get the URL to the fruit bay category's photo.
+     *
+     * @return string
+     */
+    protected function imageUrl(): Attribute
+    {
+        $image = $this->image
+            ? profile_photo($this)
+            : 'https://loremflickr.com/320/320/fruit?random='.rand();
+
+        return Attribute::make(
+            get: fn () => $image,
+        );
     }
 
     /**
