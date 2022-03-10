@@ -37,7 +37,7 @@ class FruitBay extends Model
     protected function imageUrl(): Attribute
     {
         $image = $this->image
-            ? profile_photo($this)
+            ? img($this->image, 'banner', 'original')
             : 'https://loremflickr.com/320/320/fruit?random='.rand();
 
         return Attribute::make(

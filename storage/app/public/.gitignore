@@ -1,2 +1,5 @@
 *
+!media
+!media/default_*
+!uploads
 !.gitignore
