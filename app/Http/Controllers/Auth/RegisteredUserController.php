@@ -40,7 +40,7 @@ class RegisteredUserController extends Controller
         $dev = new DeviceDetector($request->userAgent());
         $device = $dev->getBrandName()?($dev->getBrandName().$dev->getDeviceName()):$request->userAgent();
 
-        return $this-> buildResponse([
+        return $this->buildResponse([
             'message' => 'Registration was successful',
             'status' => 'success',
             'response_code' => 201,

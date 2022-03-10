@@ -16,11 +16,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::prefix('users')->name('users.')->middleware(['auth:sanctum'])->group(function() {
+Route::prefix('users')->name('users.')
+->middleware(['auth:sanctum'])
+->group(function() {
 
 });
 
-Route::prefix('admin')->name('admin.')->middleware(['auth:sanctum'])->group(function() {
+Route::prefix('admin')->name('admin.')
+->middleware(['auth:sanctum'])
+->group(function() {
     Route::controller(AdminFruitBayController::class)
     ->prefix('fruitbay')
     ->name('fruitbay.')

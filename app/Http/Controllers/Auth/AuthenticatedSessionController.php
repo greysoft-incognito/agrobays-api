@@ -21,7 +21,7 @@ class AuthenticatedSessionController extends Controller
         $dev = new DeviceDetector($request->userAgent());
         $device = $dev->getBrandName()?($dev->getBrandName().$dev->getDeviceName()):$request->userAgent();
 
-        return $this-> buildResponse([
+        return $this->buildResponse([
             'message' => 'Login was successful',
             'status' => 'success',
             'response_code' => 200,
@@ -40,7 +40,7 @@ class AuthenticatedSessionController extends Controller
     {
         $request->user()->tokens()->delete();
 
-        return $this-> buildResponse([
+        return $this->buildResponse([
             'message' => 'You have been successfully logged out',
             'status' => 'success',
             'response_code' => 200,

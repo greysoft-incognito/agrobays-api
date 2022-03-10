@@ -16,7 +16,7 @@ class AdminFruitBayController extends Controller
     {
         $items = FruitBay::paginate(12);
 
-        return $this-> buildResponse([
+        return $this->buildResponse([
             'message' => $items->isEmpty() ? 'No Fruit Bay item has been added' : '',
             'status' => $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
@@ -28,7 +28,7 @@ class AdminFruitBayController extends Controller
     {
         $item = FruitBay::whereId($item)->orWhere(['slug' => $item])->first();
 
-        return $this-> buildResponse([
+        return $this->buildResponse([
             'message' => !$item ? 'The requested item no longer exists' : '',
             'status' =>  !$item ? 'info' : 'success',
             'response_code' => !$item ? 404 : 200,
@@ -46,9 +46,6 @@ class AdminFruitBayController extends Controller
 
         $fruitbay = FruitBay::whereId($item)->orWhere(['slug' => $item])->first() ?? new FruitBay;
 
-        $slug = Str::slug($request->name);
-
-        $fruitbay->slug = !$item && FruitBay::whereSlug($slug)->first() ? ($slug . rand()) : ($fruitbay->slug??$slug);
         $fruitbay->name = $request->name;
         $fruitbay->price = $request->price;
         $fruitbay->description = $request->description;
@@ -64,7 +61,7 @@ class AdminFruitBayController extends Controller
         }
         $fruitbay->save();
 
-        return $this-> buildResponse([
+        return $this->buildResponse([
             'message' => $item ? Str::of($fruitbay->name)->append(' Has been updated!') : 'New fruit bay item added.',
             'status' =>  'success',
             'response_code' => 200,

@@ -15,7 +15,7 @@ class AdminFruitBayCategoryController extends Controller
     {
         $items = FruitBayCategory::get();
 
-        return $this-> buildResponse([
+        return $this->buildResponse([
             'message' => $items->isEmpty() ? 'No categories have been added.' : '',
             'status' => $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
@@ -27,7 +27,7 @@ class AdminFruitBayCategoryController extends Controller
     {
         $item = FruitBayCategory::whereId($item)->orWhere(['slug' => $item])->first();
 
-        return $this-> buildResponse([
+        return $this->buildResponse([
             'message' => !$item ? 'The requested category no longer exists.' : '',
             'status' =>  !$item ? 'info' : 'success',
             'response_code' => !$item ? 404 : 200,
@@ -43,10 +43,6 @@ class AdminFruitBayCategoryController extends Controller
         ]);
 
         $category = FruitBayCategory::whereId($item)->orWhere(['slug' => $item])->first() ?? new FruitBayCategory();
-
-        $slug = Str::slug($request->title);
-
-        $category->slug = !$item && FruitBayCategory::whereSlug($slug)->first() ? ($slug . rand()) : ($category->slug??$slug);
         $category->title = $request->title;
         $category->description = $request->description;
 
@@ -60,7 +56,7 @@ class AdminFruitBayCategoryController extends Controller
         }
         $category->save();
 
-        return $this-> buildResponse([
+        return $this->buildResponse([
             'message' => $item ? Str::of($category->title)->append(' Has been updated!') : 'New category item created.',
             'status' =>  'success',
             'response_code' => 200,

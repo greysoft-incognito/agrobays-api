@@ -28,7 +28,7 @@ class FruitBayController extends Controller
             $getCategory = FruitBayCategory::where(['id' => $category])->orWhere(['slug' => $category])->first();
             if (!$getCategory)
             {
-                return $this-> buildResponse([
+                return $this->buildResponse([
                     'message' => 'This category does not exist',
                     'status' => 'error',
                     'response_code' => 404,
@@ -41,7 +41,7 @@ class FruitBayController extends Controller
             $items = FruitBay::paginate(12);
         }
 
-        return $this-> buildResponse([
+        return $this->buildResponse([
             'message' => $items->isEmpty() ? 'The fruit bay is empty for now' : '',
             'status' => $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
@@ -60,7 +60,7 @@ class FruitBayController extends Controller
     {
         $item = FruitBay::whereId($item)->orWhere(['slug' => $item])->first();
 
-        return $this-> buildResponse([
+        return $this->buildResponse([
             'message' => !$item ? 'The requested item no longer exists' : '',
             'status' =>  !$item ? 'error' : 'success',
             'response_code' => !$item ? 404 : 200,
@@ -81,7 +81,7 @@ class FruitBayController extends Controller
 
         if (!$item)
         {
-            return $this-> buildResponse([
+            return $this->buildResponse([
                 'message' => 'The requested item no longer exists',
                 'status' => 'error',
                 'response_code' => 404,
@@ -97,7 +97,7 @@ class FruitBayController extends Controller
             'due' => $item->price,
         ]);
 
-        return $this-> buildResponse([
+        return $this->buildResponse([
             'message' => 'Transaction successful',
             'status' => 'success',
             'response_code' => 200,
@@ -119,7 +119,7 @@ class FruitBayController extends Controller
         {
             $item = FruitBayCategory::whereId($category)->orWhere(['slug' => $category])->first();
 
-            return $this-> buildResponse([
+            return $this->buildResponse([
                 'message' => !$item ? 'The requested category no longer exists.' : '',
                 'status' =>  !$item ? 'info' : 'success',
                 'response_code' => !$item ? 404 : 200,
@@ -129,7 +129,7 @@ class FruitBayController extends Controller
 
         $items = FruitBayCategory::get();
 
-        return $this-> buildResponse([
+        return $this->buildResponse([
             'message' => $items->isEmpty() ? 'There are no categories for now.' : '',
             'status' => $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
