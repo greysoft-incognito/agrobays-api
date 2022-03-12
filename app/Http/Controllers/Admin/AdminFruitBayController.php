@@ -49,7 +49,7 @@ class AdminFruitBayController extends Controller
         $fruitbay->name = $request->name;
         $fruitbay->price = $request->price;
         $fruitbay->description = $request->description;
-        $fruitbay->fruit_bay_category_id = $request->fruit_bay_category_id??FruitBayCategory::first()->id??null;
+        $fruitbay->fruit_bay_category_id = $request->category_id??FruitBayCategory::first()->id??null;
 
         if ($request->image)
         {
