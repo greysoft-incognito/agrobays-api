@@ -39,7 +39,7 @@ class FruitBayCategory extends Model
     {
         $image = $this->image
             ? img($this->image, 'banner', 'original')
-            : 'https://loremflickr.com/320/320/fruit?random='.rand();
+            : 'https://loremflickr.com/320/320/'.urlencode($this->title??'fruit').'?random='.rand();
 
         return Attribute::make(
             get: fn () => $image,
