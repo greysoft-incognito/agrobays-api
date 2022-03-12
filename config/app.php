@@ -169,6 +169,7 @@ return [
         /*
          * Package Service Providers...
          */
+        Khsing\World\WorldServiceProvider::class,
 
         /*
          * Application Service Providers...
