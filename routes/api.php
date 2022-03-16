@@ -35,7 +35,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
             Route::get('/{item}', 'getItem');
             Route::post('/{item?}', 'store');
         });
-    
+
         Route::controller(AdminFruitBayCategoryController::class)
         ->prefix('categories/fruitbay')
         ->name('categories.fruitbay.')
@@ -55,20 +55,23 @@ Route::middleware(['auth:sanctum'])->group(function() {
         Route::get('/{item}', 'getItem');
         Route::post('/{item}/buy', 'buyItem');
     });
-    
+
     Route::controller(AccountController::class)
     ->prefix('account')->name('account.')
     ->group(function() {
-        Route::get('/', 'index');
+        Route::get('/', 'index')->name('index');
         Route::controller(SavingsController::class)
         ->prefix('savings')->name('savings.')
         ->group(function() {
             Route::get('/get-plans', 'plans');
             Route::get('/get-plans/{plan}', 'getPlan');
-            Route::post('/activate-plan/{plan}', 'getPlan');
+            Route::get('/get-plans/{plan}/foodbags/{id?}', 'getBags');
+            Route::get('/subscription/{action?}', 'subscription');
+            Route::post('/activate-plan/{id}', 'store');
+            Route::post('/update-bag/{id}', 'updateBag');
         });
     });
-    
+
 });
 
 require __DIR__.'/auth.php';

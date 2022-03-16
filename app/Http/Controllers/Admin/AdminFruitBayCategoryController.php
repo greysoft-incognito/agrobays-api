@@ -8,6 +8,7 @@ use App\Models\FruitBayCategory;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class AdminFruitBayCategoryController extends Controller
 {
@@ -37,10 +38,19 @@ class AdminFruitBayCategoryController extends Controller
 
     public function store(Request $request, $item = null)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'title' => 'required|min:3|max:15',
             'description' => 'nullable|min:10|max:150',
         ]);
+
+        if ($validator->fails()) {
+            return $this->buildResponse([
+                'message' => 'Your input has a few errors',
+                'status' => 'error',
+                'response_code' => 422,
+                'errors' => $validator->errors(),
+            ]);
+        }
 
         $category = FruitBayCategory::whereId($item)->orWhere(['slug' => $item])->first() ?? new FruitBayCategory();
         $category->title = $request->title;

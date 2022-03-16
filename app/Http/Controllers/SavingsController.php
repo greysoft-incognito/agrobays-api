@@ -2,8 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FoodBag;
 use App\Models\Plan;
+use App\Models\Saving;
+use App\Models\Subscription;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class SavingsController extends Controller
 {
@@ -27,7 +32,7 @@ class SavingsController extends Controller
         $plans = Plan::all();
 
         return $this->buildResponse([
-            'message' => $plans->isEmpty() ? 'There are no saving plans for now.' : '',
+            'message' => $plans->isEmpty() ? 'There are no saving plans for now.' : 'OK',
             'status' => $plans->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
             'plans' => $plans,
@@ -43,10 +48,17 @@ class SavingsController extends Controller
      */
     public function getPlan(Request $request, $plan)
     {
-        $plan = Plan::whereId($plan)->orWhere(['slug' => $plan])->first();
+        if ($plan === 'user')
+        {
+            $plan = Auth::user()->subscription->plan;
+        }
+        else
+        {
+            $plan = Plan::whereId($plan)->orWhere(['slug' => $plan])->first();
+        }
 
         return $this->buildResponse([
-            'message' => !$plan ? 'The requested plan is no longer available' : '',
+            'message' => !$plan ? 'The requested plan is no longer available' : 'OK',
             'status' =>  !$plan ? 'error' : 'success',
             'response_code' => !$plan ? 404 : 200,
             'plan' => $plan,
@@ -54,13 +66,47 @@ class SavingsController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Get the food bags for the selected plan
+     * Pass the food_bag id to get a particular food bag
      *
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @param string|integer $plan
+     * @return \Illuminate\Http\Response|\Illuminate\Contracts\Routing\ResponseFactory
      */
-    public function create()
+    public function getBags(Request $request, $plan, $id = null)
     {
-        //
+        if ($plan === 'user')
+        {
+            $plan = Auth::user()->subscription->plan;
+        }
+        else
+        {
+            $plan = Plan::whereId($plan)->orWhere(['slug' => $plan])->first();
+        }
+
+        if (!$plan)
+        {
+            return $this->buildResponse([
+                'message' => 'The requested plan no longer exists.',
+                'status' => 'error',
+                'response_code' => 404,
+            ]);
+        }
+        elseif ($id && !($bag = $plan->bags()->find($id)))
+        {
+            return $this->buildResponse([
+                'message' => 'The requested food bag no longer exists.',
+                'status' => 'info',
+                'response_code' => 404,
+            ]);
+        }
+
+        return $this->buildResponse([
+            'message' => 'OK',
+            'status' => 'success',
+            'response_code' => 200,
+            $id ? 'bag' : 'bags' => $id ? $bag : $plan->bags,
+        ]);
     }
 
     /**
@@ -69,20 +115,136 @@ class SavingsController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, $id = null)
     {
-        //
+        $plan = Plan::find($id);
+
+        if (!$plan)
+        {
+            return $this->buildResponse([
+                'message' => 'The requested plan no longer exists.',
+                'status' => 'error',
+                'response_code' => 404,
+            ]);
+        }
+        elseif ((Auth::user()->subscription->id??null) === $plan->id)
+        {
+            return $this->buildResponse([
+                'message' => 'You are already active on this plan, but you can subscribe to another plan.',
+                'status' => 'info',
+                'response_code' => 200,
+            ]);
+        }
+
+        // Delete user's current subscription
+        Auth::user()->subscription()->delete();
+
+        // Create the new plan
+        $userPlan = new Subscription;
+        $userPlan->user_id = Auth::id();
+        $userPlan->plan_id = $plan->id;
+        $userPlan->food_bag_id = $plan->bags()->first()->id;
+        $userPlan->save();
+
+        return $this->buildResponse([
+            'message' => "You have successfully activated the {$userPlan->plan->title} plan",
+            'status' => 'success',
+            'response_code' => 201,
+            'data' => $userPlan,
+        ]);
     }
 
     /**
-     * Display the specified resource.
+     * Update the user's foodbag
      *
-     * @param  \App\Models\Plan  $plan
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function show(Plan $plan)
+    public function updateBag(Request $request, $id = null)
     {
-        //
+        $bag = FoodBag::find($id);
+        $ids = Auth::user()->subscription->plan->bags()->get('id')->values()->toArray();
+
+        if (!$bag || !in_array($bag->id, Collect($ids[0]??[])->filter(fn($k)=>!empty($k))->values()->toArray()))
+        {
+            return $this->buildResponse([
+                'message' => 'The requested food bag no longer exists.',
+                'status' => 'error',
+                'response_code' => 404,
+            ]);
+        }
+
+        // Update the user's current subscription's food bag
+        $plan = Auth::user()->subscription;
+        $plan->food_bag_id = $bag->id;
+        $plan->save();
+
+        return $this->buildResponse([
+            'message' => "You have successfully activated the {$bag->title} food bag",
+            'status' => 'success',
+            'response_code' => 201,
+            'data' => $bag,
+        ]);
+    }
+
+    /**
+     * List all the authenticated user's subscriptions.
+     *
+     * @param  \Illuminate\Http\Client\Request  $request
+     * @param  String $action
+     * @return \Illuminate\Http\Response
+     */
+    public function subscription(Request $request, $action = null)
+    {
+        $subscription = Auth::user()->subscription;
+
+        $key = 'subscription';
+        $data = $subscription;
+
+        if ($action === 'deposit')
+        {
+            if (!$subscription)
+            {
+                $msg = 'You do not have an active subscription';
+            }
+            elseif ($subscription->days_left <= 1)
+            {
+                $msg = 'You have completed the saving circle for this subscription, you would be notified when your food bag is ready for pickup or delivery.';
+            }
+            else
+            {
+                $save = new Saving([
+                    'user_id' => Auth::id(),
+                    'days' => $request->days ?? 1,
+                    'amount' => $subscription->plan->amount / $subscription->plan->duration,
+                    'due' => $subscription->plan->amount / $subscription->plan->duration,
+                ]);
+
+                $savings = $subscription->savings()->save($save);
+
+                $subscription->status = $subscription->days_left >= 1 ? 'active' : 'complete';
+                $subscription->save();
+
+                $key = 'deposit';
+                $_amount = money($savings->amount);
+                $_left = $subscription->days_left;
+                $msg = !$subscription
+                    ? 'You do not have an active subscription'
+                    : "You have successfully made a {$savings->days} day savings of {$_amount} for the {$subscription->plan->title} plan, you now have only {$_left} days left to save up.";
+            }
+        }
+        else
+        {
+            $subscription->plan??null;
+            $msg = !$subscription ? 'You do not have an active subscription' : 'OK';
+        }
+
+        return $this->buildResponse([
+            'message' => $msg,
+            'status' =>  !$subscription ? 'info' : 'success',
+            'response_code' => 200,
+            $key => $data??[],
+        ]);
     }
 
     /**

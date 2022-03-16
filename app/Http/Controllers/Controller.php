@@ -6,7 +6,12 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
+use MarcinOrlowski\ResponseBuilder\ResponseBuilder as RB;
 
+/**
+ *
+ * @return \Illuminate\Http\Response|\Illuminate\Contracts\Routing\ResponseFactory
+ */
 class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
@@ -26,7 +31,7 @@ class Controller extends BaseController
             'message' => $message,
             'status' => $status,
             'response_code' => $code,
-            'response' => $data,
+            'response' => $data ?? [],
         ];
 
         if ($errors)

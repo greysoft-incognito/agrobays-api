@@ -13,14 +13,15 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('plans', function (Blueprint $table) {
+        Schema::create('savings', function (Blueprint $table) {
             $table->id();
-            $table->string('title')->unique();
-            $table->string('slug')->unique();
-            $table->text('description');
-            $table->integer('duration')->default(30);
+            $table->integer('user_id')->index();
+            $table->foreignId('subscription_id')->constrained('subscriptions')->onUpdate('cascade')->onDelete('cascade');
+            $table->integer('days')->default(1);
             $table->decimal('amount')->default(0.00);
-            $table->string('icon')->nullable();
+            $table->decimal('due')->default(0.00);
+            $table->decimal('tax')->default(0.00);
+            $table->enum('status', ['pending', 'complete', 'rejected'])->default('complete');
             $table->timestamps();
         });
     }
@@ -33,6 +34,6 @@ return new class extends Migration
     public function down()
     {
         Schema::disableForeignKeyConstraints();
-        Schema::dropIfExists('plans');
+        Schema::dropIfExists('savings');
     }
 };

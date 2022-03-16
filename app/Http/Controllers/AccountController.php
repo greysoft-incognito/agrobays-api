@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AccountController extends Controller
 {
@@ -11,8 +12,13 @@ class AccountController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Auth $auth)
     {
-        //
+        return $this->buildResponse([
+            'message' => 'OK',
+            'status' => 'success',
+            'response_code' => 200,
+            'user' => $auth::user(),
+        ]);
     }
 }

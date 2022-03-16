@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class PasswordResetLinkController extends Controller
@@ -19,9 +20,18 @@ class PasswordResetLinkController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'email' => ['required', 'email'],
         ]);
+
+        if ($validator->fails()) {
+            return $this->buildResponse([
+                'message' => 'Your input has a few errors',
+                'status' => 'error',
+                'response_code' => 422,
+                'errors' => $validator->errors(),
+            ]);
+        }
 
         // We will send the password reset link to this user. Once we have attempted
         // to send the link, we will examine the response then see the message we
@@ -31,11 +41,20 @@ class PasswordResetLinkController extends Controller
         );
 
         if ($status != Password::RESET_LINK_SENT) {
-            throw ValidationException::withMessages([
-                'email' => [__($status)],
+            return $this->buildResponse([
+                'message' => 'An error occured.',
+                'status' => 'error',
+                'response_code' => 422,
+                'errors' => [
+                    'email' => __($status)
+                ]
             ]);
         }
 
-        return response()->json(['status' => __($status)]);
+        return $this->buildResponse([
+            'message' => __($status),
+            'status' => 'success',
+            'response_code' => 200,
+        ]);
     }
 }

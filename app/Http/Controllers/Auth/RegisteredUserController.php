@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use DeviceDetector\DeviceDetector;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class RegisteredUserController extends Controller
 {
@@ -23,11 +25,20 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
+
+        if ($validator->fails()) {
+            return $this->buildResponse([
+                'message' => 'Your input has a few errors',
+                'status' => 'error',
+                'response_code' => 422,
+                'errors' => $validator->errors(),
+            ]);
+        }
 
         $user = User::create([
             'name' => $request->name,
@@ -40,11 +51,25 @@ class RegisteredUserController extends Controller
         $dev = new DeviceDetector($request->userAgent());
         $device = $dev->getBrandName()?($dev->getBrandName().$dev->getDeviceName()):$request->userAgent();
 
+        $token = $user->createToken($device)->plainTextToken;
+
+        return $this->preflight($token);
+    }
+
+    public function preflight($token)
+    {
+        [$id, $user_token] = explode('|', $token, 2);
+        $token_data = DB::table('personal_access_tokens')->where('token', hash('sha256', $user_token))->first();
+        $user_id = $token_data->tokenable_id;
+
+        Auth::loginUsingId($user_id);
+        $user = Auth::user();
+
         return $this->buildResponse([
             'message' => 'Registration was successful',
             'status' => 'success',
             'response_code' => 201,
-            'token' => $user->createToken($device)->plainTextToken,
+            'token' => $token,
             'user' => $user,
         ]);
     }

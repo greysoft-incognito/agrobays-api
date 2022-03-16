@@ -29,13 +29,13 @@ class Plan extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
-    public function bag(): HasMany
+    public function bags(): HasMany
     {
         return $this->hasMany(FoodBag::class);
     }
 
     public function getFoodBagAttribute()
     {
-        return $this->bag()->get();
+        return $this->bags()->get();
     }
 }

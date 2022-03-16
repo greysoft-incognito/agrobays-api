@@ -18,7 +18,7 @@ class FoodBagSeeder extends Seeder
      */
     public function run(Generator $faker)
     {
-        FoodBag::truncate();
+        FoodBag::where('id', '!=', NULL)->delete();
         FoodBag::insert([
             [
                 'plan_id' => Plan::first()->id??1,

@@ -17,7 +17,7 @@ class PlanSeeder extends Seeder
      */
     public function run(Generator $faker)
     {
-        Plan::truncate();
+        Plan::where('id', '!=', NULL)->delete();
         Plan::insert([
             [
                 'slug' => $faker->slug(),

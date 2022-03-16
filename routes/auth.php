@@ -12,6 +12,10 @@ Route::post('/register', [RegisteredUserController::class, 'store'])
                 ->middleware('guest')
                 ->name('register');
 
+Route::get('/register/preflight/{token}', [RegisteredUserController::class, 'preflight'])
+                ->middleware('guest')
+                ->name('register.preflight');
+
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
                 ->middleware('guest')
                 ->name('login');
