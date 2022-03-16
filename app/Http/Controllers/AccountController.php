@@ -15,11 +15,13 @@ class AccountController extends Controller
      */
     public function index(Auth $auth)
     {
+        $user = $auth::user();
+        $user->subscription;
         return $this->buildResponse([
             'message' => 'OK',
             'status' => 'success',
             'response_code' => 200,
-            'user' => $auth::user(),
+            'user' => $user,
         ]);
     }
 
