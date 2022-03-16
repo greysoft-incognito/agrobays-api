@@ -46,4 +46,12 @@ class Saving extends Model
     {
         return $this->amount * $this->days;
     }
+
+    /**
+     * Get the fruit bay item's transaction.
+     */
+    public function transaction()
+    {
+        return $this->morphOne(Transaction::class, 'transactable');
+    }
 }

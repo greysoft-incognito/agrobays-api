@@ -8,7 +8,7 @@ use App\Models\Saving;
 use App\Models\Subscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class SavingsController extends Controller
 {
@@ -221,12 +221,20 @@ class SavingsController extends Controller
                 ]);
 
                 $savings = $subscription->savings()->save($save);
+                $trans = $savings->transaction();
+                $trans->create([
+                    'user_id' => Auth::id(),
+                    'reference' => Str::random(12),
+                    'method' => 'direct',
+                    'amount' => $subscription->plan->amount * $request->days,
+                    'due' => $subscription->plan->amount * $request->days,
+                ]);
 
                 $subscription->status = $subscription->days_left >= 1 ? 'active' : 'complete';
                 $subscription->save();
 
                 $key = 'deposit';
-                $_amount = money($savings->amount);
+                $_amount = money($savings->amount*$request->days);
                 $_left = $subscription->days_left;
                 $msg = !$subscription
                     ? 'You do not have an active subscription'

@@ -24,6 +24,17 @@ Route::prefix('users')->name('users.')
 
 });
 
+Route::get('/get/settings', function() {
+    return response([
+        'message' => "OK",
+        'status' => "success",
+        'response_code' => 200,
+        'response' => [
+            "settings" => collect(config("settings"))->except(['permissions', 'messages'])
+        ],
+    ]);
+});
+
 Route::middleware(['auth:sanctum'])->group(function() {
     Route::prefix('admin')->name('admin.')
     ->group(function() {
@@ -60,13 +71,14 @@ Route::middleware(['auth:sanctum'])->group(function() {
     ->prefix('account')->name('account.')
     ->group(function() {
         Route::get('/', 'index')->name('index');
+        Route::get('/transactions', 'transactions')->name('transactions');
         Route::controller(SavingsController::class)
         ->prefix('savings')->name('savings.')
         ->group(function() {
             Route::get('/get-plans', 'plans');
             Route::get('/get-plans/{plan}', 'getPlan');
             Route::get('/get-plans/{plan}/foodbags/{id?}', 'getBags');
-            Route::get('/subscription/{action?}', 'subscription');
+            Route::match(['GET', 'POST'], '/subscription/{action?}', 'subscription');
             Route::post('/activate-plan/{id}', 'store');
             Route::post('/update-bag/{id}', 'updateBag');
         });
