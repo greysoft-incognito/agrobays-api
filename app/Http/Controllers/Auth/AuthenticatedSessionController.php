@@ -21,12 +21,15 @@ class AuthenticatedSessionController extends Controller
         $dev = new DeviceDetector($request->userAgent());
         $device = $dev->getBrandName()?($dev->getBrandName().$dev->getDeviceName()):$request->userAgent();
 
+        $user = $request->user();
+        $user->subscription;
+
         return $this->buildResponse([
             'message' => 'Login was successful',
             'status' => 'success',
             'response_code' => 200,
-            'token' => $request->user()->createToken($device)->plainTextToken,
-            'user' => $request->user(),
+            'token' => $user->createToken($device)->plainTextToken,
+            'user' => $user,
         ]);
     }
 

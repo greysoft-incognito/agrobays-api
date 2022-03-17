@@ -64,6 +64,7 @@ class RegisteredUserController extends Controller
 
         Auth::loginUsingId($user_id);
         $user = Auth::user();
+        $user->subscription;
 
         return $this->buildResponse([
             'message' => 'Registration was successful',
