@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -12,7 +13,8 @@ class Plan extends Model
     use HasFactory;
 
     public $appends = [
-        'food_bag'
+        'food_bag',
+        'image_url',
     ];
 
     public static function boot()
@@ -34,8 +36,26 @@ class Plan extends Model
         return $this->hasMany(FoodBag::class);
     }
 
-    public function getFoodBagAttribute()
+    public function foodBag(): Attribute
     {
-        return $this->bags()->get();
+        return Attribute::make(
+            get: fn() => $this->bags()->get()
+        );
+    }
+
+    /**
+     * Get the URL to the fruit bay item's photo.
+     *
+     * @return string
+     */
+    protected function imageUrl(): Attribute
+    {
+        $image = $this->image
+            ? img($this->image, 'banner', 'original')
+            : 'https://loremflickr.com/320/320/'.urlencode($this->title??'fruit');
+
+        return Attribute::make(
+            get: fn () => $image,
+        );
     }
 }

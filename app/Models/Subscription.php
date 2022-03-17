@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -59,23 +60,31 @@ class Subscription extends Model
         return $this->hasOne(FoodBag::class);
     }
 
-    public function getPaidDaysAttribute()
+    public function paidDays(): Attribute
     {
-        return $this->savings()->count('id');
+        return Attribute::make(
+            get: fn() => $this->savings()->count('id')
+        );
     }
 
-    public function getDaysLeftAttribute()
+    public function daysLeft(): Attribute
     {
-        return $this->plan->duration - $this->savings()->count('id');
+        return Attribute::make(
+            get: fn() => $this->plan->duration - $this->savings()->count('id')
+        );
     }
 
-    public function getTotalSavedAttribute()
+    public function totalSaved(): Attribute
     {
-        return number_format($this->savings()->sum('amount'), 2);
+        return Attribute::make(
+            get: fn() => number_format($this->savings()->sum('amount'), 2)
+        );
     }
 
-    public function getTotalLeftAttribute()
+    public function totalLeft(): Attribute
     {
-        return number_format($this->plan->amount - $this->savings()->sum('amount'), 2);
+        return Attribute::make(
+            get: fn() => number_format($this->plan->amount - $this->savings()->sum('amount'), 2)
+        );
     }
 }

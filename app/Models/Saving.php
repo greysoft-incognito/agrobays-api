@@ -42,9 +42,11 @@ class Saving extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function getTotalAttribute()
+    public function total(): Attribute
     {
-        return $this->amount * $this->days;
+        return Attribute::make(
+            get: fn()=> $this->amount * $this->days
+        );
     }
 
     /**

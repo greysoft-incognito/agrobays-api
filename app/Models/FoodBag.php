@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -25,8 +26,10 @@ class FoodBag extends Model
         return $this->hasMany(Food::class);
     }
 
-    public function getFoodsAttribute()
+    public function foods(): Attribute
     {
-        return $this->getFoods()->get();
+        return Attribute::make(
+            get: fn()=> $this->getFoods()->get()
+        );
     }
 }
