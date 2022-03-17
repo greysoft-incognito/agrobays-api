@@ -63,7 +63,7 @@ class Subscription extends Model
     public function paidDays(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->savings()->count('id')
+            get: fn() => $this->savings()->sum('days')
         );
     }
 
