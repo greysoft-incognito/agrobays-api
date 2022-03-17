@@ -31,12 +31,7 @@ class NewPasswordController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->buildResponse([
-                'message' => 'Your input has a few errors',
-                'status' => 'error',
-                'response_code' => 422,
-                'errors' => $validator->errors(),
-            ]);
+            return $this->validatorFails($validator);
         }
 
         // Here we will attempt to reset the user's password. If it is successful we

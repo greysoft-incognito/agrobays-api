@@ -32,12 +32,7 @@ class RegisteredUserController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->buildResponse([
-                'message' => 'Your input has a few errors',
-                'status' => 'error',
-                'response_code' => 422,
-                'errors' => $validator->errors(),
-            ]);
+            return $this->validatorFails($validator);
         }
 
         $user = User::create([

@@ -25,12 +25,7 @@ class PasswordResetLinkController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->buildResponse([
-                'message' => 'Your input has a few errors',
-                'status' => 'error',
-                'response_code' => 422,
-                'errors' => $validator->errors(),
-            ]);
+            return $this->validatorFails($validator);
         }
 
         // We will send the password reset link to this user. Once we have attempted

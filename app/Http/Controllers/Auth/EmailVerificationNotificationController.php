@@ -21,7 +21,7 @@ class EmailVerificationNotificationController extends Controller
                 'message' => 'Your email is already verified.',
                 'status' => 'success',
                 'response_code' => 200,
-            ])->redirect()->route('account.index');
+            ]);
             // return redirect()->intended(RouteServiceProvider::HOME);
         }
 

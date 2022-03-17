@@ -8,6 +8,7 @@ use App\Models\Saving;
 use App\Models\Subscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class SavingsController extends Controller
@@ -199,10 +200,19 @@ class SavingsController extends Controller
         $subscription = Auth::user()->subscription;
 
         $key = 'subscription';
-        $data = $subscription;
 
         if ($action === 'deposit')
         {
+            $validator = Validator::make($request->all(), [
+                'days' => ['required', 'numeric', 'min:1', 'max:'.$subscription->plan->duration],
+            ], [
+                'days.min' => 'You have to save for at least 1 day.'
+            ]);
+
+            if ($validator->fails()) {
+                return $this->validatorFails($validator);
+            }
+
             if (!$subscription)
             {
                 $msg = 'You do not have an active subscription';
@@ -251,7 +261,7 @@ class SavingsController extends Controller
             'message' => $msg,
             'status' =>  !$subscription ? 'info' : 'success',
             'response_code' => 200,
-            $key => $data??[],
+            $key => $subscription??[],
         ]);
     }
 

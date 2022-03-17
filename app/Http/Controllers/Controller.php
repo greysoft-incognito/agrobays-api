@@ -6,6 +6,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Contracts\Validation\Validator;
 use MarcinOrlowski\ResponseBuilder\ResponseBuilder as RB;
 
 /**
@@ -16,6 +17,12 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
+    /**
+     * Prepare the API response
+     *
+     * @param array $data
+     * @return void
+     */
     public function buildResponse($data = [])
     {
         $message = $data['message'] ?? 'Request was successful';
@@ -50,5 +57,21 @@ class Controller extends BaseController
         }
 
         return response($response, $code);
+    }
+
+    /**
+     * Prepare the validation error.
+     *
+     * @param Validator $validator
+     * @return void
+     */
+    public function validatorFails(Validator $validator)
+    {
+        return $this->buildResponse([
+            'message' => 'Your input has a few errors',
+            'status' => 'error',
+            'response_code' => 422,
+            'errors' => $validator->errors(),
+        ]);
     }
 }
