@@ -71,11 +71,11 @@ class Subscription extends Model
 
     public function getTotalSavedAttribute()
     {
-        return $this->savings()->sum('amount');
+        return number_format($this->savings()->sum('amount'), 2);
     }
 
     public function getTotalLeftAttribute()
     {
-        return $this->plan->amount - $this->savings()->sum('amount');
+        return number_format($this->plan->amount - $this->savings()->sum('amount'), 2);
     }
 }
