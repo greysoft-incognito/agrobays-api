@@ -70,7 +70,7 @@ class Subscription extends Model
     public function daysLeft(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->plan->duration - $this->savings()->count('id')
+            get: fn() => $this->plan->duration - $this->savings()->sum('days')
         );
     }
 

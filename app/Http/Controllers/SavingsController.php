@@ -206,7 +206,8 @@ class SavingsController extends Controller
             $validator = Validator::make($request->all(), [
                 'days' => ['required', 'numeric', 'min:1', 'max:'.$subscription->plan->duration],
             ], [
-                'days.min' => 'You have to save for at least 1 day.'
+                'days.min' => 'You have to save for at least 1 day.',
+                'days.max' => "You cannot save for more than {$subscription->plan->duration} days."
             ]);
 
             if ($validator->fails()) {
@@ -225,7 +226,7 @@ class SavingsController extends Controller
             {
                 $save = new Saving([
                     'user_id' => Auth::id(),
-                    'days' => $request->days ?? 1,
+                    'days' => $request->days,
                     'amount' => $subscription->plan->amount / $subscription->plan->duration,
                     'due' => $subscription->plan->amount / $subscription->plan->duration,
                 ]);
