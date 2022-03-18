@@ -5,15 +5,20 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\FruitBayCategory;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Yajra\DataTables\DataTables;
 
 class AdminFruitBayCategoryController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, DataTables $dataTables)
     {
+        $model = FruitBayCategory::query();
+        return app('datatables')->eloquent($model)->toJson();
+
         $items = FruitBayCategory::paginate(15);
 
         return $this->buildResponse([

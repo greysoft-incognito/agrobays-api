@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\Admin\AdminFoodbagsController;
 use App\Http\Controllers\Admin\AdminFruitBayCategoryController;
 use App\Http\Controllers\Admin\AdminFruitBayController;
 use App\Http\Controllers\Admin\AdminPlansController;
@@ -62,6 +63,16 @@ Route::middleware(['auth:sanctum'])->group(function() {
         Route::controller(AdminPlansController::class)
         ->prefix('savings/plans')
         ->name('savings.plan.')
+        ->group(function() {
+            Route::get('/', 'index');
+            Route::get('/{item}', 'getItem');
+            Route::post('/{item?}', 'store');
+            Route::delete('/{item?}', 'destroy');
+        });
+
+        Route::controller(AdminFoodbagsController::class)
+        ->prefix('foodbags')
+        ->name('foodbags.')
         ->group(function() {
             Route::get('/', 'index');
             Route::get('/{item}', 'getItem');
