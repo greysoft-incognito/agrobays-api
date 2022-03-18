@@ -128,7 +128,7 @@ class SavingsController extends Controller
                 'response_code' => 404,
             ]);
         }
-        elseif (($usub = Auth::user()->subscription->days_left??0) < $plan->duration && $usub !== $plan->duration)
+        elseif (($usub = Auth::user()->subscription->days_left??0) < $plan->duration && $usub !== $plan->duration && $usub !== 0)
         {
             return $this->buildResponse([
                 'message' => "You have a savings pattern on your current plan, you can only switch after you complete the {$plan->duration} day savings for the plan.",
