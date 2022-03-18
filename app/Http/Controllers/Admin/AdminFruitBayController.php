@@ -15,14 +15,27 @@ class AdminFruitBayController extends Controller
 {
     public function index(Request $request)
     {
-        $items = FruitBay::paginate(15);
+        $model = FruitBay::query();
+        return app('datatables')->eloquent($model)
+            ->editColumn('created_at', function(FruitBay $item) {
+                return $item->created_at->format('Y-m-d H:i');
+            })
+            ->editColumn('description', function(FruitBay $item) {
+                return Str::words($item->description, '8');
+            })
+            ->addColumn('action', function (FruitBay $item) {
+                return '<a href="#edit-'.$item->id.'" class="btn btn-xs btn-primary"><i class="fa fa-pen-alt"></i> Edit</a>';
+            })
+            ->removeColumn('updated_at')->toJson();
 
-        return $this->buildResponse([
-            'message' => $items->isEmpty() ? 'No Fruit Bay item has been added' : '',
-            'status' => $items->isEmpty() ? 'info' : 'success',
-            'response_code' => 200,
-            'items' => $items,
-        ]);
+        // $items = FruitBay::paginate(15);
+
+        // return $this->buildResponse([
+        //     'message' => $items->isEmpty() ? 'No Fruit Bay item has been added' : '',
+        //     'status' => $items->isEmpty() ? 'info' : 'success',
+        //     'response_code' => 200,
+        //     'items' => $items,
+        // ]);
     }
 
     public function getItem(Request $request, $item)

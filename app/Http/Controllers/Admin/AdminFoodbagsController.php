@@ -12,14 +12,27 @@ class AdminFoodbagsController extends Controller
 {
     public function index(Request $request)
     {
-        $bags = FoodBag::paginate(15);
+        $model = FoodBag::query();
+        return app('datatables')->eloquent($model)
+            ->editColumn('created_at', function(FoodBag $item) {
+                return $item->created_at->format('Y-m-d H:i');
+            })
+            ->editColumn('description', function(FoodBag $item) {
+                return Str::words($item->description, '8');
+            })
+            ->addColumn('action', function (FoodBag $item) {
+                return '<a href="#edit-'.$item->id.'" class="btn btn-xs btn-primary"><i class="fa fa-pen-alt"></i> Edit</a>';
+            })
+            ->removeColumn('updated_at')->toJson();
 
-        return $this->buildResponse([
-            'message' => $bags->isEmpty() ? 'No foodbag has been created' : '',
-            'status' => $bags->isEmpty() ? 'info' : 'success',
-            'response_code' => 200,
-            'bags' => $bags,
-        ]);
+        // $bags = FoodBag::paginate(15);
+
+        // return $this->buildResponse([
+        //     'message' => $bags->isEmpty() ? 'No foodbag has been created' : '',
+        //     'status' => $bags->isEmpty() ? 'info' : 'success',
+        //     'response_code' => 200,
+        //     'bags' => $bags,
+        // ]);
     }
 
     public function getItem(Request $request, $item)
@@ -38,7 +51,6 @@ class AdminFoodbagsController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'title' => 'required|min:3|max:15|unique:food_bags',
-            'plan_id' => 'required|numeric|min:1',
             'description' => 'nullable|min:10|max:150',
         ]);
 

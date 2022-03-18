@@ -14,14 +14,27 @@ class AdminPlansController extends Controller
 {
     public function index(Request $request)
     {
-        $plans = Plan::paginate(15);
+        $model = Plan::query();
+        return app('datatables')->eloquent($model)
+            ->editColumn('created_at', function(Plan $item) {
+                return $item->created_at->format('Y-m-d H:i');
+            })
+            ->editColumn('description', function(Plan $item) {
+                return Str::words($item->description, '8');
+            })
+            ->addColumn('action', function (Plan $item) {
+                return '<a href="#edit-'.$item->id.'" class="btn btn-xs btn-primary"><i class="fa fa-pen-alt"></i> Edit</a>';
+            })
+            ->removeColumn('updated_at')->toJson();
 
-        return $this->buildResponse([
-            'message' => $plans->isEmpty() ? 'No savings plan has been created' : '',
-            'status' => $plans->isEmpty() ? 'info' : 'success',
-            'response_code' => 200,
-            'plans' => $plans,
-        ]);
+        // $plans = Plan::paginate(15);
+
+        // return $this->buildResponse([
+        //     'message' => $plans->isEmpty() ? 'No savings plan has been created' : '',
+        //     'status' => $plans->isEmpty() ? 'info' : 'success',
+        //     'response_code' => 200,
+        //     'plans' => $plans,
+        // ]);
     }
 
     public function getItem(Request $request, $item)

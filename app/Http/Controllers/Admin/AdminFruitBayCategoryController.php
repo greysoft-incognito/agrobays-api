@@ -18,17 +18,26 @@ class AdminFruitBayCategoryController extends Controller
     {
         $model = FruitBayCategory::query();
 
-        // header("Access-Control-Allow-Origin: *");
-        return app('datatables')->eloquent($model)->toJson();
+        return app('datatables')->eloquent($model)
+            ->editColumn('created_at', function(FruitBayCategory $cat) {
+                return $cat->created_at->format('Y-m-d H:i');
+            })
+            ->editColumn('description', function(FruitBayCategory $cat) {
+                return Str::words($cat->description, '8');
+            })
+            ->addColumn('action', function (FruitBayCategory $cat) {
+                return '<a href="#edit-'.$cat->id.'" class="btn btn-xs btn-primary"><i class="fa fa-pen-alt"></i> Edit</a>';
+            })
+            ->removeColumn('updated_at')->toJson();
 
-        $items = FruitBayCategory::paginate(15);
+        // $items = FruitBayCategory::paginate(15);
 
-        return $this->buildResponse([
-            'message' => $items->isEmpty() ? 'No categories have been added.' : '',
-            'status' => $items->isEmpty() ? 'info' : 'success',
-            'response_code' => 200,
-            'items' => $items,
-        ]);
+        // return $this->buildResponse([
+        //     'message' => $items->isEmpty() ? 'No categories have been added.' : '',
+        //     'status' => $items->isEmpty() ? 'info' : 'success',
+        //     'response_code' => 200,
+        //     'items' => $items,
+        // ]);
     }
 
     public function getItem(Request $request, $item)
