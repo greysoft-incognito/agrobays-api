@@ -17,6 +17,8 @@ class AdminFruitBayCategoryController extends Controller
     public function index(Request $request, DataTables $dataTables)
     {
         $model = FruitBayCategory::query();
+
+        // header("Access-Control-Allow-Origin: *");
         return app('datatables')->eloquent($model)->toJson();
 
         $items = FruitBayCategory::paginate(15);
