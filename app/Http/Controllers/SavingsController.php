@@ -133,7 +133,7 @@ class SavingsController extends Controller
             return $this->buildResponse([
                 'message' => "You have a savings pattern on your current plan, you can only switch after you complete the {$plan->duration} day savings for the plan.",
                 'status' => 'info',
-                'response_code' => 200,
+                'response_code' => 406,
             ]);
         }
         elseif ((Auth::user()->subscription->plan->id??null) === $plan->id)
@@ -141,7 +141,7 @@ class SavingsController extends Controller
             return $this->buildResponse([
                 'message' => 'You are already active on this plan, but you can subscribe to another plan.',
                 'status' => 'info',
-                'response_code' => 200,
+                'response_code' => 406,
             ]);
         }
 
