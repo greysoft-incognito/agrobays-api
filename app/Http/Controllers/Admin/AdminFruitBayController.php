@@ -15,7 +15,7 @@ class AdminFruitBayController extends Controller
 {
     public function index(Request $request)
     {
-        $items = FruitBay::paginate(12);
+        $items = FruitBay::paginate(15);
 
         return $this->buildResponse([
             'message' => $items->isEmpty() ? 'No Fruit Bay item has been added' : '',
@@ -76,6 +76,35 @@ class AdminFruitBayController extends Controller
             'status' =>  'success',
             'response_code' => 200,
             'item' => $fruitbay,
+        ]);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($item = null)
+    {
+        $item = FruitBay::whereId($item)->first();
+
+        if ($item)
+        {
+            $item->image && Storage::delete($item->image);
+
+            $status = $item->delete();
+
+            return $this->buildResponse([
+                'message' => "{$item->name} has been deleted.",
+                'status' =>  'success',
+                'response_code' => 200,
+            ]);
+        }
+
+        return $this->buildResponse([
+            'message' => 'The requested item no longer exists.',
+            'status' => 'error',
+            'response_code' => 404,
         ]);
     }
 }

@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('savings', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id')->index();
+            $table->foreignId('user_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('subscription_id')->constrained('subscriptions')->onUpdate('cascade')->onDelete('cascade');
             $table->integer('days')->default(1);
             $table->decimal('amount')->default(0.00);

@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('food_bags', function (Blueprint $table) {
             $table->id();
-            $table->integer('plan_id');
+            $table->foreignId('plan_id')->constrained('plans')->onUpdate('cascade')->onDelete('cascade');
             $table->string('title')->nullable();
             $table->text('description')->nullable();
             $table->timestamps();
@@ -29,6 +29,7 @@ return new class extends Migration
      */
     public function down()
     {
+        Schema::disableForeignKeyConstraints();
         Schema::dropIfExists('food_bags');
     }
 };

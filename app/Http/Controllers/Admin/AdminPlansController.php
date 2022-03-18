@@ -4,42 +4,45 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\FruitBayCategory;
+use App\Models\Plan;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
-class AdminFruitBayCategoryController extends Controller
+class AdminPlansController extends Controller
 {
     public function index(Request $request)
     {
-        $items = FruitBayCategory::paginate(15);
+        $plans = Plan::paginate(15);
 
         return $this->buildResponse([
-            'message' => $items->isEmpty() ? 'No categories have been added.' : '',
-            'status' => $items->isEmpty() ? 'info' : 'success',
+            'message' => $plans->isEmpty() ? 'No savings plan has been created' : '',
+            'status' => $plans->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'items' => $items,
+            'plans' => $plans,
         ]);
     }
 
     public function getItem(Request $request, $item)
     {
-        $item = FruitBayCategory::whereId($item)->orWhere(['slug' => $item])->first();
+        $plan = Plan::whereId($item)->orWhere(['slug' => $item])->first();
 
         return $this->buildResponse([
-            'message' => !$item ? 'The requested category no longer exists.' : '',
-            'status' =>  !$item ? 'info' : 'success',
-            'response_code' => !$item ? 404 : 200,
-            'item' => $item,
+            'message' => !$plan ? 'The requested plan no longer exists' : '',
+            'status' =>  !$plan ? 'info' : 'success',
+            'response_code' => !$plan ? 404 : 200,
+            'plan' => $plan,
         ]);
     }
 
     public function store(Request $request, $item = null)
     {
         $validator = Validator::make($request->all(), [
-            'title' => 'required|min:3|max:15',
+            'title' => 'required|min:3|max:15|unique:plans',
+            'amount' => 'required|numeric|min:1',
+            'duration' => 'required|numeric|min:1',
+            'icon' => 'required|string',
             'description' => 'nullable|min:10|max:150',
         ]);
 
@@ -52,53 +55,57 @@ class AdminFruitBayCategoryController extends Controller
             ]);
         }
 
-        $category = FruitBayCategory::whereId($item)->orWhere(['slug' => $item])->first() ?? new FruitBayCategory();
-        $category->title = $request->title;
-        $category->description = $request->description;
+        $plan = Plan::whereId($item)->orWhere(['slug' => $item])->first() ?? new Plan;
+
+        $plan->title = $request->title;
+        $plan->amount = $request->amount;
+        $plan->icon;
+        $plan->duration = $request->duration;
+        $plan->description = $request->description;
+        $plan->status = $request->status ?? true;
 
         if ($request->image)
         {
-            Storage::delete($category->image);
+            Storage::delete($plan->image);
             $photo = new File($request->image);
             $filename =  rand() . '_' . rand() . '.' . $photo->extension();
             Storage::putFileAs('public/uploads/images', $photo, $filename);
-            $category->image = 'uploads/images/'. $filename;
+            $plan->image = 'uploads/images/'. $filename;
         }
-        $category->save();
+        $plan->save();
 
         return $this->buildResponse([
-            'message' => $item ? Str::of($category->title)->append(' Has been updated!') : 'New category item created.',
+            'message' => $item ? Str::of($plan->title)->append(' Has been updated!') : 'New plan has been created.',
             'status' =>  'success',
             'response_code' => 200,
-            'item' => $category,
+            'plan' => $plan,
         ]);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\FruitBayCategory  $category
      * @return \Illuminate\Http\Response
      */
     public function destroy($item = null)
     {
-        $item = FruitBayCategory::whereId($item)->first();
+        $plan = Plan::whereId($item)->first();
 
-        if ($item)
+        if ($plan)
         {
-            $item->image && Storage::delete($item->image);
+            $plan->image && Storage::delete($plan->image);
 
-            $status = $item->delete();
+            $plan->delete();
 
             return $this->buildResponse([
-                'message' => "{$item->title} has been deleted.",
+                'message' => "{$plan->title} has been deleted.",
                 'status' =>  'success',
                 'response_code' => 200,
             ]);
         }
 
         return $this->buildResponse([
-            'message' => 'The requested category no longer exists.',
+            'message' => 'The requested plan no longer exists.',
             'status' => 'error',
             'response_code' => 404,
         ]);

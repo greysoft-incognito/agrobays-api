@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id')->index();
+            $table->foreignId('user_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('plan_id')->constrained('plans')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('food_bag_id')->constrained('food_bags')->onUpdate('cascade')->onDelete('cascade');
             $table->enum('status', ['pending', 'active', 'complete'])->default('pending');

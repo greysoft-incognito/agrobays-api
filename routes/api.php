@@ -3,6 +3,7 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\AdminFruitBayCategoryController;
 use App\Http\Controllers\Admin\AdminFruitBayController;
+use App\Http\Controllers\Admin\AdminPlansController;
 use App\Http\Controllers\FruitBayController;
 use App\Http\Controllers\SavingsController;
 use Illuminate\Support\Facades\Route;
@@ -45,6 +46,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
             Route::get('/', 'index');
             Route::get('/{item}', 'getItem');
             Route::post('/{item?}', 'store');
+            Route::delete('/{item?}', 'destroy');
         });
 
         Route::controller(AdminFruitBayCategoryController::class)
@@ -54,6 +56,17 @@ Route::middleware(['auth:sanctum'])->group(function() {
             Route::get('/', 'index');
             Route::get('/{item}', 'getItem');
             Route::post('/{item?}', 'store');
+            Route::delete('/{item?}', 'destroy');
+        });
+
+        Route::controller(AdminPlansController::class)
+        ->prefix('savings/plans')
+        ->name('savings.plan.')
+        ->group(function() {
+            Route::get('/', 'index');
+            Route::get('/{item}', 'getItem');
+            Route::post('/{item?}', 'store');
+            Route::delete('/{item?}', 'destroy');
         });
     });
 
@@ -72,7 +85,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
     ->group(function() {
         Route::get('/', 'index')->name('index');
         Route::get('/transactions', 'transactions')->name('transactions');
-        Route::get('/savings', 'savings')->name('index');
+        Route::get('/savings ', 'savings')->name('index');
         Route::controller(SavingsController::class)
         ->prefix('savings')->name('savings.')
         ->group(function() {
