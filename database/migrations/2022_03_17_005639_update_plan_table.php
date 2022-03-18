@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::table('plans', function (Blueprint $table) {
             $table->string('image', 550)->after('amount')->nullable();
+            $table->boolean('status')->after('icon')->default(true);
         });
     }
 
@@ -27,6 +28,7 @@ return new class extends Migration
     {
         Schema::table('plans', function (Blueprint $table) {
             $table->drop('image');
+            $table->drop('status');
         });
     }
 };

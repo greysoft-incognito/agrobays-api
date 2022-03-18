@@ -72,6 +72,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
     ->group(function() {
         Route::get('/', 'index')->name('index');
         Route::get('/transactions', 'transactions')->name('transactions');
+        Route::get('/savings', 'savings')->name('index');
         Route::controller(SavingsController::class)
         ->prefix('savings')->name('savings.')
         ->group(function() {

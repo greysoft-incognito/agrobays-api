@@ -41,4 +41,22 @@ class AccountController extends Controller
             'transactions' => $auth::user()->transactions()->paginate(15),
         ]);
     }
+
+
+    /**
+     * Display a listing of the user's transactions.
+     *
+     * @param \Illuminate\Support\Facades\Auth $auth
+     * @return \Illuminate\Http\Response
+     */
+    public function savings(Auth $auth)
+    {
+        $savings = $auth::user()->savings();
+        return $this->buildResponse([
+            'message' => 'OK',
+            'status' => 'success',
+            'response_code' => 200,
+            'savings' => $savings->paginate(15),
+        ]);
+    }
 }

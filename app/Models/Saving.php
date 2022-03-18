@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class Saving extends Model
 {
@@ -21,15 +20,23 @@ class Saving extends Model
     ];
 
     protected $appends = [
-        'total'
+        'total',
+        'get_subscription',
     ];
 
     /**
-     * Get the saving's plan.
+     * Get the saving's subscription.
      */
-    public function plan(): HasOneThrough
+    public function subscription(): BelongsTo
     {
-        return $this->hasOneThrough(Subscription::class, Plan::class);
+        return $this->belongsTo(Subscription::class)->where('status', '!=', 'complete');
+    }
+
+    public function getSubscription(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->subscription
+        );
     }
 
     /**
