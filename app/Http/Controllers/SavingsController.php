@@ -128,7 +128,7 @@ class SavingsController extends Controller
                 'response_code' => 404,
             ]);
         }
-        elseif ((Auth::user()->subscription->days_left??0) < $plan->duration)
+        elseif (($usub = Auth::user()->subscription->days_left??0) < $plan->duration && $usub > 0)
         {
             return $this->buildResponse([
                 'message' => "You have a savings pattern on your current plan, you can only switch after you complete the {$plan->duration} day savings for the plan.",
@@ -146,7 +146,9 @@ class SavingsController extends Controller
         }
 
         // Delete user's current subscription
-        Auth::user()->subscription()->delete();
+        Subscription::where('user_id', Auth::id())->where('status', 'pending')->delete();
+        Subscription::where('user_id', Auth::id())->where('status', 'active')->update(['status' => 'completed']);
+        // Auth::user()->subscription()->delete();
 
         // Create the new plan
         $userPlan = new Subscription;
