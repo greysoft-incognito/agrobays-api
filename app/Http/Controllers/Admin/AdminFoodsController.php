@@ -56,7 +56,7 @@ class AdminFoodsController extends Controller
             'name' => 'required|min:3|max:15', Rule::unique('foods')->ignore($item),
             'food_bag_id' => 'required|numeric|min:1',
             'weight' => 'nullable|string|min:1',
-            'image' => 'nullable',
+            'image' => 'nullable|mimes:jpg,jpeg,png',
             'description' => 'nullable|min:10|max:150',
         ]);
 
