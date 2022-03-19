@@ -26,7 +26,7 @@ class AdminFruitBayCategoryController extends Controller
                 return Str::words($cat->description, '8');
             })
             ->addColumn('action', function (FruitBayCategory $cat) {
-                return '<q-btn>Hello</q-btn><a href="#edit-'.$cat->id.'" class="btn btn-xs btn-primary"><i class="fa fa-pen-alt"></i> Edit</a>';
+                return '<q-btn @click="alert("muta fucker")">Hello</q-btn><a href="#edit-'.$cat->id.'" class="btn btn-xs btn-primary"><i class="fa fa-pen-alt"></i> Edit</a>';
             })
             ->removeColumn('updated_at')->toJson();
 
