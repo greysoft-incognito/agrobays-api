@@ -80,7 +80,7 @@ class AdminFoodsController extends Controller
         if ($request->image)
         {
             Storage::delete($food->image);
-            $photo = new File($request->image); dd($photo);
+            $photo = new File($request->image); dump($photo);
             $filename =  rand() . '_' . rand() . '.' . $photo->extension();
             Storage::putFileAs('public/uploads/images', $photo, $filename);
             $food->image = 'uploads/images/'. $filename;
