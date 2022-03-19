@@ -42,7 +42,7 @@ class AdminPlansController extends Controller
         $plan = Plan::whereId($item)->orWhere(['slug' => $item])->first();
 
         return $this->buildResponse([
-            'message' => !$plan ? 'The requested plan no longer exists' : '',
+            'message' => !$plan ? 'The requested plan no longer exists' : 'OK',
             'status' =>  !$plan ? 'info' : 'success',
             'response_code' => !$plan ? 404 : 200,
             'plan' => $plan,
@@ -72,7 +72,7 @@ class AdminPlansController extends Controller
 
         $plan->title = $request->title;
         $plan->amount = $request->amount;
-        $plan->icon;
+        $plan->icon = $request->icon;
         $plan->duration = $request->duration;
         $plan->description = $request->description;
         $plan->status = $request->status ?? true;

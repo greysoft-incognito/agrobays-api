@@ -4,57 +4,59 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\FruitBay;
-use App\Models\FruitBayCategory;
+use App\Models\Food;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
-class AdminFruitBayController extends Controller
+class AdminFoodsController extends Controller
 {
     public function index(Request $request)
     {
-        $model = FruitBay::query();
+        $model = Food::query();
         return app('datatables')->eloquent($model)
-            ->editColumn('created_at', function(FruitBay $item) {
+            ->editColumn('created_at', function(Food $item) {
                 return $item->created_at->format('Y-m-d H:i');
             })
-            ->editColumn('description', function(FruitBay $item) {
+            ->editColumn('description', function(Food $item) {
                 return Str::words($item->description, '8');
             })
-            ->addColumn('action', function (FruitBay $item) {
+            ->addColumn('action', function (Food $item) {
                 return '<a href="#edit-'.$item->id.'" class="btn btn-xs btn-primary"><i class="fa fa-pen-alt"></i> Edit</a>';
             })
             ->removeColumn('updated_at')->toJson();
 
-        // $items = FruitBay::paginate(15);
+        // $foods = Plan::paginate(15);
 
         // return $this->buildResponse([
-        //     'message' => $items->isEmpty() ? 'No Fruit Bay item has been added' : '',
-        //     'status' => $items->isEmpty() ? 'info' : 'success',
+        //     'message' => $foods->isEmpty() ? 'No food has been created' : '',
+        //     'status' => $foods->isEmpty() ? 'info' : 'success',
         //     'response_code' => 200,
-        //     'items' => $items,
+        //     'foods' => $foods,
         // ]);
     }
 
     public function getItem(Request $request, $item)
     {
-        $item = FruitBay::whereId($item)->orWhere(['slug' => $item])->first();
+        $plan = Food::whereId($item)->first();
 
         return $this->buildResponse([
-            'message' => !$item ? 'The requested item no longer exists' : 'OK',
-            'status' =>  !$item ? 'info' : 'success',
-            'response_code' => !$item ? 404 : 200,
-            'item' => $item,
+            'message' => !$plan ? 'The requested food no longer exists' : 'OK',
+            'status' =>  !$plan ? 'info' : 'success',
+            'response_code' => !$plan ? 404 : 200,
+            'plan' => $plan,
         ]);
     }
 
     public function store(Request $request, $item = null)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|min:3|max:15',
-            'price' => 'required|numeric|min:1',
+            'name' => 'required|min:3|max:15', Rule::unique('foods')->ignore($item),
+            'food_bag_id' => 'required|numeric|min:1',
+            'weight' => 'nullable|string|min:1',
+            'image' => 'nullable|string',
             'description' => 'nullable|min:10|max:150',
         ]);
 
@@ -67,28 +69,29 @@ class AdminFruitBayController extends Controller
             ]);
         }
 
-        $fruitbay = FruitBay::whereId($item)->orWhere(['slug' => $item])->first() ?? new FruitBay;
+        $food = Food::whereId($item)->first() ?? new Food;
 
-        $fruitbay->name = $request->name;
-        $fruitbay->price = $request->price;
-        $fruitbay->description = $request->description;
-        $fruitbay->fruit_bay_category_id = $request->category_id??FruitBayCategory::first()->id??null;
+        $food->name = $request->name;
+        $food->food_bag_id = $request->food_bag_id;
+        $food->weight = $request->weight ?? $food->weight ?? '';
+        $food->image = $request->image ?? $food->image ?? '';
+        $food->description = $request->description;
 
         if ($request->image)
         {
-            Storage::delete($fruitbay->image);
+            Storage::delete($food->image);
             $photo = new File($request->image);
             $filename =  rand() . '_' . rand() . '.' . $photo->extension();
             Storage::putFileAs('public/uploads/images', $photo, $filename);
-            $fruitbay->image = 'uploads/images/'. $filename;
+            $food->image = 'uploads/images/'. $filename;
         }
-        $fruitbay->save();
+        $food->save();
 
         return $this->buildResponse([
-            'message' => $item ? Str::of($fruitbay->name)->append(' Has been updated!') : 'New fruit bay item added.',
+            'message' => $item ? Str::of($food->name)->append(' Has been updated!') : 'New food has been added.',
             'status' =>  'success',
             'response_code' => 200,
-            'item' => $fruitbay,
+            'food' => $food,
         ]);
     }
 
@@ -99,23 +102,23 @@ class AdminFruitBayController extends Controller
      */
     public function destroy($item = null)
     {
-        $item = FruitBay::whereId($item)->first();
+        $food = Food::whereId($item)->first();
 
-        if ($item)
+        if ($food)
         {
-            $item->image && Storage::delete($item->image);
+            $food->image && Storage::delete($food->image);
 
-            $status = $item->delete();
+            $food->delete();
 
             return $this->buildResponse([
-                'message' => "{$item->name} has been deleted.",
+                'message' => "{$food->name} has been deleted.",
                 'status' =>  'success',
                 'response_code' => 200,
             ]);
         }
 
         return $this->buildResponse([
-            'message' => 'The requested item no longer exists.',
+            'message' => 'The requested food no longer exists.',
             'status' => 'error',
             'response_code' => 404,
         ]);

@@ -3,55 +3,67 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\FoodBag;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use App\Models\Saving;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
-class AdminFoodbagsController extends Controller
+class AdminSavingController extends Controller
 {
     public function index(Request $request)
     {
-        $model = FoodBag::query();
+        $model = Saving::query();
         return app('datatables')->eloquent($model)
-            ->editColumn('created_at', function(FoodBag $item) {
+            ->editColumn('created_at', function(Saving $item) {
                 return $item->created_at->format('Y-m-d H:i');
             })
-            ->editColumn('description', function(FoodBag $item) {
-                return Str::words($item->description, '8');
-            })
-            ->addColumn('action', function (FoodBag $item) {
+            ->addColumn('action', function (Saving $item) {
                 return '<a href="#edit-'.$item->id.'" class="btn btn-xs btn-primary"><i class="fa fa-pen-alt"></i> Edit</a>';
             })
             ->removeColumn('updated_at')->toJson();
 
-        // $bags = FoodBag::paginate(15);
+        // $saving = Saving::paginate(15);
 
         // return $this->buildResponse([
-        //     'message' => $bags->isEmpty() ? 'No foodbag has been created' : '',
-        //     'status' => $bags->isEmpty() ? 'info' : 'success',
+        //     'message' => $saving->isEmpty() ? 'No food has been created' : '',
+        //     'status' => $saving->isEmpty() ? 'info' : 'success',
         //     'response_code' => 200,
-        //     'bags' => $bags,
+        //     'saving' => $saving,
         // ]);
     }
 
     public function getItem(Request $request, $item)
     {
-        $bag = FoodBag::find($item);
+        $saving = Saving::whereId($item)->first();
 
         return $this->buildResponse([
-            'message' => !$bag ? 'The requested foodbag no longer exists' : 'OK',
-            'status' =>  !$bag ? 'info' : 'success',
-            'response_code' => !$bag ? 404 : 200,
-            'bag' => $bag,
+            'message' => !$saving ? 'The requested saving no longer exists' : 'OK',
+            'status' =>  !$saving ? 'info' : 'success',
+            'response_code' => !$saving ? 404 : 200,
+            'saving' => $saving,
         ]);
     }
 
+    /**
+     * Update the saving status
+     *
+     * @param Request $request
+     * @param integer $item
+     * @return void
+     */
     public function store(Request $request, $item = null)
     {
+        $saving = Saving::find($item);
+        if (!$saving) {
+            return $this->buildResponse([
+                'message' => 'The requested saving no longer exists',
+                'status' => 'success',
+                'response_code' => 404,
+            ]);
+        }
+
         $validator = Validator::make($request->all(), [
-            'title' => 'required|min:3|max:15|unique:food_bags',
-            'description' => 'nullable|min:10|max:150',
+            'status' => 'required|in:pending,complete,rejected',
         ]);
 
         if ($validator->fails()) {
@@ -63,18 +75,14 @@ class AdminFoodbagsController extends Controller
             ]);
         }
 
-        $bag = FoodBag::find($item) ?? new FoodBag;
-
-        $bag->title = $request->title;
-        $bag->plan_id = $request->plan_id;
-        $bag->description = $request->description;
-        $bag->save();
+        $saving->status = $request->status;
+        $saving->save();
 
         return $this->buildResponse([
-            'message' => $item ? Str::of($bag->title)->append(' Has been updated!') : 'New foodbag has been created.',
+            'message' => 'Saving status updated.',
             'status' =>  'success',
             'response_code' => 200,
-            'bag' => $bag,
+            'plan' => $saving,
         ]);
     }
 
@@ -85,21 +93,21 @@ class AdminFoodbagsController extends Controller
      */
     public function destroy($item = null)
     {
-        $bag = FoodBag::whereId($item)->first();
+        $food = Transaction::whereId($item)->first();
 
-        if ($bag)
+        if ($food)
         {
-            $bag->delete();
+            $food->delete();
 
             return $this->buildResponse([
-                'message' => "{$bag->title} has been deleted.",
+                'message' => "Transaction has been deleted.",
                 'status' =>  'success',
                 'response_code' => 200,
             ]);
         }
 
         return $this->buildResponse([
-            'message' => 'The requested foodbag no longer exists.',
+            'message' => 'The requested transaction no longer exists.',
             'status' => 'error',
             'response_code' => 404,
         ]);

@@ -45,7 +45,7 @@ class AdminFruitBayCategoryController extends Controller
         $item = FruitBayCategory::whereId($item)->orWhere(['slug' => $item])->first();
 
         return $this->buildResponse([
-            'message' => !$item ? 'The requested category no longer exists.' : '',
+            'message' => !$item ? 'The requested category no longer exists.' : 'OK',
             'status' =>  !$item ? 'info' : 'success',
             'response_code' => !$item ? 404 : 200,
             'item' => $item,

@@ -2,9 +2,13 @@
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\AdminFoodbagsController;
+use App\Http\Controllers\Admin\AdminFoodsController;
 use App\Http\Controllers\Admin\AdminFruitBayCategoryController;
 use App\Http\Controllers\Admin\AdminFruitBayController;
 use App\Http\Controllers\Admin\AdminPlansController;
+use App\Http\Controllers\Admin\AdminSavingController;
+use App\Http\Controllers\Admin\AdminSubscriptionController;
+use App\Http\Controllers\Admin\AdminTransactionController;
 use App\Http\Controllers\FruitBayController;
 use App\Http\Controllers\SavingsController;
 use Illuminate\Support\Facades\Route;
@@ -37,9 +41,13 @@ Route::get('/get/settings', function() {
     ]);
 });
 
-Route::middleware(['auth:sanctum'])->group(function() {
+/**
+ * Admin Routes
+ */
+Route::middleware(['auth:sanctum', 'admin'])->group(function() {
     Route::prefix('admin')->name('admin.')
     ->group(function() {
+        // Load admin food bay
         Route::controller(AdminFruitBayController::class)
         ->prefix('fruitbay')
         ->name('fruitbay.')
@@ -50,6 +58,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
             Route::delete('/{item?}', 'destroy');
         });
 
+        // Admin food bay category
         Route::controller(AdminFruitBayCategoryController::class)
         ->prefix('categories/fruitbay')
         ->name('categories.fruitbay.')
@@ -60,6 +69,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
             Route::delete('/{item?}', 'destroy');
         });
 
+        // Admin Plans
         Route::controller(AdminPlansController::class)
         ->prefix('savings/plans')
         ->name('savings.plan.')
@@ -70,9 +80,54 @@ Route::middleware(['auth:sanctum'])->group(function() {
             Route::delete('/{item?}', 'destroy');
         });
 
+        // Admin Foods
+        Route::controller(AdminFoodsController::class)
+        ->prefix('foodbags/foods')
+        ->name('foodbags.foods')
+        ->group(function() {
+            Route::get('/', 'index');
+            Route::get('/{item}', 'getItem');
+            Route::post('/{item?}', 'store');
+            Route::delete('/{item?}', 'destroy');
+        });
+
+        // Admin Food Bags
         Route::controller(AdminFoodbagsController::class)
         ->prefix('foodbags')
         ->name('foodbags.')
+        ->group(function() {
+            Route::get('/', 'index');
+            Route::get('/{item}', 'getItem');
+            Route::post('/{item?}', 'store');
+            Route::delete('/{item?}', 'destroy');
+        });
+
+        // Admin Transactions
+        Route::controller(AdminTransactionController::class)
+        ->prefix('transactions')
+        ->name('transactions.')
+        ->group(function() {
+            Route::get('/', 'index');
+            Route::get('/{item}', 'getItem');
+            Route::post('/{item?}', 'store');
+            Route::delete('/{item?}', 'destroy');
+        });
+
+        // Admin Subscriptions
+        Route::controller(AdminSubscriptionController::class)
+        ->prefix('subscriptions')
+        ->name('subscriptions.')
+        ->group(function() {
+            Route::get('/', 'index');
+            Route::get('/{item}', 'getItem');
+            Route::post('/{item?}', 'store');
+            Route::delete('/{item?}', 'destroy');
+        });
+
+        // Admin Savings
+        Route::controller(AdminSavingController::class)
+        ->prefix('savings')
+        ->name('savings.')
         ->group(function() {
             Route::get('/', 'index');
             Route::get('/{item}', 'getItem');
