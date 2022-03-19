@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Food;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -79,6 +80,7 @@ class AdminFoodsController extends Controller
 
         if ($request->hasFile('image'))
         {
+            Log::debug($request->image);
             Storage::delete($food->image);
             $photo = new File($request->image);
             return $this->buildResponse(['image'=>$request]);
