@@ -80,7 +80,7 @@ class AdminFoodsController extends Controller
 
         if ($request->hasFile('image'))
         {
-            Log::debug($request->image);
+            $request->file('image')->store('public/uploads/images/test');
             Storage::delete($food->image);
             $photo = new File($request->image);
             return $this->buildResponse(['image'=>$request]);
