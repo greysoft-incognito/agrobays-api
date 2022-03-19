@@ -15,7 +15,12 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('firstname');
+            $table->string('lastname');
+            $table->enum('gender', ['male', 'female', 'non-binary', 'transgender', 'bisexual', 'other'])->default('male');
+            $table->string('nextofkin')->nullable();
+            $table->string('nextofkin_relationship')->nullable();
+            $table->string('nextofkin_phone')->nullable();
             $table->string('email')->unique();
             $table->string('username')->unique();
             $table->string('password');
