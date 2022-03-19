@@ -79,7 +79,7 @@ class AdminFoodsController extends Controller
 
         if ($request->hasFile('image'))
         {
-            $food->image = $request->file('avatar')->storeAs(
+            $food->image = $request->file('image')->storeAs(
                 'public/uploads/images', rand() . '_' . rand()
             );
         }
