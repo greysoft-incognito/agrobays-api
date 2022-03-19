@@ -4,12 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\FoodBag;
 use App\Models\Plan;
-use App\Models\Saving;
 use App\Models\Subscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 
 class SavingsController extends Controller
 {
@@ -212,62 +209,9 @@ class SavingsController extends Controller
 
         $key = 'subscription';
 
-        if ($action === 'deposit')
-        {
-            $validator = Validator::make($request->all(), [
-                'days' => ['required', 'numeric', 'min:1', 'max:'.$subscription->plan->duration],
-            ], [
-                'days.min' => 'You have to save for at least 1 day.',
-                'days.max' => "You cannot save for more than {$subscription->plan->duration} days."
-            ]);
+        $subscription->plan??null;
 
-            if ($validator->fails()) {
-                return $this->validatorFails($validator);
-            }
-
-            if (!$subscription)
-            {
-                $msg = 'You do not have an active subscription';
-            }
-            elseif ($subscription->days_left <= 1)
-            {
-                $msg = 'You have completed the saving circle for this subscription, you would be notified when your food bag is ready for pickup or delivery.';
-            }
-            else
-            {
-                $save = new Saving([
-                    'user_id' => Auth::id(),
-                    'days' => $request->days,
-                    'amount' => $subscription->plan->amount / $subscription->plan->duration,
-                    'due' => $subscription->plan->amount / $subscription->plan->duration,
-                ]);
-
-                $savings = $subscription->savings()->save($save);
-                $trans = $savings->transaction();
-                $trans->create([
-                    'user_id' => Auth::id(),
-                    'reference' => Str::random(12),
-                    'method' => 'direct',
-                    'amount' => $subscription->plan->amount * $request->days,
-                    'due' => $subscription->plan->amount * $request->days,
-                ]);
-
-                $subscription->status = $subscription->days_left >= 1 ? 'active' : 'complete';
-                $subscription->save();
-
-                $key = 'deposit';
-                $_amount = money($savings->amount*$request->days);
-                $_left = $subscription->days_left;
-                $msg = !$subscription
-                    ? 'You do not have an active subscription'
-                    : "You have successfully made a {$savings->days} day savings of {$_amount} for the {$subscription->plan->title} plan, you now have only {$_left} days left to save up.";
-            }
-        }
-        else
-        {
-            $subscription->plan??null;
-            $msg = !$subscription ? 'You do not have an active subscription' : 'OK';
-        }
+        $msg = !$subscription ? 'You do not have an active subscription' : 'OK';
 
         return $this->buildResponse([
             'message' => $msg,

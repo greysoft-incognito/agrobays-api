@@ -55,7 +55,7 @@ class AdminPlansController extends Controller
             'title' => 'required|min:3|max:15|unique:plans',
             'amount' => 'required|numeric|min:1',
             'duration' => 'required|numeric|min:1',
-            'icon' => 'required|string',
+            'icon' => 'nullable|string',
             'description' => 'nullable|min:10|max:150',
         ]);
 

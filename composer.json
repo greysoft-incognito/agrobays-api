@@ -13,6 +13,7 @@
         "laravel/sanctum": "^2.14.1",
         "laravel/tinker": "^2.7",
         "matomo/device-detector": "^5.0",
+        "yabacon/paystack-php": "^2.2",
         "yajra/laravel-datatables-oracle": "~9.0"
     },
     "require-dev": {

@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\AdminSavingController;
 use App\Http\Controllers\Admin\AdminSubscriptionController;
 use App\Http\Controllers\Admin\AdminTransactionController;
 use App\Http\Controllers\FruitBayController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SavingsController;
 use Illuminate\Support\Facades\Route;
 
@@ -41,11 +42,12 @@ Route::get('/get/settings', function() {
     ]);
 });
 
-/**
- * Admin Routes
- */
-Route::middleware(['auth:sanctum', 'admin'])->group(function() {
-    Route::prefix('admin')->name('admin.')
+Route::middleware(['auth:sanctum'])->group(function() {
+    /**
+     * Admin Routes
+     */
+    Route::middleware(['admin'])
+    ->prefix('admin')->name('admin.')
     ->group(function() {
         // Load admin food bay
         Route::controller(AdminFruitBayController::class)
@@ -136,6 +138,9 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function() {
         });
     });
 
+    /**
+     * Fruitbay Routes
+     */
     Route::controller(FruitBayController::class)
     ->prefix('fruitbay')->name('fruitbay.')
     ->group(function() {
@@ -146,12 +151,17 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function() {
         Route::post('/{item}/buy', 'buyItem');
     });
 
+    /**
+     * Account Routes
+     */
     Route::controller(AccountController::class)
     ->prefix('account')->name('account.')
     ->group(function() {
         Route::get('/', 'index')->name('index');
         Route::get('/transactions', 'transactions')->name('transactions');
         Route::get('/savings ', 'savings')->name('index');
+
+        // Savings Route
         Route::controller(SavingsController::class)
         ->prefix('savings')->name('savings.')
         ->group(function() {
@@ -164,6 +174,17 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function() {
         });
     });
 
+    /**
+     * Payment Routes
+     */
+    Route::controller(PaymentController::class)
+    ->prefix('payment')->name('payment.')
+    ->group(function() {
+        Route::post('/initialize/{type?}', 'initialize')->name('initialize');
+        Route::post('/paystack/webhook', 'paystackWebhook')->name('paystack.webhook');
+    });
 });
+
+Route::get('/payment/paystack/verify', [PaymentController::class, 'paystackVerify'])->name('payment.paystack.verify');
 
 require __DIR__.'/auth.php';

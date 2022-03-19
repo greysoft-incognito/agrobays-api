@@ -27,7 +27,7 @@ class Subscription extends Model
      */
     public function savings(): HasMany
     {
-        return $this->hasMany(Saving::class);
+        return $this->hasMany(Saving::class)->where('status', 'complete');
     }
 
     /**
