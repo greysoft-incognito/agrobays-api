@@ -17,6 +17,7 @@ class Saving extends Model
         'user_id',
         'days',
         'status',
+        'payment_ref',
     ];
 
     protected $appends = [

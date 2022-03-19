@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Saving;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -49,11 +50,33 @@ class PaymentController extends Controller
 
             try {
                 $paystack = new Paystack(env("PAYSTACK_SECRET_KEY"));
+                $reference = Str::random(12);
+
                 $tranx = $paystack->transaction->initialize([
                   'amount' => ($subscription->plan->amount * $request->days) * 100,       // in kobo
                   'email' => Auth::user()->email,         // unique to customers
-                  'reference' => Str::random(12),         // unique to transactions
+                  'reference' => $reference,         // unique to transactions
                   'callback_url' => route('payment.paystack.verify')
+                ]);
+
+                $savings = $subscription->savings()->save(
+                    new Saving([
+                        'user_id' => Auth::id(),
+                        'status' => 'pending',
+                        'payment_ref' => $reference,
+                        'days' => $request->days,
+                        'amount' => $subscription->plan->amount / $subscription->plan->duration,
+                        'due' => $subscription->plan->amount / $subscription->plan->duration,
+                    ])
+                );
+                $transaction = $savings->transaction();
+                $transaction->create([
+                    'user_id' => Auth::id(),
+                    'reference' => $reference,
+                    'method' => 'Paystack',
+                    'status' => 'pending',
+                    'amount' => $subscription->plan->amount * $request->days,
+                    'due' => $subscription->plan->amount * $request->days,
                 ]);
 
                 $payload = $tranx;
@@ -86,6 +109,7 @@ class PaymentController extends Controller
      */
     public function paystackVerify(Request $request)
     {
+        $msg = 'Invalid Transaction.';
         if(!$request->reference){
             $msg = 'No reference supplied';
         }
@@ -96,14 +120,26 @@ class PaymentController extends Controller
               'reference' => $request->reference,   // unique to transactions
             ]);
 
-            if ('success' === $tranx->data->status) {
-              // transaction was successful...
-              // please check other things like whether you already gave value for this ref
-              // if the email matches the customer who owns the product etc
-              // Give value
+            $saving = Saving::where('payment_ref', $request->reference)->where('status', 'pending')->first();
+            if ($saving) {
+                $subscription = User::find($saving->user_id)->subscription;
+                $_amount = money($tranx->data->amount/100);
+                $_left = $subscription->days_left;
+                if ('success' === $tranx->data->status) {
+                    $saving->status = 'complete';
+                    $trns = $saving->transaction;
+                    $trns->status = 'complete';
+                    $msg = "You have successfully made a {$saving->days} day savings of {$_amount} for the {$subscription->plan->title} plan, you now have only {$_left} days left to save up.";
+                } else {
+                    $saving->status = 'rejected';
+                    $trns = $saving->transaction;
+                    $trns->status = 'rejected';
+                }
+                $saving->save();
+                $trns->save();
+                $payload = $tranx;
             }
 
-            $payload = $tranx;
 
         } catch (ApiException | \InvalidArgumentException $e) {
             return $this->buildResponse([
@@ -120,7 +156,6 @@ class PaymentController extends Controller
             'response_code' => 200,
             'payload' => $payload??[],
         ]);
-        dd($request->all());
     }
 
     /**
