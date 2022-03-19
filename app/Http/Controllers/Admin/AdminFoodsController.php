@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use App\Models\Food;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -80,13 +79,9 @@ class AdminFoodsController extends Controller
 
         if ($request->hasFile('image'))
         {
-            $file_name = $request->file('image')->store('public/uploads/images');
-            Storage::delete($food->image);
-            $photo = new File($request->image);
-            return $this->buildResponse(['image'=>$file_name]);
-            $filename =  rand() . '_' . rand() . '.' . $photo->extension();
-            Storage::putFileAs('public/uploads/images', $photo, $filename);
-            $food->image = 'uploads/images/'. $filename;
+            $food->image = $request->file('avatar')->storeAs(
+                'public/uploads/images', rand() . '_' . rand()
+            );
         }
         $food->save();
 
