@@ -79,8 +79,9 @@ class AdminFoodsController extends Controller
 
         if ($request->image)
         {
+            return $this->buildResponse(['image'=>$request->image]);
             Storage::delete($food->image);
-            $photo = new File($request->image); dump($photo);
+            $photo = new File($request->image);
             $filename =  rand() . '_' . rand() . '.' . $photo->extension();
             Storage::putFileAs('public/uploads/images', $photo, $filename);
             $food->image = 'uploads/images/'. $filename;
