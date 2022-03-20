@@ -154,7 +154,7 @@ class PaymentController extends Controller
 
         return $this->buildResponse([
             'message' => $msg??'OK',
-            'status' => '204',
+            'status' => 'success',
             'response_code' => 200,
             'payload' => $payload??[],
         ]);
