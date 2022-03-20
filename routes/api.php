@@ -161,7 +161,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
     ->prefix('account')->name('account.')
     ->group(function() {
         Route::get('/', 'index')->name('index');
-        Route::post('/', 'update')->name('store');
+        Route::post('/update', 'store')->name('update');
         Route::get('/transactions', 'transactions')->name('transactions');
         Route::get('/savings ', 'savings')->name('index');
 
