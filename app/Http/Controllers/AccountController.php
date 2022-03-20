@@ -107,7 +107,7 @@ class AccountController extends Controller
 
         $user->firstname = $request->firstname;
         $user->lastname = $request->lastname;
-        $user->username = $request->username;
+        $user->username = $request->username??$user->username;
         $user->email = $request->email;
         $user->phone = $request->phone;
         $user->gender = $request->gender;
