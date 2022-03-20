@@ -143,6 +143,7 @@ class PaymentController extends Controller
                 $saving->save();
                 $trns->save();
                 $payload = $tranx;
+                $status = 'success';
                 $code = 200;
             }
         } catch (ApiException | \InvalidArgumentException $e) {
