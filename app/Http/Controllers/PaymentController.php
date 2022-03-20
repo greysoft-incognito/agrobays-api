@@ -135,6 +135,8 @@ class PaymentController extends Controller
                     $trns = $saving->transaction;
                     $trns->status = 'complete';
                     $msg = "You have successfully made a {$saving->days} day savings of {$_amount} for the {$subscription->plan->title} plan, you now have only {$_left} days left to save up.";
+                    $subscription->status = $subscription->days_left >= 1 ? 'active' : 'complete';
+                    $subscription->save();
                 } else {
                     $saving->status = 'rejected';
                     $trns = $saving->transaction;
@@ -160,6 +162,7 @@ class PaymentController extends Controller
             'status' => $status ?? 'success',
             'response_code' => $code ?? 200,
             'payload' => $payload??[],
+            'deposit' => $subscription??[]
         ]);
     }
 
