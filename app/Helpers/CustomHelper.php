@@ -75,13 +75,13 @@ if (!function_exists('img')) {
             return $image;
         }
 
-        if ($image && Storage::exists((config('filesystems.default') === 'local' ? 'public/' : '') . $image)) {
+        if ($image && Storage::exists($image)) {
             $fpath    = preg_match("/^(media\/|home\/){1,2}\w+/", $image) ? $image : 'media/' . $image;
             $photo    = asset((config('filesystems.default') === 'local' ? $fpath : Storage::url($image)));
         } else {
             if ($no_default === true) return null;
 
-            $default = Storage::exists((config('filesystems.default') === 'local' ? 'public/' : '') . $image);
+            $default = Storage::exists($image);
             $photo = asset((config('filesystems.default') === 'local'
                 ? env('default_' . $type, 'media/' . $type . (in_array($type, ['logo', 'avatar']) ? '.svg' : '.png'))
                 : Storage::url(env('default_' . $type, 'media/' . $type . (in_array($type, ['logo', 'avatar']) ? '.svg' : '.png')))));
