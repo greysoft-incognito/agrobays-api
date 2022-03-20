@@ -71,7 +71,7 @@ if (!function_exists('profile_photo')) {
 if (!function_exists('img')) {
     function img($image, $type = 'avatar', $cached_size = 'original', $no_default = false)
     {
-        if (filter_var($image, FILTER_VALIDATE_URL)) {
+        if (filter_var($image, FILTER_VALIDATE_URL|FILTER_FLAG_PATH_REQUIRED)) {
             return $image;
         }
 
