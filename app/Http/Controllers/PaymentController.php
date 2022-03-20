@@ -59,6 +59,7 @@ class PaymentController extends Controller
                   'reference' => $reference,         // unique to transactions
                   'callback_url' => config('settings.payment_verify_url', route('payment.paystack.verify'))
                 ]);
+                $code = '200';
 
                 $savings = $subscription->savings()->save(
                     new Saving([
