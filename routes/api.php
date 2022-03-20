@@ -39,6 +39,7 @@ Route::get('/get/settings', function() {
         'response' => [
             "settings" => collect(config("settings"))->except(['permissions', 'messages']),
             "fruitbay_categories" => \App\Models\FruitBayCategory::all(),
+            "foodbags" => \App\Models\Foodbag::all(),
             "plans" => \App\Models\Plan::all()
         ],
     ]);
