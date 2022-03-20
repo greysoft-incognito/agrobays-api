@@ -59,7 +59,7 @@ class PaymentController extends Controller
                   'reference' => $reference,         // unique to transactions
                   'callback_url' => config('settings.payment_verify_url', route('payment.paystack.verify'))
                 ]);
-                
+
                 $code = 200;
 
                 $savings = $subscription->savings()->save(
@@ -113,6 +113,7 @@ class PaymentController extends Controller
     public function paystackVerify(Request $request)
     {
         $msg = 'Invalid Transaction.';
+        $status = 'error';
         $code = 403;
         if(!$request->reference){
             $msg = 'No reference supplied';
@@ -224,7 +225,7 @@ class PaymentController extends Controller
 
         return $this->buildResponse([
             'message' => $msg,
-            'status' =>  !$subscription ? 'info' : 'success',
+            'status' =>  $status ?? (!$subscription ? 'info' : 'success'),
             'response_code' => 200,
             $key => $subscription??[],
         ]);
