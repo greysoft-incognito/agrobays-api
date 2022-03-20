@@ -57,7 +57,7 @@ class AdminSavingController extends Controller
         if (!$saving) {
             return $this->buildResponse([
                 'message' => 'The requested saving no longer exists',
-                'status' => 'success',
+                'status' => 'error',
                 'response_code' => 404,
             ]);
         }

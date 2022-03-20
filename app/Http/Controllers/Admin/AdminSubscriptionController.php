@@ -56,7 +56,7 @@ class AdminSubscriptionController extends Controller
         if (!$subscription) {
             return $this->buildResponse([
                 'message' => 'The requested subscription no longer exists',
-                'status' => 'success',
+                'status' => 'error',
                 'response_code' => 404,
             ]);
         }

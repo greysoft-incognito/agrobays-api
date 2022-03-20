@@ -57,7 +57,7 @@ class AdminTransactionController extends Controller
         if (!$transaction) {
             return $this->buildResponse([
                 'message' => 'The requested transaction no longer exists',
-                'status' => 'success',
+                'status' => 'error',
                 'response_code' => 404,
             ]);
         }

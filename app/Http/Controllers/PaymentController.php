@@ -25,7 +25,8 @@ class PaymentController extends Controller
     {
         $subscription = Auth::user()->subscription;
 
-        $key = 'subscription';
+        $key  = 'subscription';
+        $code = '403';
 
         if (!$subscription)
         {
@@ -56,7 +57,7 @@ class PaymentController extends Controller
                   'amount' => ($subscription->plan->amount * $request->days) * 100,       // in kobo
                   'email' => Auth::user()->email,         // unique to customers
                   'reference' => $reference,         // unique to transactions
-                  'callback_url' => route('payment.paystack.verify')
+                  'callback_url' => config('settings.payment_verify_url', route('payment.paystack.verify'))
                 ]);
 
                 $savings = $subscription->savings()->save(
@@ -94,7 +95,7 @@ class PaymentController extends Controller
         return $this->buildResponse([
             'message' => $msg??'OK',
             'status' =>  !$subscription ? 'info' : 'success',
-            'response_code' => 200, //202
+            'response_code' => $code ?? 200, //202
             'payload' => $payload??[],
         ]);
     }
