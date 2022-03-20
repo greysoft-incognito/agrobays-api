@@ -26,7 +26,7 @@ class PaymentController extends Controller
         $subscription = Auth::user()->subscription;
 
         $key  = 'subscription';
-        $code = '403';
+        $code = 403;
 
         if (!$subscription)
         {
@@ -59,7 +59,8 @@ class PaymentController extends Controller
                   'reference' => $reference,         // unique to transactions
                   'callback_url' => config('settings.payment_verify_url', route('payment.paystack.verify'))
                 ]);
-                $code = '200';
+                
+                $code = 200;
 
                 $savings = $subscription->savings()->save(
                     new Saving([
@@ -112,6 +113,7 @@ class PaymentController extends Controller
     public function paystackVerify(Request $request)
     {
         $msg = 'Invalid Transaction.';
+        $code = 403;
         if(!$request->reference){
             $msg = 'No reference supplied';
         }
@@ -140,9 +142,8 @@ class PaymentController extends Controller
                 $saving->save();
                 $trns->save();
                 $payload = $tranx;
+                $code = 200;
             }
-
-
         } catch (ApiException | \InvalidArgumentException $e) {
             return $this->buildResponse([
                 'message' => $e->getMessage(),
@@ -155,7 +156,7 @@ class PaymentController extends Controller
         return $this->buildResponse([
             'message' => $msg??'OK',
             'status' => 'success',
-            'response_code' => 200,
+            'response_code' => $code ?? 200,
             'payload' => $payload??[],
         ]);
     }
