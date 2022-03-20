@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class AccountController extends Controller
 {
@@ -82,9 +83,9 @@ class AccountController extends Controller
         $validator = Validator::make($request->all(), [
             'firstname' => ['required', 'string', 'max:255'],
             'lastname' => ['required', 'string', 'max:255'],
-            'email' => ['nullable', 'required', 'string', 'email', 'max:255', 'unique:users'],
-            'phone' => ['nullable', 'required', 'string', 'max:255', 'unique:users'],
-            'username' => ['nullable', 'string', 'max:255', 'unique:users'],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'phone' => ['required', 'string', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'username' => ['nullable', 'string', 'max:255', Rule::unique('users')->ignore($user->id)],
             'gender' => ['in:male,female,non-binary,transgender,bisexual,other'],
             'nextofkin' => ['required', 'string', 'max:255'],
             'nextofkin_relationship' => ['required', 'string', 'max:255'],
