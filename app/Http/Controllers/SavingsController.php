@@ -169,18 +169,27 @@ class SavingsController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function updateBag(Request $request, $id = null)
+    public function updateBag(Request $request, $plan_id = 'user', $id = null)
     {
         $bag = FoodBag::find($id);
-        $ids = Auth::user()->subscription->plan->bags()->get('id')->values()->toArray();
+        if ($plan_id === 'user')
+        {
+            $plan = Plan::find($id);
+            $ids = $plan ? $plan->bags()->get('id')->values()->toArray() : [];
+            $msg = 'The requested plan no longer exists.';
+            $status = 'error';
+            $code = 404;
+        }
+        else
+        {
+            $ids = Auth::user()->subscription->plan->bags()->get('id')->values()->toArray();
+        }
 
         if (!$bag || !in_array($bag->id, Collect($ids[0]??[])->filter(fn($k)=>!empty($k))->values()->toArray()))
         {
-            return $this->buildResponse([
-                'message' => 'The requested food bag no longer exists.',
-                'status' => 'error',
-                'response_code' => 404,
-            ]);
+            $msg = 'The requested food bag no longer exists.';
+            $status = 'error';
+            $code = 404;
         }
 
         // Update the user's current subscription's food bag
@@ -189,10 +198,10 @@ class SavingsController extends Controller
         $plan->save();
 
         return $this->buildResponse([
-            'message' => "You have successfully activated the {$bag->title} food bag",
-            'status' => 'success',
-            'response_code' => 201,
-            'data' => $bag,
+            'message' => $msg ?? "You have successfully activated the {$bag->title} food bag",
+            'status' => $status ?? 'success',
+            'response_code' => $code ?? 201,
+            'data' => $bag ?? null,
         ]);
     }
 

@@ -174,7 +174,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
             Route::get('/get-plans/{plan}/foodbags/{id?}', 'getBags');
             Route::match(['GET', 'POST'], '/subscription/{action?}', 'subscription');
             Route::post('/activate-plan/{id}', 'store');
-            Route::post('/update-bag/{id}', 'updateBag');
+            Route::post('/update-bag/plan/{plan_id}/bag/{id}', 'updateBag');
         });
     });
 
@@ -189,6 +189,6 @@ Route::middleware(['auth:sanctum'])->group(function() {
     });
 });
 
-Route::get('/payment/paystack/verify', [PaymentController::class, 'paystackVerify'])->name('payment.paystack.verify');
+Route::get('/payment/paystack/verify/{type?}', [PaymentController::class, 'paystackVerify'])->name('payment.paystack.verify');
 
 require __DIR__.'/auth.php';

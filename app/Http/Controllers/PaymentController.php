@@ -106,11 +106,11 @@ class PaymentController extends Controller
     /**
      * Verify the paystack payment.
      *
-     * @param  \Illuminate\Http\Client\Request  $request
+     * @param  \Illuminate\Http\Request  $request
      * @param  String $action
      * @return \Illuminate\Http\Response
      */
-    public function paystackVerify(Request $request)
+    public function paystackVerify(Request $request, $type = 'savings')
     {
         $msg = 'Invalid Transaction.';
         $status = 'error';
@@ -125,29 +125,10 @@ class PaymentController extends Controller
               'reference' => $request->reference,   // unique to transactions
             ]);
 
-            $saving = Saving::where('payment_ref', $request->reference)->where('status', 'pending')->first();
-            if ($saving) {
-                $subscription = User::find($saving->user_id)->subscription;
-                $_amount = money($tranx->data->amount/100);
-                $_left = $subscription->days_left;
-                if ('success' === $tranx->data->status) {
-                    $saving->status = 'complete';
-                    $trns = $saving->transaction;
-                    $trns->status = 'complete';
-                    $msg = "You have successfully made a {$saving->days} day savings of {$_amount} for the {$subscription->plan->title} plan, you now have only {$_left} days left to save up.";
-                    $subscription->status = $subscription->days_left >= 1 ? 'active' : 'complete';
-                    $subscription->save();
-                } else {
-                    $saving->status = 'rejected';
-                    $trns = $saving->transaction;
-                    $trns->status = 'rejected';
-                }
-                $saving->save();
-                $trns->save();
-                $payload = $tranx;
-                $status = 'success';
-                $code = 200;
+            if ($type === 'savings') {
+                $processSaving = $this->processSaving($request, $tranx);
             }
+            extract($processSaving);
         } catch (ApiException | \InvalidArgumentException $e) {
             return $this->buildResponse([
                 'message' => $e->getMessage(),
@@ -164,6 +145,49 @@ class PaymentController extends Controller
             'payload' => $payload??[],
             'deposit' => $subscription??[]
         ]);
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param [type] $tranx
+     * @return array
+     */
+    public function processSaving(Request $request, $tranx): array
+    {
+        $msg = "OK";
+        $saving = Saving::where('payment_ref', $request->reference)->where('status', 'pending')->first();
+        if ($saving) {
+            $subscription = User::find($saving->user_id)->subscription;
+            $_amount = money($tranx->data->amount/100);
+            $_left = $subscription->days_left;
+            if ('success' === $tranx->data->status) {
+                $saving->status = 'complete';
+                $trns = $saving->transaction;
+                $trns->status = 'complete';
+                $msg = "You have successfully made a {$saving->days} day savings of {$_amount} for the {$subscription->plan->title} plan, you now have only {$_left} days left to save up.";
+                $subscription->status = $subscription->days_left >= 1 ? 'active' : 'complete';
+                $subscription->save();
+            } else {
+                $saving->status = 'rejected';
+                $trns = $saving->transaction;
+                $trns->status = 'rejected';
+            }
+            $saving->save();
+            $trns->save();
+            $payload = $tranx;
+            $status = 'success';
+            $code = 200;
+        }
+
+        return [
+            'msg' => $msg,
+            'code' => $code,
+            'status' => $status,
+            'payload' => $payload,
+            'subscription' => $subscription,
+        ];
     }
 
     /**
