@@ -172,11 +172,11 @@ class SavingsController extends Controller
     public function updateBag(Request $request, $subscription_id = 'user', $id = null)
     {
         $bag = FoodBag::find($id);
+        $msg = 'The requested plan no longer exists.';
         if ($subscription_id !== 'user')
         {
             $sub = Subscription::find($subscription_id);
             $ids = $sub ? $sub->plan->bags()->get('id')->values()->toArray() : [];
-            $msg = 'The requested plan no longer exists.';
             $status = 'error';
             $code = 404;
         }
