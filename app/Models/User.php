@@ -75,4 +75,14 @@ class User extends Authenticatable
     {
         return $this->hasOne(Subscription::class)->where('status', '!=', 'complete');
     }
+
+    /**
+     * Get all of the subscriptions for the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
 }

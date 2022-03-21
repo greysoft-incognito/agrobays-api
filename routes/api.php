@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\AdminTransactionController;
 use App\Http\Controllers\FruitBayController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SavingsController;
+use App\Http\Controllers\SubscriptionController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -165,16 +166,24 @@ Route::middleware(['auth:sanctum'])->group(function() {
         Route::get('/transactions', 'transactions')->name('transactions');
         Route::get('/savings ', 'savings')->name('index');
 
-        // Savings Route
-        Route::controller(SavingsController::class)
-        ->prefix('savings')->name('savings.')
-        ->group(function() {
-            Route::get('/get-plans', 'plans');
-            Route::get('/get-plans/{plan}', 'getPlan');
-            Route::get('/get-plans/{plan}/foodbags/{id?}', 'getBags');
-            Route::match(['GET', 'POST'], '/subscription/{action?}', 'subscription');
-            Route::post('/activate-plan/{id}', 'store');
-            Route::post('/update-bag/subscription/{subscription_id}/bag/{id}', 'updateBag');
+        // Savings Routes
+        Route::prefix('savings')->name('savings.')->group(function() {
+            // Savings Controller Routes
+            Route::controller(SavingsController::class)
+            ->group(function() {
+                Route::get('/get-plans', 'plans');
+                Route::get('/get-plans/{plan}', 'getPlan');
+                Route::get('/get-plans/{plan}/foodbags/{id?}', 'getBags');
+                Route::post('/activate-plan/{id}', 'store');
+            });
+
+            // Savings Controller Routes
+            Route::controller(SubscriptionController::class)
+            ->group(function() {
+                Route::match(['GET', 'POST'], '/subscriptions/{limit?}/{status?}', 'index');
+                Route::post('/update-bag/subscription/{subscription_id}/bag/{id}', 'updateBag');
+                Route::get('/subscription/{subscription_id?}', 'subscription');
+            });
         });
     });
 
