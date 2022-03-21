@@ -174,7 +174,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
             Route::get('/get-plans/{plan}/foodbags/{id?}', 'getBags');
             Route::match(['GET', 'POST'], '/subscription/{action?}', 'subscription');
             Route::post('/activate-plan/{id}', 'store');
-            Route::post('/update-bag/plan/{subscription_id}/bag/{id}', 'updateBag');
+            Route::post('/update-bag/subscription/{subscription_id}/bag/{id}', 'updateBag');
         });
     });
 
