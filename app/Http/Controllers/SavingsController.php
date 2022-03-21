@@ -194,9 +194,12 @@ class SavingsController extends Controller
         }
 
         // Update the user's current subscription's food bag
-        $plan = Auth::user()->subscription;
-        $plan->food_bag_id = $bag->id;
-        $plan->save();
+        if ($bag)
+        {
+            $plan = Auth::user()->subscription;
+            $plan->food_bag_id = $bag->id;
+            $plan->save();
+        }
 
         return $this->buildResponse([
             'message' => $msg ?? "You have successfully activated the {$bag->title} food bag",
