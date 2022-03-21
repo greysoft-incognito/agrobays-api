@@ -169,20 +169,21 @@ class SavingsController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function updateBag(Request $request, $plan_id = 'user', $id = null)
+    public function updateBag(Request $request, $subscription_id = 'user', $id = null)
     {
         $bag = FoodBag::find($id);
-        if ($plan_id === 'user')
+        if ($subscription_id === 'user')
         {
-            $plan = Plan::find($id);
-            $ids = $plan ? $plan->bags()->get('id')->values()->toArray() : [];
+            $sub = Subscription::find($subscription_id);
+            $ids = $sub ? $sub->plan->bags()->get('id')->values()->toArray() : [];
             $msg = 'The requested plan no longer exists.';
             $status = 'error';
             $code = 404;
         }
         else
         {
-            $ids = Auth::user()->subscription->plan->bags()->get('id')->values()->toArray();
+            $sub = Auth::user()->subscription;
+            $ids = $sub ? $sub->plan->bags()->get('id')->values()->toArray() : [];
         }
 
         if (!$bag || !in_array($bag->id, Collect($ids[0]??[])->filter(fn($k)=>!empty($k))->values()->toArray()))
