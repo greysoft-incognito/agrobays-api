@@ -172,7 +172,7 @@ class SavingsController extends Controller
     public function updateBag(Request $request, $subscription_id = 'user', $id = null)
     {
         $bag = FoodBag::find($id);
-        if ($subscription_id === 'user')
+        if ($subscription_id !== 'user')
         {
             $sub = Subscription::find($subscription_id);
             $ids = $sub ? $sub->plan->bags()->get('id')->values()->toArray() : [];
@@ -186,7 +186,7 @@ class SavingsController extends Controller
             $ids = $sub ? $sub->plan->bags()->get('id')->values()->toArray() : [];
         }
 
-        if (!$bag || !in_array($bag->id, Collect($ids[0]??[])->filter(fn($k)=>!empty($k))->values()->toArray()))
+        if ($sub && (!$bag || !in_array($bag->id, Collect($ids[0]??[])->filter(fn($k)=>!empty($k))->values()->toArray())))
         {
             $msg = 'The requested food bag no longer exists.';
             $status = 'error';
