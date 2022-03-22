@@ -58,7 +58,7 @@ class PaymentController extends Controller
                 $due = $subscription->plan->amount / $subscription->plan->duration;
 
                 $tranx = $paystack->transaction->initialize([
-                  'amount' => number_format(($due * $request->days) ),       // in kobo
+                  'amount' => $due,       // in kobo
                   'email' => Auth::user()->email,         // unique to customers
                   'reference' => $reference,         // unique to transactions
                   'callback_url' => config('settings.payment_verify_url', route('payment.paystack.verify'))
