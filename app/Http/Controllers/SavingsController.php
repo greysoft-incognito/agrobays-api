@@ -157,7 +157,7 @@ class SavingsController extends Controller
         $userPlan = new Subscription;
         $userPlan->user_id = Auth::id();
         $userPlan->plan_id = $plan->id;
-        $userPlan->food_bag_id = $plan->bags()->first()->id;
+        $userPlan->food_bag_id = $plan->bags()->first()->id ?? FoodBag::first()->id;
         $userPlan->save();
 
         return $this->buildResponse([
