@@ -13,6 +13,7 @@ use App\Http\Controllers\FruitBayController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SavingsController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -163,8 +164,15 @@ Route::middleware(['auth:sanctum'])->group(function() {
     ->group(function() {
         Route::get('/', 'index')->name('index');
         Route::post('/update', 'store')->name('update');
-        Route::get('/transactions', 'transactions')->name('transactions');
         Route::get('/savings/get/{id?}', 'savings')->name('savings');
+
+        // Transactions Controller Routes
+        Route::prefix('transactions')->name('transactions.')
+        ->controller(TransactionController::class)
+        ->group(function() {
+            Route::get('/{transaction_id?}', 'index')->name('index');
+            Route::get('/limit/{limit?}/{status?}', 'transactions')->name('limited');
+        });
 
         // Savings Routes
         Route::prefix('savings')->name('savings.')->group(function() {

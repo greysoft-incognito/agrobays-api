@@ -31,42 +31,6 @@ class AccountController extends Controller
         ]);
     }
 
-
-    /**
-     * Display a listing of the user's transactions.
-     *
-     * @param \Illuminate\Support\Facades\Auth $auth
-     * @return \Illuminate\Http\Response
-     */
-    public function transactions(Auth $auth)
-    {
-        $model = Transaction::query();
-        return app('datatables')->eloquent($model)
-            ->editColumn('created_at', function(Transaction $item) {
-                return $item->created_at->format('Y-m-d H:i');
-            })
-            ->editColumn('type', function(Transaction $item) {
-                if ($item->transactable() instanceof Saving) {
-                    return $item->transactable()->subscription->plan->title;
-                }
-                elseif ($item->transactable() instanceof Saving) {
-                    return $item->transactable()->subscription->plan->title;
-                }
-            })
-            ->addColumn('action', function (Transaction $item) {
-                return '<a href="#edit-'.$item->id.'" class="btn btn-xs btn-primary"><i class="fa fa-pen-alt"></i> Edit</a>';
-            })
-            ->removeColumn('updated_at')->toJson();
-
-        // return $this->buildResponse([
-        //     'message' => 'OK',
-        //     'status' => 'success',
-        //     'response_code' => 200,
-        //     'transactions' => $auth::user()->transactions()->paginate(15),
-        // ]);
-    }
-
-
     /**
      * Display a listing of the user's transactions or return
      * a particular transaction if an id is provided.
