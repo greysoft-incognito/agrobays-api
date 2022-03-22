@@ -65,10 +65,10 @@ class Controller extends BaseController
      * @param Validator $validator
      * @return void
      */
-    public function validatorFails(Validator $validator)
+    public function validatorFails(Validator $validator, $field = null)
     {
         return $this->buildResponse([
-            'message' => 'Your input has a few errors',
+            'message' => $field ? $validator->errors()->first() : 'Your input has a few errors',
             'status' => 'error',
             'response_code' => 422,
             'errors' => $validator->errors(),
