@@ -158,6 +158,7 @@ class PaymentController extends Controller
     public function processSaving(Request $request, $tranx): array
     {
         $msg = "OK";
+        $code = 422;
         $saving = Saving::where('payment_ref', $request->reference)->where('status', 'pending')->first();
         if ($saving) {
             $subscription = User::find($saving->user_id)->subscription;
