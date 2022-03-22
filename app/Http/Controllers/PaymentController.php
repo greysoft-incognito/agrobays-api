@@ -48,13 +48,13 @@ class PaymentController extends Controller
         }
         else
         {
-            $due = $subscription->plan->amount / $subscription->plan->duration;
+            $due = number_format($subscription->plan->amount / $subscription->plan->duration, 2);
             try {
                 $paystack = new Paystack(env("PAYSTACK_SECRET_KEY"));
                 $reference = Str::random(12);
 
                 $tranx = $paystack->transaction->initialize([
-                  'amount' => number_format(($due * $request->days)*100, 2),       // in kobo
+                  'amount' => ($due * $request->days)*100,       // in kobo
                   'email' => Auth::user()->email,         // unique to customers
                   'reference' => $reference,         // unique to transactions
                   'callback_url' => config('settings.payment_verify_url', route('payment.paystack.verify'))
