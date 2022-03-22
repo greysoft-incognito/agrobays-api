@@ -32,10 +32,10 @@ class PaymentController extends Controller
         $subscription = Auth::user()->subscription()->find($request->subscription_id);
 
         if (($validator = Validator::make($request->all(), [
-            'days' => ['required', 'numeric', 'min:1', 'max:'.$subscription->plan->duration],
+            'days' => ['required', 'numeric', 'min:1', 'max:'.$subscription->days_left],
         ], [
             'days.min' => 'You have to save for at least 1 day.',
-            'days.max' => "You cannot save for more than {$subscription->plan->duration} days."
+            'days.max' => "You cannot save for more than {$subscription->days_left} days."
         ]))->fails()) {
             return $this->validatorFails($validator);
         }
