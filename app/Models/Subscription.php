@@ -78,9 +78,9 @@ class Subscription extends Model
     {
         $saved = $this->savings->mapWithKeys(function($value, $key) {
             return ['total' => $value->total];
-        });dd($saved);
+        });
         return Attribute::make(
-            get: fn() => number_format($saved, 2)
+            get: fn() => $saved
         );
     }
 
