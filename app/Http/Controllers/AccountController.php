@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Saving;
+use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -37,6 +40,24 @@ class AccountController extends Controller
      */
     public function transactions(Auth $auth)
     {
+        $model = Transaction::query();
+        return app('datatables')->eloquent($model)
+            ->editColumn('created_at', function(Transaction $item) {
+                return $item->created_at->format('Y-m-d H:i');
+            })
+            ->editColumn('type', function(Transaction $item) {
+                if ($item->transactable() instanceof Saving) {
+                    return $item->transactable()->subscription->plan->title;
+                }
+                elseif ($item->transactable() instanceof Saving) {
+                    return $item->transactable()->subscription->plan->title;
+                }
+            })
+            ->addColumn('action', function (Transaction $item) {
+                return '<a href="#edit-'.$item->id.'" class="btn btn-xs btn-primary"><i class="fa fa-pen-alt"></i> Edit</a>';
+            })
+            ->removeColumn('updated_at')->toJson();
+
         return $this->buildResponse([
             'message' => 'OK',
             'status' => 'success',
