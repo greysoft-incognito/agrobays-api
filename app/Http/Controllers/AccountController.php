@@ -83,6 +83,9 @@ class AccountController extends Controller
                 ->editColumn('created_at', function(Saving $item) {
                     return $item->created_at->format('Y-m-d H:i');
                 })
+                ->editColumn('amount', function(Saving $item) {
+                    return money($item->amount);
+                })
                 ->editColumn('type', function(Saving $item) {
                     return $item->subscription->plan->title;
                 })
