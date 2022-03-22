@@ -77,14 +77,14 @@ class Subscription extends Model
     public function totalSaved(): Attribute
     {
         return Attribute::make(
-            get: fn() => number_format($this->savings()->sum('amount'), 2)
+            get: fn() => number_format($this->savings()->sum('amount') * $this->savings()->sum('days'), 2)
         );
     }
 
     public function totalLeft(): Attribute
     {
         return Attribute::make(
-            get: fn() => number_format($this->plan->amount - $this->savings()->sum('amount'), 2)
+            get: fn() => number_format($this->plan->amount - ($this->savings()->sum('amount') * $this->savings()->sum('days')), 2)
         );
     }
 }
