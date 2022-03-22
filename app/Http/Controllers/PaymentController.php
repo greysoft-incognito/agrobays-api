@@ -169,6 +169,9 @@ class PaymentController extends Controller
                 $trns = $saving->transaction;
                 $trns->status = 'complete';
 
+                $subscription->status = $subscription->days_left >= 1 ? 'active' : 'complete';
+                $subscription->save();
+
                 if ($_left <= 1)
                 {
                     $msg = 'You have completed the saving circle for this subscription, you would be notified when your food bag is ready for pickup or delivery.';
@@ -177,9 +180,6 @@ class PaymentController extends Controller
                 {
                     $msg = "You have successfully made a {$saving->days} day savings of {$_amount} for the {$subscription->plan->title} plan, you now have only {$_left} days left to save up.";
                 }
-
-                $subscription->status = $subscription->days_left >= 1 ? 'active' : 'complete';
-                $subscription->save();
             } else {
                 $saving->status = 'rejected';
                 $trns = $saving->transaction;
