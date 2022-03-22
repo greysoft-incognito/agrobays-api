@@ -90,7 +90,6 @@ class PaymentController extends Controller
                     'status' => 'error',
                     'response_code' => 422,
                     'due' => $due,
-                    'test' => ceil(($due * $request->days)*100),
                     'payload' => $e instanceof ApiException ? $e->getResponseObject() : [],
                 ]);
             }
@@ -166,7 +165,7 @@ class PaymentController extends Controller
         if ($saving) {
             $subscription = User::find($saving->user_id)->subscription()->where('id', $saving->subscription_id)->first();
             $_amount = money($tranx->data->amount/100);
-            $_left = $subscription->days_left;
+            $_left = $subscription->days_left - $request->duration;
 
             if ('success' === $tranx->data->status) {
                 $saving->status = 'complete';
