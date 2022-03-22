@@ -133,7 +133,7 @@ class SavingsController extends Controller
         //         'response_code' => 406,
         //     ]);
         // }
-        elseif (Auth::user()->subscriptions()->where('status', 'pending')->exists())
+        elseif (Auth::user()->subscriptions()->where([['plan_id', '=', $id], ['status', '=', 'pending']])->exists())
         {
             return $this->buildResponse([
                 'message' => 'You need to make at least one savings on all your existing subscriptions before you can subscribe to another plan.',
