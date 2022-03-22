@@ -63,7 +63,7 @@ class AccountController extends Controller
         //     'status' => 'success',
         //     'response_code' => 200,
         //     'transactions' => $auth::user()->transactions()->paginate(15),
-        ]);
+        // ]);
     }
 
 
