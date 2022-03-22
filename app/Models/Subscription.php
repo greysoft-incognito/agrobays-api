@@ -76,9 +76,8 @@ class Subscription extends Model
 
     public function totalSaved(): Attribute
     {
-        $saved = $this->savings->map(function($value, $key) {
-            $value->get_total = $value->total;
-            return $value;
+        $saved = $this->savings->mapWithKeys(function($value, $key) {
+            return ['total' => $value->total];
         });dd($saved);
         return Attribute::make(
             get: fn() => number_format($saved, 2)
