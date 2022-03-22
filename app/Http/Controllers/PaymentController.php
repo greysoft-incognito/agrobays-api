@@ -159,6 +159,7 @@ class PaymentController extends Controller
     {
         $msg = "OK";
         $code = 422;
+        $status = 'error';
         $saving = Saving::where('payment_ref', $request->reference)->where('status', 'pending')->first();
         if ($saving) {
             $subscription = User::find($saving->user_id)->subscription;
