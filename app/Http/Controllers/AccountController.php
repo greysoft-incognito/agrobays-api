@@ -83,7 +83,7 @@ class AccountController extends Controller
                     return $item->created_at->format('Y-m-d H:i');
                 })
                 ->editColumn('type', function(Saving $item) {
-                    return $item->id;
+                    return $item;
                     return Saving::find($item->id)->subscription->plan->title;
                 })
                 ->removeColumn('updated_at')->toJson();
