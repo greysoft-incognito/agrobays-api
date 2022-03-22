@@ -68,7 +68,8 @@ class AccountController extends Controller
 
 
     /**
-     * Display a listing of the user's transactions.
+     * Display a listing of the user's transactions or return
+     * a particular transaction if an id is provided.
      *
      * @param \Illuminate\Support\Facades\Auth $auth
      * @return \Illuminate\Http\Response
