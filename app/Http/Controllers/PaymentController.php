@@ -55,7 +55,7 @@ class PaymentController extends Controller
             try {
                 $paystack = new Paystack(env("PAYSTACK_SECRET_KEY"));
                 $reference = Str::random(12);
-                $due = $subscription->plan->amount / $subscription->plan->duration;
+                $due = (int)$subscription->plan->amount / $subscription->plan->duration;
 
                 $tranx = $paystack->transaction->initialize([
                   'amount' => $due,       // in kobo
