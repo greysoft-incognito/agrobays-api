@@ -78,7 +78,7 @@ class AccountController extends Controller
     {
         if (!$id)
         {
-            $model = Saving::where('user_id', Auth::id())->query();
+            $model = Saving::where('user_id', Auth::id())->get();
             return app('datatables')->eloquent($model)
                 ->editColumn('created_at', function(Saving $item) {
                     return $item->created_at->format('Y-m-d H:i');
