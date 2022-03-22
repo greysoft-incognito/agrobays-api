@@ -90,7 +90,7 @@ class PaymentController extends Controller
                     'status' => 'error',
                     'response_code' => 422,
                     'due' => $due,
-                    'test' => ($due * $request->days)*100,
+                    'test' => round(($due * $request->days)*100),
                     'payload' => $e instanceof ApiException ? $e->getResponseObject() : [],
                 ]);
             }
