@@ -36,7 +36,7 @@ class Saving extends Model
     /**
      * Get all of the saving's subscription.
      */
-    public function get_subscription(): BelongsTo
+    public function gsubscription(): BelongsTo
     {
         return $this->belongsTo(Subscription::class);
     }
