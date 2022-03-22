@@ -81,7 +81,7 @@ class Subscription extends Model
         });
 
         return Attribute::make(
-            get: fn() => number_format($total->count() ? $total->sum() : 0, 2)
+            get: fn() => number_format($total->count() > 0 ? $total->sum() : 0, 2)
         );
     }
 
