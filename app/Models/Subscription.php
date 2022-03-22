@@ -77,7 +77,7 @@ class Subscription extends Model
     public function totalSaved(): Attribute
     {
         $total = $this->savings()->get()->map(function($value, $key) {
-            return $value->total;
+            return $value->total ?? 0;
         })->sum();
 
         return Attribute::make(
