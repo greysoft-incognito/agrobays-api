@@ -55,9 +55,10 @@ class PaymentController extends Controller
             try {
                 $paystack = new Paystack(env("PAYSTACK_SECRET_KEY"));
                 $reference = Str::random(12);
+                $due = $subscription->plan->amount / $subscription->plan->duration;
 
                 $tranx = $paystack->transaction->initialize([
-                  'amount' => ($subscription->plan->amount * $request->days) * 100,       // in kobo
+                  'amount' => ($due * $request->days) * 100,       // in kobo
                   'email' => Auth::user()->email,         // unique to customers
                   'reference' => $reference,         // unique to transactions
                   'callback_url' => config('settings.payment_verify_url', route('payment.paystack.verify'))
@@ -71,8 +72,8 @@ class PaymentController extends Controller
                         'status' => 'pending',
                         'payment_ref' => $reference,
                         'days' => $request->days,
-                        'amount' => $subscription->plan->amount / $subscription->plan->duration,
-                        'due' => $subscription->plan->amount / $subscription->plan->duration,
+                        'amount' => $due,
+                        'due' => $due,
                     ])
                 );
                 $transaction = $savings->transaction();
@@ -81,8 +82,8 @@ class PaymentController extends Controller
                     'reference' => $reference,
                     'method' => 'Paystack',
                     'status' => 'pending',
-                    'amount' => $subscription->plan->amount * $request->days,
-                    'due' => $subscription->plan->amount * $request->days,
+                    'amount' => $due * $request->days,
+                    'due' => $due * $request->days,
                 ]);
 
                 $payload = $tranx;

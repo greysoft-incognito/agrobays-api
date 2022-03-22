@@ -13,7 +13,7 @@ return [
     'currency' => 'NGN',
     'use_queue' => true,
     'keep_successful_queue_logs' => true,
-    'payment_verify_url' => 'http://localhost:8080/payment/verify',
+    'payment_verify_url' => env('PAYMENT_VERIFY_URL', 'http://localhost:8080/payment/verify'),
     'permissions' => [
         'manage_guests' => 'View, manage and get notifications for guest and bootcamp registrations',
         'manage_users' => 'Create, view, manage and get notifications for user access',
