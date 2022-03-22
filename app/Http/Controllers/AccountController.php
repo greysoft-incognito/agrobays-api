@@ -85,7 +85,7 @@ class AccountController extends Controller
                 ->editColumn('type', function(Saving $item) {
                     return $item->subscription->plan->title;
                 })
-                ->addColumn('action', function (Transaction $item) {
+                ->addColumn('action', function (Saving $item) {
                     return '<a href="#edit-'.$item->id.'" class="btn btn-xs btn-primary"><i class="fa fa-pen-alt"></i>Edit</a>';
                 })
                 ->removeColumn('updated_at')->toJson();
