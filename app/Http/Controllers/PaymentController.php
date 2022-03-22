@@ -163,7 +163,7 @@ class PaymentController extends Controller
         $subscription = $payload = [];
         $saving = Saving::where('payment_ref', $request->reference)->where('status', 'pending')->first();
         if ($saving) {
-            $subscription = User::find($saving->user_id)->subscription;
+            $subscription = User::find($saving->user_id)->subscription()->where('id', $saving->subscription_id)->get();
             $_amount = money($tranx->data->amount/100);
             $_left = $subscription->days_left;
 
