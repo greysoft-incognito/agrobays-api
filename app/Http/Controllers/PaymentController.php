@@ -21,11 +21,25 @@ class PaymentController extends Controller
      * @param  String $action
      * @return \Illuminate\Http\Response
      */
-    public function initialize(Request $request, $type = 'savings')
+    public function initializeSaving(Request $request)
     {
-        $subscription = Auth::user()->subscription;
+        if (($validator = Validator::make($request->all(), [
+            'subscription_id' => ['required', 'numeric'],
+        ]))->fails()) {
+            return $this->validatorFails($validator);
+        }
 
-        $key  = 'subscription';
+        $subscription = Auth::user()->subscription()->find($request->subscription_id);
+
+        if (($validator = Validator::make($request->all(), [
+            'days' => ['required', 'numeric', 'min:1', 'max:'.$subscription->plan->duration],
+        ], [
+            'days.min' => 'You have to save for at least 1 day.',
+            'days.max' => "You cannot save for more than {$subscription->plan->duration} days."
+        ]))->fails()) {
+            return $this->validatorFails($validator);
+        }
+
         $code = 403;
 
         if (!$subscription)
@@ -36,19 +50,8 @@ class PaymentController extends Controller
         {
             $msg = 'You have completed the saving circle for this subscription, you would be notified when your food bag is ready for pickup or delivery.';
         }
-        elseif ($type === 'savings')
+        else
         {
-            $validator = Validator::make($request->all(), [
-                'days' => ['required', 'numeric', 'min:1', 'max:'.$subscription->plan->duration],
-            ], [
-                'days.min' => 'You have to save for at least 1 day.',
-                'days.max' => "You cannot save for more than {$subscription->plan->duration} days."
-            ]);
-
-            if ($validator->fails()) {
-                return $this->validatorFails($validator);
-            }
-
             try {
                 $paystack = new Paystack(env("PAYSTACK_SECRET_KEY"));
                 $reference = Str::random(12);

@@ -193,7 +193,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
     Route::controller(PaymentController::class)
     ->prefix('payment')->name('payment.')
     ->group(function() {
-        Route::post('/initialize/{type?}', 'initialize')->name('initialize');
+        Route::post('/initialize/savings', 'initializeSaving')->name('initialize.savings');
         Route::post('/paystack/webhook', 'paystackWebhook')->name('paystack.webhook');
     });
 });
