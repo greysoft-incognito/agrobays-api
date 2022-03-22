@@ -25,7 +25,7 @@ class PaymentController extends Controller
     {
         if (($validator = Validator::make($request->all(), [
             'subscription_id' => ['required', 'numeric'],
-        ]))->fails()) {
+        ]))->stopOnFirstFailure()->fails()) {
             return $this->validatorFails($validator);
         }
 
@@ -36,7 +36,7 @@ class PaymentController extends Controller
         ], [
             'days.min' => 'You have to save for at least 1 day.',
             'days.max' => "You cannot save for more than {$subscription->days_left} days."
-        ]))->fails()) {
+        ]))->stopOnFirstFailure()->fails()) {
             return $this->validatorFails($validator);
         }
 
