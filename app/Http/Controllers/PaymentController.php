@@ -48,7 +48,7 @@ class PaymentController extends Controller
         }
         else
         {
-            $due = number_format($subscription->plan->amount / $subscription->plan->duration, 2);
+            $due = round($subscription->plan->amount / $subscription->plan->duration, 2);
             try {
                 $paystack = new Paystack(env("PAYSTACK_SECRET_KEY"));
                 $reference = Str::random(12);
