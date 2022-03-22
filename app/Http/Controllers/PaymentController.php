@@ -157,7 +157,7 @@ class PaymentController extends Controller
      */
     public function processSaving(Request $request, $tranx): array
     {
-        $msg = "OK";
+        $msg = "An unrecoverable error occured";
         $code = 422;
         $status = 'error';
         $subscription = $payload = [];
