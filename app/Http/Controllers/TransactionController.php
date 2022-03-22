@@ -63,7 +63,7 @@ class TransactionController extends Controller
 
         $transactions = $trans->get();
 
-        $msg = !$transactions ? 'You have not made any transactions.' : 'OK';
+        $msg = !$transactions->isNotEmpty() ? 'You have not made any transactions.' : 'OK';
 
         return $this->buildResponse([
             'message' => $msg,
