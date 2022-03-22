@@ -52,14 +52,23 @@ class AccountController extends Controller
      * @param \Illuminate\Support\Facades\Auth $auth
      * @return \Illuminate\Http\Response
      */
-    public function savings(Auth $auth)
+    public function savings(Auth $auth, $id = null)
     {
         $savings = $auth::user()->savings();
+
+        if ($id && !($saving = $savings->find($id))) {
+            return $this->buildResponse([
+                'message' => 'The requested saving no longer exists.',
+                'status' => 'error',
+                'response_code' => 404,
+            ]);
+        }
+
         return $this->buildResponse([
             'message' => 'OK',
             'status' => 'success',
             'response_code' => 200,
-            'savings' => $savings->paginate(15),
+            $id ? 'saving' : 'savings' => $id ? $saving : $savings->paginate(15),
         ]);
     }
 
