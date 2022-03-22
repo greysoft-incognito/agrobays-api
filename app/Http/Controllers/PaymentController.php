@@ -52,7 +52,7 @@ class PaymentController extends Controller
         }
         else
         {
-            $due = (int)$subscription->plan->amount / $subscription->plan->duration;
+            $due = $subscription->plan->amount / $subscription->plan->duration;
             try {
                 $paystack = new Paystack(env("PAYSTACK_SECRET_KEY"));
                 $reference = Str::random(12);
