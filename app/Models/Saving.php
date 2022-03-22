@@ -33,6 +33,14 @@ class Saving extends Model
         return $this->belongsTo(Subscription::class)->where('status', '!=', 'complete');
     }
 
+    /**
+     * Get all of the saving's subscription.
+     */
+    public function get_subscription(): BelongsTo
+    {
+        return $this->belongsTo(Subscription::class);
+    }
+
     public function getSubscription(): Attribute
     {
         return Attribute::make(
