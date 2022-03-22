@@ -31,8 +31,9 @@ return [
     */
 
     'paths' => [
-        public_path('upload'),
+        public_path('uploads'),
         public_path('images'),
+        public_path('media'),
         public_path('uploads/images'),
     ],
 
