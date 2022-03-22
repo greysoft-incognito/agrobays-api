@@ -56,7 +56,7 @@ class PaymentController extends Controller
                 $paystack = new Paystack(env("PAYSTACK_SECRET_KEY"));
                 $reference = Str::random(12);
                 $due = $subscription->plan->amount / $subscription->plan->duration;
-return dump($due);
+return var_dump($due);
                 $tranx = $paystack->transaction->initialize([
                   'amount' => $due,       // in kobo
                   'email' => Auth::user()->email,         // unique to customers
