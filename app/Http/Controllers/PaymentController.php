@@ -52,10 +52,10 @@ class PaymentController extends Controller
         }
         else
         {
+            $due = (int)$subscription->plan->amount / $subscription->plan->duration;
             try {
                 $paystack = new Paystack(env("PAYSTACK_SECRET_KEY"));
                 $reference = Str::random(12);
-                $due = (int)$subscription->plan->amount / $subscription->plan->duration;
 
                 $tranx = $paystack->transaction->initialize([
                   'amount' => $due,       // in kobo
@@ -93,6 +93,7 @@ class PaymentController extends Controller
                     'message' => $e->getMessage(),
                     'status' => 'error',
                     'response_code' => 422,
+                    'due' => $due,
                     'payload' => $e instanceof ApiException ? $e->getResponseObject() : [],
                 ]);
             }
