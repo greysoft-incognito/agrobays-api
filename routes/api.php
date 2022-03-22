@@ -164,7 +164,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
         Route::get('/', 'index')->name('index');
         Route::post('/update', 'store')->name('update');
         Route::get('/transactions', 'transactions')->name('transactions');
-        Route::get('/savings/{id?}', 'savings')->name('savings');
+        Route::get('/savings/get/{id?}', 'savings')->name('savings');
 
         // Savings Routes
         Route::prefix('savings')->name('savings.')->group(function() {
