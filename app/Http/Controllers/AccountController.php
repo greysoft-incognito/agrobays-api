@@ -58,11 +58,11 @@ class AccountController extends Controller
             })
             ->removeColumn('updated_at')->toJson();
 
-        return $this->buildResponse([
-            'message' => 'OK',
-            'status' => 'success',
-            'response_code' => 200,
-            'transactions' => $auth::user()->transactions()->paginate(15),
+        // return $this->buildResponse([
+        //     'message' => 'OK',
+        //     'status' => 'success',
+        //     'response_code' => 200,
+        //     'transactions' => $auth::user()->transactions()->paginate(15),
         ]);
     }
 
@@ -75,6 +75,19 @@ class AccountController extends Controller
      */
     public function savings(Auth $auth, $id = null)
     {
+        if (!$id)
+        {
+            $model = Saving::query();
+            return app('datatables')->eloquent($model)
+                ->editColumn('created_at', function(Saving $item) {
+                    return $item->created_at->format('Y-m-d H:i');
+                })
+                ->editColumn('type', function(Saving $item) {
+                    return $item->subscription->plan->title;
+                })
+                ->removeColumn('updated_at')->toJson();
+        }
+
         $savings = $auth::user()->savings();
 
         if ($id && !($saving = $savings->find($id))) {
