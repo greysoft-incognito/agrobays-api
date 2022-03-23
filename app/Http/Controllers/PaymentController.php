@@ -126,7 +126,9 @@ class PaymentController extends Controller
             return $item;
         });
 
-        $pricing = $cart->values();
+        $pricing = $cart->mapWithKeys(function($value, $key) {
+            return [$value->total];
+        });
 
         $payload = [$cart, $pricing];
 
