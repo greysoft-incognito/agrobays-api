@@ -218,8 +218,9 @@ class PaymentController extends Controller
             ]);
 
             $transaction = Transaction::where('reference', $request->reference)->where('status', 'pending')->first();
+            throw_if(!$transaction, \ErrorException::class, 'Transaction not found.')
 
-            if (($transactable = $transaction->transactable()) instanceof Saving) {
+            if (($transactable = $transaction->transactable) instanceof Saving) {
                 $processSaving = $this->processSaving($request, $tranx, $transactable);
             }
             elseif (($transactable = $transaction->transactable) instanceof Order) {
@@ -258,7 +259,7 @@ class PaymentController extends Controller
         $code = 422;
         $status = 'error';
         $subscription = $payload = [];
-        $saving = Saving::where('payment_ref', $request->reference)->where('status', 'pending')->first();
+        $saving = $saving->where('status', 'pending')->first();
         if ($saving) {
             $subscription = User::find($saving->user_id)->subscription()->where('id', $saving->subscription_id)->first();
             $_amount = money($tranx->data->amount/100);
