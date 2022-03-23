@@ -79,7 +79,7 @@ class AdminFoodsController extends Controller
 
         if ($request->hasFile('image'))
         {
-            Storage::delete($food->image);
+            $food->image && Storage::delete($food->image??'');
             $food->image = $request->file('image')->storeAs(
                 'public/uploads/images', rand() . '_' . rand() . '.' . $request->file('image')->extension()
             );

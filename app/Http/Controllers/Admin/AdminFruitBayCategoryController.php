@@ -74,7 +74,7 @@ class AdminFruitBayCategoryController extends Controller
 
         if ($request->hasFile('image'))
         {
-            Storage::delete($category->image);
+            $category->image && Storage::delete($category->image??'');
             $category->image = $request->file('image')->storeAs(
                 'public/uploads/images', rand() . '_' . rand() . '.' . $request->file('image')->extension()
             );

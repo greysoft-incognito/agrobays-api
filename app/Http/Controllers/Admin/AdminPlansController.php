@@ -79,11 +79,10 @@ class AdminPlansController extends Controller
 
         if ($request->image)
         {
-            Storage::delete($plan->image);
-            $photo = new File($request->image);
-            $filename =  rand() . '_' . rand() . '.' . $photo->extension();
-            Storage::putFileAs('public/uploads/images', $photo, $filename);
-            $plan->image = 'uploads/images/'. $filename;
+            $plan->image && Storage::delete($plan->image??'');
+            $plan->image = $request->file('image')->storeAs(
+                'public/uploads/images', rand() . '_' . rand() . '.' . $request->file('image')->extension()
+            );
         }
         $plan->save();
 

@@ -133,7 +133,7 @@ class AccountController extends Controller
 
         if ($request->hasFile('image'))
         {
-            Storage::delete($user->image);
+            $user->image && Storage::delete($user->image??'');
             $user->image = $request->file('image')->storeAs(
                 'public/uploads/images', rand() . '_' . rand() . '.' . $request->file('image')->extension()
             );
