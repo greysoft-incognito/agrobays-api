@@ -7,6 +7,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -129,6 +130,15 @@ class AccountController extends Controller
         $user->country = $request->country;
         $user->state = $request->state;
         $user->city = $request->city;
+
+        if ($request->hasFile('image'))
+        {
+            Storage::delete($user->image);
+            $user->image = $request->file('image')->storeAs(
+                'public/uploads/images', rand() . '_' . rand() . '.' . $request->file('image')->extension()
+            );
+        }
+
         $user->save();
 
         return $this->buildResponse([

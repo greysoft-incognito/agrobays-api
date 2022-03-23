@@ -74,13 +74,12 @@ class AdminFruitBayController extends Controller
         $fruitbay->description = $request->description;
         $fruitbay->fruit_bay_category_id = $request->category_id??FruitBayCategory::first()->id??null;
 
-        if ($request->image)
+        if ($request->hasFile('image'))
         {
             Storage::delete($fruitbay->image);
-            $photo = new File($request->image);
-            $filename =  rand() . '_' . rand() . '.' . $photo->extension();
-            Storage::putFileAs('public/uploads/images', $photo, $filename);
-            $fruitbay->image = 'uploads/images/'. $filename;
+            $fruitbay->image = $request->file('image')->storeAs(
+                'public/uploads/images', rand() . '_' . rand() . '.' . $request->file('image')->extension()
+            );
         }
         $fruitbay->save();
 

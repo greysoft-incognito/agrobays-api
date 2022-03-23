@@ -6,6 +6,7 @@ use App\Models\Saving;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class TransactionController extends Controller
 {
@@ -24,12 +25,10 @@ class TransactionController extends Controller
                 return $item->created_at->format('Y-m-d H:i');
             })
             ->editColumn('type', function(Transaction $item) {
-                if ($item->transactable() instanceof Saving) {
-                    return $item->transactable()->subscription->plan->title;
-                }
-                elseif ($item->transactable() instanceof Saving) {
-                    return $item->transactable()->subscription->plan->title;
-                }
+                Str::replace('App\\Models\\', '', $item->transactable_type);
+            })
+            ->addColumn('action', function (Transaction $item) {
+                return '<a href="transactions/invoice/'.$item->id.'" class="btn btn-xs btn-primary"><i class="fas invoice"></i></a>';
             })
             ->removeColumn('updated_at')->toJson();
 
