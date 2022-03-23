@@ -126,13 +126,17 @@ class PaymentController extends Controller
             return $item;
         });
 
-        $payload =$cart;
+        $pricing = $cart->filter(function ($value, $key) {
+            return $key === 'total';
+        });
+
+        $payload = [$cart, $pricing];
 
         $code = 403;
 
-        if (1==1)
+        if ($cart->count() <= 0)
         {
-            $msg = 'You do not have an active subscription';
+            $msg = 'You have too few items in your basket, please add more to checkout.';
         }
         else
         {
