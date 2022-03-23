@@ -105,6 +105,88 @@ class PaymentController extends Controller
 
 
     /**
+     * Initialize FruitBay Payment.
+     *
+     * @param  \Illuminate\Http\Client\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function initializeFruitBay(Request $request)
+    {
+        if (($validator = Validator::make($request->all(), [
+            'cart' => ['required', 'array'],
+        ]))->stopOnFirstFailure()->fails()) {
+            return $this->validatorFails($validator, 'cart');
+        }
+
+        collect($request->cart)->map(function($value) {
+
+        });
+
+        $code = 403;
+
+        if (1==1)
+        {
+            $msg = 'You do not have an active subscription';
+        }
+        else
+        {
+            $due = round($subscription->plan->amount / $subscription->plan->duration, 2);
+            try {
+                $paystack = new Paystack(env("PAYSTACK_SECRET_KEY"));
+                $reference = Str::random(12);
+
+                $tranx = $paystack->transaction->initialize([
+                  'amount' => ($due * $request->days)*100,       // in kobo
+                  'email' => Auth::user()->email,         // unique to customers
+                  'reference' => $reference,         // unique to transactions
+                  'callback_url' => config('settings.payment_verify_url', route('payment.paystack.verify'))
+                ]);
+
+                $code = 200;
+
+                $savings = $subscription->savings()->save(
+                    new Saving([
+                        'user_id' => Auth::id(),
+                        'status' => 'pending',
+                        'payment_ref' => $reference,
+                        'days' => $request->days,
+                        'amount' => $due,
+                        'due' => $due,
+                    ])
+                );
+                $transaction = $savings->transaction();
+                $transaction->create([
+                    'user_id' => Auth::id(),
+                    'reference' => $reference,
+                    'method' => 'Paystack',
+                    'status' => 'pending',
+                    'amount' => $due * $request->days,
+                    'due' => $due * $request->days,
+                ]);
+
+                $payload = $tranx;
+
+            } catch (ApiException | \InvalidArgumentException $e) {
+                return $this->buildResponse([
+                    'message' => $e->getMessage(),
+                    'status' => 'error',
+                    'response_code' => 422,
+                    'due' => $due,
+                    'payload' => $e instanceof ApiException ? $e->getResponseObject() : [],
+                ]);
+            }
+        }
+
+        return $this->buildResponse([
+            'message' => $msg??'OK',
+            'status' =>  !$subscription ? 'info' : 'success',
+            'response_code' => $code ?? 200, //202
+            'payload' => $payload??[],
+        ]);
+    }
+
+
+    /**
      * Verify the paystack payment.
      *
      * @param  \Illuminate\Http\Request  $request
