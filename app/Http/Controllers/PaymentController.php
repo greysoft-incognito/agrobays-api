@@ -259,7 +259,7 @@ class PaymentController extends Controller
         $code = 422;
         $status = 'error';
         $subscription = $payload = [];
-        $saving = $saving->where('status', 'pending')->first();
+        $saving = Saving::where('payment_ref', $request->reference)->where('status', 'pending')->first();
         if ($saving) {
             $subscription = User::find($saving->user_id)->subscription()->where('id', $saving->subscription_id)->first();
             $_amount = money($tranx->data->amount/100);
