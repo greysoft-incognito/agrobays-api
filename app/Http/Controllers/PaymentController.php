@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FruitBay;
 use Illuminate\Http\Request;
 use App\Models\Saving;
 use App\Models\User;
@@ -118,9 +119,11 @@ class PaymentController extends Controller
             return $this->validatorFails($validator, 'cart');
         }
 
-        collect($request->cart)->map(function($value) {
-
+        $cart = collect($request->cart)->map(function($value) {
+            return FruitBay::find($value->item_id);
         });
+
+        $payload =$cart;
 
         $code = 403;
 
@@ -179,7 +182,7 @@ class PaymentController extends Controller
 
         return $this->buildResponse([
             'message' => $msg??'OK',
-            'status' =>  !$subscription ? 'info' : 'success',
+            'status' =>  !$cart ? 'info' : 'success',
             'response_code' => $code ?? 200, //202
             'payload' => $payload??[],
         ]);
