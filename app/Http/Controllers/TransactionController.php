@@ -25,7 +25,7 @@ class TransactionController extends Controller
                 return $item->created_at->format('Y-m-d H:i');
             })
             ->addColumn('type', function(Transaction $item) {
-                Str::replace('App\\Models\\', '', $item->transactable_type);
+                return Str::replace('App\\Models\\', '', $item->transactable_type);
             })
             ->addColumn('action', function (Transaction $item) {
                 return '<a href="transactions/invoice/'.$item->id.'" class="btn btn-xs btn-primary"><i class="fas invoice"></i></a>';
