@@ -128,6 +128,12 @@ class PaymentController extends Controller
             return $item;
         });
 
+        if ($request->address && $request->address !== Auth::user()->address){
+            User::find(Auth::id())->update([
+                'address' => $request->address
+            ]);
+        }
+
         $code = 403;
 
         if ($cart->count() <= 0)
