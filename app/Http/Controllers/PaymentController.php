@@ -129,9 +129,9 @@ class PaymentController extends Controller
         });
 
         if ($request->address && $request->address !== Auth::user()->address){
-            User::find(Auth::id())->update([
-                'address' => $request->address
-            ]);
+            $user = User::find(Auth::id());
+            $user->address = $request->address;
+            $user->save();
         }
 
         $code = 403;
