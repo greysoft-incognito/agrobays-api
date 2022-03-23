@@ -124,7 +124,7 @@ class PaymentController extends Controller
             $item->total = $item->price * $value['qty'];
             $item->qty = $value['qty'];
             return $item;
-        });
+        })->first();
 
         $pricing = $cart->filter(function ($value, $key) {
             return $key === 'total';
