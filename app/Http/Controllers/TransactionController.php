@@ -28,7 +28,7 @@ class TransactionController extends Controller
                 return Str::replace('App\\Models\\', '', $item->transactable_type);
             })
             ->addColumn('action', function (Transaction $item) {
-                return '<a href="transactions/invoice/'.$item->id.'" class="btn btn-xs btn-primary"><i class="ri-file-list-2-fill"></i></a>';
+                return '<a href="transactions/invoice/'.$item->id.'" class="btn btn-xs btn-primary"><i class="ri-file-list-2-fill ri-xl"></i></a>';
             })
             ->removeColumn('updated_at')->toJson();
 
