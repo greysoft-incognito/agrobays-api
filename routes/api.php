@@ -171,6 +171,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
         ->controller(TransactionController::class)
         ->group(function() {
             Route::get('/{transaction_id?}', 'index')->name('index');
+            Route::get('/invoice/{transaction_id?}', 'invoice')->name('invoice');
             Route::get('/limit/{limit?}/{status?}', 'transactions')->name('limited');
         });
 

@@ -71,4 +71,24 @@ class TransactionController extends Controller
             'transactions' => $transactions??[],
         ]);
     }
+
+    /**
+     * Display an invoice of the user's transactions.
+     *
+     * @param \Illuminate\Support\Facades\Auth $auth
+     * @return \Illuminate\Http\Response
+     */
+    public function invoice($transaction_id = null)
+    {
+        $transactions = Auth::user()->transactions()->find($transaction_id);
+
+        $msg = !$transactions ? 'This transaction was does not exist' : 'OK'
+
+        return $this->buildResponse([
+            'message' => $msg,
+            'status' =>  !$transactions ? 'info' : 'success',
+            'response_code' => 200,
+            'transactions' => $transactions??[],
+        ]);
+    }
 }
