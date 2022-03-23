@@ -134,7 +134,7 @@ class PaymentController extends Controller
 
         $code = 403;
 
-        if ($cart->count() <= 0)
+        if ($cart->count() <= 0 && 1==1)
         {
             $msg = 'You have too few items in your basket, please add more to checkout.';
         }
