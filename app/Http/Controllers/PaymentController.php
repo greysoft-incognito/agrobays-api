@@ -6,6 +6,7 @@ use App\Models\FruitBay;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use App\Models\Saving;
+use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -216,8 +217,13 @@ class PaymentController extends Controller
               'reference' => $request->reference,   // unique to transactions
             ]);
 
-            if ($type === 'savings') {
-                $processSaving = $this->processSaving($request, $tranx);
+            $transaction = Transaction::where('reference', $request->reference)->where('status', 'pending')->first();
+
+            if (($transactable = $transaction->transactable()) instanceof Saving) {
+                $processSaving = $this->processSaving($request, $tranx, $transactable);
+            }
+            elseif (($transactable = $transaction->transactable()) instanceof Order) {
+                $processSaving = $this->processOrder($request, $tranx, $transactable);
             }
             extract($processSaving);
         } catch (ApiException | \InvalidArgumentException $e) {
@@ -239,13 +245,14 @@ class PaymentController extends Controller
     }
 
     /**
-     * Undocumented function
+     * Process a saving's payment request
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param [type] $tranx
+     * @param object $tranx                          Transaction data returned by paystack
+     * @param object $saving                          Transaction saving retrieved from transaction
      * @return array
      */
-    public function processSaving(Request $request, $tranx): array
+    public function processSaving(Request $request, $tranx, $saving = null): array
     {
         $msg = "An unrecoverable error occured";
         $code = 422;
@@ -292,6 +299,51 @@ class PaymentController extends Controller
             'status' => $status,
             'payload' => $payload,
             'subscription' => $subscription,
+        ];
+    }
+
+    /**
+     * Process an order payment
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param object $tranx                          Transaction data returned by paystack
+     * @param object $order                          Transaction order retrieved from transaction
+     * @return array
+     */
+    public function processOrder(Request $request, $tranx, $order = null): array
+    {
+        $msg = "An unrecoverable error occured";
+        $code = 422;
+        $status = 'error';
+        $order = $order->where('status', 'pending')->first();
+        if ($order)
+        {
+            $trns = $order->transaction;
+            if ('success' === $tranx->data->status) {
+                $order->payment = 'complete';
+                $trns->status = 'complete';
+
+                $msg = "Your order has been placed successfully, you will be notified whenever it is ready for pickup or delivery.";
+                $order->save();
+
+            } else {
+                $order->payment = 'rejected';
+                $order->status = 'rejected';
+                $trns->status = 'rejected';
+            }
+            $order->save();
+            $trns->save();
+            $payload = $tranx;
+            $status = 'success';
+            $code = 200;
+        }
+
+        return [
+            'msg' => $msg,
+            'code' => $code,
+            'status' => $status,
+            'payload' => $payload,
+            'order' => $order,
         ];
     }
 
