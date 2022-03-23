@@ -120,7 +120,7 @@ class PaymentController extends Controller
         }
 
         $cart = collect($request->cart)->map(function($value) {
-            return FruitBay::find($value->item_id);
+            return FruitBay::find($value['item_id']);
         });
 
         $payload =$cart;
