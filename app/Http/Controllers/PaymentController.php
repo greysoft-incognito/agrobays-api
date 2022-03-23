@@ -218,7 +218,7 @@ class PaymentController extends Controller
             ]);
 
             $transaction = Transaction::where('reference', $request->reference)->where('status', 'pending')->first();
-            throw_if(!$transaction, \ErrorException::class, 'Transaction not found.')
+            throw_if(!$transaction, \ErrorException::class, 'Transaction not found.');
 
             if (($transactable = $transaction->transactable) instanceof Saving) {
                 $processSaving = $this->processSaving($request, $tranx, $transactable);
