@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Attribute;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -45,6 +46,31 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = [
+        'image_url',
+    ];
+
+    /**
+     * Get the URL to the fruit bay category's photo.
+     *
+     * @return string
+     */
+    protected function imageUrl(): Attribute
+    {
+        $image = $this->image
+            ? img($this->image, 'banner', 'original')
+            : 'https://ui-avatars.com/api/?name='.urlencode($this->firstname.' '.$this->lastname).'&background=0D8ABC&color=fff&size=150&font-size=0.95&bold=true';
+
+        return Attribute::make(
+            get: fn () => $image,
+        );
+    }
 
     /**
      * Get all of the transactions for the User
