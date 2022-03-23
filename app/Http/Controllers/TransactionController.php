@@ -24,7 +24,7 @@ class TransactionController extends Controller
             ->editColumn('created_at', function(Transaction $item) {
                 return $item->created_at->format('Y-m-d H:i');
             })
-            ->editColumn('type', function(Transaction $item) {
+            ->addColumn('type', function(Transaction $item) {
                 Str::replace('App\\Models\\', '', $item->transactable_type);
             })
             ->addColumn('action', function (Transaction $item) {
