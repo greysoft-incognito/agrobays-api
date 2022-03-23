@@ -75,11 +75,10 @@ if (!function_exists('img')) {
             return $image;
         }
 
-        $image = Str::of($image)->replace('public', '')->trim('/')->__toString();
-
         if ($image && Storage::exists($image)) {
-            $fpath    = preg_match("/^(media\/|home\/){1,2}\w+/", $image) ? $image : 'media/' . $image;
-            $photo    = asset((config('filesystems.default') === 'local' ? $fpath : Storage::url($image)));
+            $image = Str::of($image)->replace('public', '')->trim('/')->__toString();
+            $fpath = preg_match("/^(media\/|home\/){1,2}\w+/", $image) ? $image : 'media/' . $image;
+            $photo = asset((config('filesystems.default') === 'local' ? $fpath : Storage::url($image)));
         } else {
             if ($no_default === true) return null;
 
