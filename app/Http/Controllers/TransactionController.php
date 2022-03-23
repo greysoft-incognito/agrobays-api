@@ -89,7 +89,7 @@ class TransactionController extends Controller
             'status' =>  !$transaction ? 'info' : 'success',
             'response_code' => 200,
             'transaction' => $transaction??[],
-            'items' => $transaction->content()->items??$transaction->content,
+            'items' => $transaction->transactable()->items??$transaction->content,
         ]);
     }
 }
