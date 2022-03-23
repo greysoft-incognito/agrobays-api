@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\FruitBay;
+use App\Models\Order;
 use Illuminate\Http\Request;
 use App\Models\Saving;
 use App\Models\User;
@@ -126,27 +127,24 @@ class PaymentController extends Controller
             return $item;
         });
 
-        $pricing = $cart->mapWithKeys(function($value, $key) {
-            return [$key => $value->total];
-        })->sum();
-
-        $payload = [$cart, $pricing];
-
         $code = 403;
 
-        if ($cart->count() <= 0 || 1==1)
+        if ($cart->count() <= 0)
         {
             $msg = 'You have too few items in your basket, please add more to checkout.';
         }
         else
         {
-            $due = round($subscription->plan->amount / $subscription->plan->duration, 2);
+            $due = $cart->mapWithKeys(function($value, $key) {
+                return [$key => $value->total];
+            })->sum();
+
             try {
                 $paystack = new Paystack(env("PAYSTACK_SECRET_KEY"));
-                $reference = Str::random(12);
+                $reference = Str::random(15);
 
                 $tranx = $paystack->transaction->initialize([
-                  'amount' => ($due * $request->days)*100,       // in kobo
+                  'amount' => $due*100,       // in kobo
                   'email' => Auth::user()->email,         // unique to customers
                   'reference' => $reference,         // unique to transactions
                   'callback_url' => config('settings.payment_verify_url', route('payment.paystack.verify'))
@@ -154,24 +152,24 @@ class PaymentController extends Controller
 
                 $code = 200;
 
-                $savings = $subscription->savings()->save(
-                    new Saving([
-                        'user_id' => Auth::id(),
-                        'status' => 'pending',
-                        'payment_ref' => $reference,
-                        'days' => $request->days,
-                        'amount' => $due,
-                        'due' => $due,
-                    ])
-                );
-                $transaction = $savings->transaction();
+                $order = Order::create([
+                    'due' => $due,
+                    'items' => $cart,
+                    'status' => 'pending',
+                    'amount' => $due,
+                    'user_id' => Auth::id(),
+                    'payment' => 'pending',
+                    'reference' => $reference,
+                ]);
+
+                $transaction = $order->transaction();
                 $transaction->create([
                     'user_id' => Auth::id(),
                     'reference' => $reference,
                     'method' => 'Paystack',
                     'status' => 'pending',
-                    'amount' => $due * $request->days,
-                    'due' => $due * $request->days,
+                    'amount' => $due,
+                    'due' => $due,
                 ]);
 
                 $payload = $tranx;
@@ -189,7 +187,7 @@ class PaymentController extends Controller
 
         return $this->buildResponse([
             'message' => $msg??'OK',
-            'status' =>  !$cart ? 'info' : 'success',
+            'status' =>  $code !== 200 ? 'error' : 'success',
             'response_code' => $code ?? 200, //202
             'payload' => $payload??[],
         ]);
