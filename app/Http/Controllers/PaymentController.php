@@ -222,7 +222,7 @@ class PaymentController extends Controller
             if (($transactable = $transaction->transactable()) instanceof Saving) {
                 $processSaving = $this->processSaving($request, $tranx, $transactable);
             }
-            elseif (($transactable = $transaction->transactable()) instanceof Order) {
+            elseif (($transactable = $transaction->transactable) instanceof Order) {
                 $processSaving = $this->processOrder($request, $tranx, $transactable);
             }
             extract($processSaving);
