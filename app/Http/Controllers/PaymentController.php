@@ -126,7 +126,7 @@ class PaymentController extends Controller
             return $item;
         });
 
-        $pricing = $cart->filter(function ($value, $key) {
+        $pricing = $cart->values()->filter(function ($value, $key) {
             return $key == 'total';
         });
 
