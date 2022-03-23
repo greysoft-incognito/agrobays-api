@@ -31,7 +31,7 @@ class Transaction extends Model
      * @var array
      */
     protected $appends = [
-        'transaction'
+        'item'
     ];
 
     /**
@@ -42,7 +42,7 @@ class Transaction extends Model
         return $this->morphTo();
     }
 
-    public function transaction(): Attribute
+    public function item(): Attribute
     {
         return new Attribute(
             get: fn () => $this->transactable()->get(),
