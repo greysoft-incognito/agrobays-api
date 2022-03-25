@@ -72,6 +72,16 @@ class User extends Authenticatable
         );
     }
 
+    public function fullname(): Attribute
+    {
+        $name = isset($this->firstname) ? $this->firstname : '';
+        $name .= isset($this->lastname) ? ' ' . $this->lastname : '';
+        $name .= !isset($this->lastname) && !isset($this->firstname) && isset($this->username) ? $this->username : '';
+        return new Attribute(
+            get: fn () => strtoupper($name),
+        );
+    }
+
     /**
      * Get all of the transactions for the User
      *
