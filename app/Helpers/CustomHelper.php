@@ -102,6 +102,21 @@ if (!function_exists('img')) {
     }
 }
 
+if (!function_exists('num_reformat'))
+{
+    /**
+     * Reverse number formating created by php number format.
+     *
+     * @param string|interger $num
+     * @return NumberFormatter::parse
+     */
+    function num_reformat($num)
+    {
+        $fmt = new NumberFormatter( 'de_DE', NumberFormatter::DECIMAL );
+        return $fmt->parse($num);
+    }
+}
+
 if (!function_exists('money')) {
     /**
      * Shorten long numbers to K/M/B

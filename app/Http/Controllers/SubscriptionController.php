@@ -66,10 +66,10 @@ class SubscriptionController extends Controller
                 return $item->plan->title;
             })
             ->editColumn('total_left', function (Subscription $item) {
-                return money((integer)$item->total_left);
+                return money(num_reformat($item->total_left));
             })
             ->editColumn('total_saved', function (Subscription $item) {
-                return money((integer)$item->total_saved);
+                return money(num_reformat($item->total_saved));
             })
             ->addColumn('action', function (Subscription $item) {
                 return '<a href="savings/'.$item->plan->id.'" class="btn btn-xs btn-primary"><i class="ri-file-list-2-fill ri-xl"></i></a>';
