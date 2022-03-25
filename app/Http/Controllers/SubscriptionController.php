@@ -53,7 +53,7 @@ class SubscriptionController extends Controller
     public function dataTable(Auth $auth, $plan_id = null)
     {
         $model = Subscription::where('user_id', Auth::id());
-        if ($plan)
+        if ($plan_id)
         {
             $model->where('plan_id', $plan_id);
         }
