@@ -112,7 +112,7 @@ if (!function_exists('num_reformat'))
      */
     function num_reformat($num)
     {
-        $fmt = new NumberFormatter( 'de_DE', NumberFormatter::DECIMAL );
+        $fmt = new NumberFormatter( 'en_US', NumberFormatter::DECIMAL );
         return $fmt->parse($num);
     }
 }
