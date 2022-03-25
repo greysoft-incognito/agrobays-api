@@ -41,7 +41,7 @@ class AccountController extends Controller
      */
     public function savings(Auth $auth, $id = null, $planned = false)
     {
-        if (!$id)
+        if (!$id || $planned === 'planned')
         {
             $model = Saving::where('user_id', Auth::id());
             if ($planned !== false) {
