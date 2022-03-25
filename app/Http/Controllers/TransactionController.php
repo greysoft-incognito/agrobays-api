@@ -91,12 +91,13 @@ class TransactionController extends Controller
 
         $msg = !$transaction ? 'This transaction does not exist' : 'OK';
 
+        $transaction->user;
         return $this->buildResponse([
             'message' => $msg,
             'status' =>  !$transaction ? 'info' : 'success',
             'response_code' => 200,
             'transaction' => $transaction??[],
-            'items' => $transaction->transactable->items??($transaction->transactable??[]),
+            'items' => $transaction->transactable->items??[($transaction->transactable??null)],
         ]);
     }
 }
