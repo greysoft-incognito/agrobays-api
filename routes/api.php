@@ -191,6 +191,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
             ->group(function() {
                 Route::match(['GET', 'POST'], '/subscriptions/{limit?}/{status?}', 'index');
                 Route::post('/update-bag/subscription/{subscription_id}/bag/{id}', 'updateBag');
+                Route::get('/subscription/data/{plan_id?}', 'dataTable')->name('data');
                 Route::get('/subscription/{subscription_id?}', 'subscription');
             });
         });

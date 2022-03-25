@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\FoodBag;
 use App\Models\Subscription;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class SubscriptionController extends Controller
 {
@@ -40,6 +42,40 @@ class SubscriptionController extends Controller
             'response_code' => 200,
             'subscriptions' => $subscriptions??[],
         ]);
+    }
+
+    /**
+     * Display a listing of the user's transactions.
+     *
+     * @param \Illuminate\Support\Facades\Auth $auth
+     * @return \Illuminate\Http\Response
+     */
+    public function dataTable(Auth $auth, $plan_id = null)
+    {
+        $model = Subscription::where('user_id', Auth::id());
+        if ($plan)
+        {
+            $model->where('plan_id', $plan_id);
+        }
+
+        return app('datatables')->eloquent($model)
+            ->editColumn('created_at', function(Subscription $item) {
+                return $item->created_at->format('Y-m-d H:i');
+            })
+            ->addColumn('plan', function(Subscription $item) {
+                return $item->plan()->title;
+            })
+            ->addColumn('action', function (Subscription $item) {
+                return '<a href="savings/'.$item->plan()->id.'" class="btn btn-xs btn-primary"><i class="ri-file-list-2-fill ri-xl"></i></a>';
+            })
+            ->removeColumn('updated_at')->toJson();
+
+        // return $this->buildResponse([
+        //     'message' => 'OK',
+        //     'status' => 'success',
+        //     'response_code' => 200,
+        //     'transactions' => $auth::user()->transactions()->paginate(15),
+        // ]);
     }
 
     /**

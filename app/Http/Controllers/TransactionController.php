@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 class TransactionController extends Controller
 {
     /**
-     * Display a listing of the user's transactions.
+     * Display a listing of the user's transactions for datatables.
      *
      * @param \Illuminate\Support\Facades\Auth $auth
      * @return \Illuminate\Http\Response
@@ -82,7 +82,7 @@ class TransactionController extends Controller
     {
         $transaction = Auth::user()->transactions()->find($transaction_id);
 
-        $msg = !$transaction ? 'This transaction was does not exist' : 'OK';
+        $msg = !$transaction ? 'This transaction does not exist' : 'OK';
 
         return $this->buildResponse([
             'message' => $msg,
