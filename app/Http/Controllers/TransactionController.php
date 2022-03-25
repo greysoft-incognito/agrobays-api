@@ -7,6 +7,7 @@ use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Nette\Utils\Html;
 
 class TransactionController extends Controller
 {
@@ -28,7 +29,9 @@ class TransactionController extends Controller
                 return Str::replace('App\\Models\\', '', $item->transactable_type);
             })
             ->addColumn('action', function (Transaction $item) {
-                return '<a href="transactions/invoice/'.$item->id.'" class="btn btn-xs btn-primary"><i class="ri-file-list-2-fill ri-xl"></i></a>';
+                return implode([
+                    Html::el('a')->href('transactions/invoice/'.$item->plan->id)->setHtml(Html::el('i')->class('ri-file-list-2-fill ri-2x text-primary'))
+                ]);
             })
             ->removeColumn('updated_at')->toJson();
 

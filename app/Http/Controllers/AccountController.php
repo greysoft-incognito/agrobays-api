@@ -39,11 +39,14 @@ class AccountController extends Controller
      * @param \Illuminate\Support\Facades\Auth $auth
      * @return \Illuminate\Http\Response
      */
-    public function savings(Auth $auth, $id = null)
+    public function savings(Auth $auth, $id = null, $planned = false)
     {
         if (!$id)
         {
             $model = Saving::where('user_id', Auth::id());
+            if ($planned !== false) {
+                $model->where('subscription_id', $id);
+            }
             return app('datatables')->eloquent($model)
                 ->editColumn('created_at', function(Saving $item) {
                     return $item->created_at->format('Y-m-d H:i');
