@@ -75,11 +75,11 @@ class User extends Authenticatable
 
     public function fullname(): Attribute
     {
-        $name = isset($this->firstname) ? $this->firstname : '';
-        $name .= isset($this->lastname) ? ' ' . $this->lastname : '';
-        $name .= !isset($this->lastname) && !isset($this->firstname) && isset($this->username) ? $this->username : '';
+        $name = isset($this->firstname) ? ucfirst($this->firstname) : '';
+        $name .= isset($this->lastname) ? ' ' . ucfirst($this->lastname) : '';
+        $name .= !isset($this->lastname) && !isset($this->firstname) && isset($this->username) ? ucfirst($this->username) : '';
         return new Attribute(
-            get: fn () => strtoupper($name),
+            get: fn () => $name,
         );
     }
 
