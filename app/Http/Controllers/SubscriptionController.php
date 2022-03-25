@@ -60,7 +60,7 @@ class SubscriptionController extends Controller
         }
 
         return app('datatables')->eloquent($model)
-            ->rawColumns(['action'])
+            ->rawColumns(['name', 'action'])
             ->editColumn('created_at', function(Subscription $item) {
                 return $item->created_at->format('Y-m-d H:i');
             })
@@ -75,7 +75,7 @@ class SubscriptionController extends Controller
             })
             ->addColumn('action', function (Subscription $item) {
                 return implode([
-                    Html::el('a')->href('savings/'.$item->plan->id)->setHtml(Html::el('i')->class('ri-eye-fill ri-2x text-primary'))
+                    Html::el('a')->href('subscriptions/'.$item->plan->id)->setHtml(Html::el('i')->class('ri-eye-fill ri-2x text-primary'))
                 ]);
             })
             ->removeColumn('updated_at')->toJson();
