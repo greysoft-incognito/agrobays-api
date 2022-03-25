@@ -43,8 +43,8 @@ class RegisteredUserController extends Controller
         $username = $eser->first(fn($k)=>(User::where('username', $k)->doesntExist()), $eser->first().rand());
 
         $user = User::create([
-            'firstname' => $name->first(fn($k)=>$k!==null, $request->name),
-            'lastname' => $name->last(fn($k)=>$k!==$name->first(fn($k)=>$k!==null, $request->name), ''),
+            'firstname' => ($firstname = $name->first(fn($k)=>$k!==null, $request->name)),
+            'lastname' => $name->last(fn($k)=>$k!==$firstname, ''),
             'email' => $request->email,
             'username' => $username,
             'password' => Hash::make($request->password),
