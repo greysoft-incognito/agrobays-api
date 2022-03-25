@@ -30,7 +30,7 @@ class TransactionController extends Controller
             })
             ->addColumn('action', function (Transaction $item) {
                 return implode([
-                    Html::el('a')->href('transactions/invoice/'.$item->plan->id)->setHtml(Html::el('i')->class('ri-file-list-2-fill ri-2x text-primary'))
+                    Html::el('a')->href('transactions/invoice/'.$item->id)->setHtml(Html::el('i')->class('ri-file-list-2-fill ri-2x text-primary'))
                 ]);
             })
             ->removeColumn('updated_at')->toJson();
