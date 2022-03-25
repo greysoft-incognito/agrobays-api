@@ -22,6 +22,7 @@ class TransactionController extends Controller
         $model = Transaction::where('user_id', Auth::id());
 
         return app('datatables')->eloquent($model)
+            ->rawColumns(['action'])
             ->editColumn('created_at', function(Transaction $item) {
                 return $item->created_at->format('Y-m-d H:i');
             })

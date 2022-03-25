@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use DeviceDetector\DeviceDetector;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 
 class RegisteredUserController extends Controller
@@ -26,10 +27,10 @@ class RegisteredUserController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'firstname' => ['required', 'string', 'max:255'],
-            'lastname' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255'],
+            // 'lastname' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'username' => ['required', 'string', 'max:255', 'unique:users'],
+            // 'username' => ['required', 'string', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
@@ -37,11 +38,15 @@ class RegisteredUserController extends Controller
             return $this->validatorFails($validator);
         }
 
+        $name = Str::of($request->name)->explode(' ');
+        $eser = Str::of($request->email)->explode('@');
+        $username = $eser->first(fn($k)=>(User::where('username', $k)->doesntExist()), $eser->first().rand());
+
         $user = User::create([
-            'firstname' => $request->firstname,
-            'lastname' => $request->lastname,
+            'firstname' => $name->first(fn($k)=>$k!==null, $request->name),
+            'lastname' => $name->last(fn($k)=>$k!==null, ''),
             'email' => $request->email,
-            'username' => $request->username,
+            'username' => $username,
             'password' => Hash::make($request->password),
         ]);
 

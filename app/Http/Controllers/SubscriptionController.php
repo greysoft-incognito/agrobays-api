@@ -60,7 +60,7 @@ class SubscriptionController extends Controller
         }
 
         return app('datatables')->eloquent($model)
-            ->rawColumns(['name', 'action'])
+            ->rawColumns(['action'])
             ->editColumn('created_at', function(Subscription $item) {
                 return $item->created_at->format('Y-m-d H:i');
             })
