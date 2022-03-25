@@ -63,7 +63,7 @@ class SubscriptionController extends Controller
                 return $item->created_at->format('Y-m-d H:i');
             })
             ->addColumn('plan', function(Subscription $item) {
-                return $item->plan()->title;
+                return $item->plan->title;
             })
             ->addColumn('action', function (Subscription $item) {
                 return '<a href="savings/'.$item->plan()->id.'" class="btn btn-xs btn-primary"><i class="ri-file-list-2-fill ri-xl"></i></a>';
