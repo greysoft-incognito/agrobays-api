@@ -66,7 +66,7 @@ class SubscriptionController extends Controller
                 return $item->plan->title;
             })
             ->addColumn('action', function (Subscription $item) {
-                return '<a href="savings/'.$item->plan()->id.'" class="btn btn-xs btn-primary"><i class="ri-file-list-2-fill ri-xl"></i></a>';
+                return '<a href="savings/'.$item->plan->id.'" class="btn btn-xs btn-primary"><i class="ri-file-list-2-fill ri-xl"></i></a>';
             })
             ->removeColumn('updated_at')->toJson();
 
