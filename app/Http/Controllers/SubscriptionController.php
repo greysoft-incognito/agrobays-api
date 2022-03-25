@@ -8,6 +8,7 @@ use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Nette\Utils\Html;
 
 class SubscriptionController extends Controller
 {
@@ -59,6 +60,7 @@ class SubscriptionController extends Controller
         }
 
         return app('datatables')->eloquent($model)
+            ->rawColumns(['action'])
             ->editColumn('created_at', function(Subscription $item) {
                 return $item->created_at->format('Y-m-d H:i');
             })
@@ -72,7 +74,9 @@ class SubscriptionController extends Controller
                 return money(num_reformat($item->total_saved));
             })
             ->addColumn('action', function (Subscription $item) {
-                return '<a href="savings/'.$item->plan->id.'" class="btn btn-xs btn-primary"><i class="ri-file-list-2-fill ri-xl"></i></a>';
+                return implode([
+                    Html::el('a')->class('savings/'.$item->plan->id)->setHtml(Html::el('i')->class('ri-eye-2-fill ri-xl'))
+                ]);
             })
             ->removeColumn('updated_at')->toJson();
 
