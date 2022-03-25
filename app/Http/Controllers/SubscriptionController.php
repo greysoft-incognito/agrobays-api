@@ -75,7 +75,7 @@ class SubscriptionController extends Controller
             })
             ->addColumn('action', function (Subscription $item) {
                 return implode([
-                    Html::el('a')->class('savings/'.$item->plan->id)->setHtml(Html::el('i')->class('ri-eye-2-fill ri-xl'))
+                    Html::el('a')->href('savings/'.$item->plan->id)->setHtml(Html::el('i')->class('ri-eye-2-fill ri-3x text-primary'))
                 ]);
             })
             ->removeColumn('updated_at')->toJson();
