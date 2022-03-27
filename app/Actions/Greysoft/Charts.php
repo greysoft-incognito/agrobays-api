@@ -111,7 +111,7 @@ class Charts
                     "name" => "Savings",
                     "type" => "bar",
                     "data" => collect(range(1,12))->map(function($get) {
-                        return rand(100, 1500) . "m: $get";
+                        return rand(100, 1500);
                     })->toArray(),
                     "color" => "#f88c2b",
                 ]
