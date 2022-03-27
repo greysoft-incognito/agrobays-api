@@ -180,7 +180,7 @@ class AccountController extends Controller
                         "value" => floor($orders)
                     ]
                 ]
-            ]
+            ],
             "bar" => (new Charts)->bar([])
         ));
 
