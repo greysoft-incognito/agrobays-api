@@ -23,7 +23,10 @@ class AdminController extends Controller
             'charts' => [
                 "pie" => (new Charts)->getPie('admin'),
                 "bar" => (new Charts)->getBar('admin'),
-                "transactions" => ""
+                "transactions" => (new Charts)->totalTransactions('admin', 'month'),
+                "customers" => (new Charts)->customers('admin', 'month'),
+                "income" => (new Charts)->income('admin', 'month'),
+                "sales" => (new Charts)->sales('admin', 'week')
             ],
         ]);
     }

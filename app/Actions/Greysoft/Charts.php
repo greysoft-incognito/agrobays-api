@@ -5,6 +5,7 @@ use App\Models\Order;
 use App\Models\Saving;
 use App\Models\Subscription;
 use App\Models\Transaction;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -125,13 +126,66 @@ class Charts
         if ($period === 'year') {
             $start = Carbon::now()->startOfYear();
             $end = Carbon::now()->endOfYear();
-        } else {
+        } elseif ($period === 'month') {
             $start = Carbon::now()->startOfMonth();
             $end = Carbon::now()->endOfMonth();
+        } else {
+            $start = Carbon::now()->startOfWeek();
+            $end = Carbon::now()->endOfWeek();
         }
 
         return (($for === 'user') ? Auth::user()->transactions() : Transaction::query())
             ->whereBetween('created_at', [$start, $end])->sum('amount');
+    }
+
+    public function sales($for = 'user', $period = 'year')
+    {
+        if ($period === 'year') {
+            $start = Carbon::now()->startOfYear();
+            $end = Carbon::now()->endOfYear();
+        } elseif ($period === 'month') {
+            $start = Carbon::now()->startOfMonth();
+            $end = Carbon::now()->endOfMonth();
+        } else {
+            $start = Carbon::now()->startOfWeek();
+            $end = Carbon::now()->endOfWeek();
+        }
+
+        return (($for === 'user') ? Auth::user()->orders() : Order::query())
+            ->whereBetween('created_at', [$start, $end])->sum('amount');
+    }
+
+    public function income($for = 'user', $period = 'year')
+    {
+        if ($period === 'year') {
+            $start = Carbon::now()->startOfYear();
+            $end = Carbon::now()->endOfYear();
+        } elseif ($period === 'month') {
+            $start = Carbon::now()->startOfMonth();
+            $end = Carbon::now()->endOfMonth();
+        } else {
+            $start = Carbon::now()->startOfWeek();
+            $end = Carbon::now()->endOfWeek();
+        }
+
+        return (($for === 'user') ? Auth::user()->transactions() : Transaction::query())
+            ->whereBetween('created_at', [$start, $end])->sum('amount');
+    }
+
+    public function customers($for = 'user', $period = 'year')
+    {
+        if ($period === 'year') {
+            $start = Carbon::now()->startOfYear();
+            $end = Carbon::now()->endOfYear();
+        } elseif ($period === 'month') {
+            $start = Carbon::now()->startOfMonth();
+            $end = Carbon::now()->endOfMonth();
+        } else {
+            $start = Carbon::now()->startOfWeek();
+            $end = Carbon::now()->endOfWeek();
+        }
+
+        return User::whereBetween('created_at', [$start, $end])->count('id');
     }
 
     /**
@@ -142,7 +196,6 @@ class Charts
      */
     public function getPie($for = 'user')
     {
-
         $savings = (($for === 'user') ? Auth::user()->savings() : Saving::query())
         ->get()->map(function($value, $key) {
             return $value->total ?? 0;
