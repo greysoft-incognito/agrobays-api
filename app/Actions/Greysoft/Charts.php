@@ -187,7 +187,7 @@ class Charts
             "transactions" =>collect(range(1,12))->map(function($get) use ($transactions) {
                 $start = Carbon::now()->month($get)->startOfMonth();
                 $end = Carbon::now()->month($get)->endOfMonth();
-                return $transactions->whereBetween('created_ats', [$start, $end])->sum('amount');
+                return $transactions->whereBetween('created_at', [$start, $end])->sum('amount');
             })->toArray(),
             "subscriptions" => collect(range(1,12))->map(function($get) use ($subscriptions) {
                 $start = Carbon::now()->month($get)->startOfMonth();
