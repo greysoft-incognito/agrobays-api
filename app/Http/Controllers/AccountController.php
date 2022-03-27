@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use App\Actions\Greysoft\Charts;
 
 class AccountController extends Controller
 {
@@ -158,23 +159,18 @@ class AccountController extends Controller
             return $value->total ?? 0;
         })->sum();
 
-        $data = array(
+        $data = (new Charts)->pie(array(
             'legend' => ["Savings", "Fruit Orders"],
             'data' => [
-            [
-                'value' => floor($savings),
-                'name' => 'Savings',
-                'itemStyle' => [
-                    'color' => '#546bfa'
+                [
+                    ["color" => "#546bfa"],
+                    ["value" => floor($savings)]
+                ], [
+                    ["color" => "#f88c2b"],
+                    ["value" => 135]
                 ]
-            ], [
-                'value' => 135,
-                'name' => 'Fruit Orders',
-                'itemStyle' => [
-                    'color' => '#f88c2b'
-                ]
-            ],
-        ]);
+            ]
+        ));
 
         return $this->buildResponse([
             'message' => 'OK',
