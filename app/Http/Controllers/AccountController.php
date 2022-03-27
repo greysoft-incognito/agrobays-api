@@ -181,7 +181,7 @@ class AccountController extends Controller
                     ]
                 ]
             ]
-            "bar" => (new Charts)->bar([]);
+            "bar" => (new Charts)->bar([])
         ));
 
         return $this->buildResponse([
