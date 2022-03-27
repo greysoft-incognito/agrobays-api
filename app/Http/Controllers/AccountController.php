@@ -158,7 +158,9 @@ class AccountController extends Controller
             'legend' => ["Savings", "Fruit Orders"],
             'data' => [
             [
-                'value' => Saving::where('user_id', Auth::id())->where('status', 'complete')->sum('amount'),
+                'value' => Auth::user()->savings()->get()->map(function($value, $key) {
+                    return $value->total ?? 0;
+                })->sum(),
                 'name' => 'Savings',
                 'itemStyle' => [
                     'color' => '#546bfa'
