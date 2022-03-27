@@ -5,6 +5,10 @@ class Charts
 {
     public function pie(array $data)
     {
+        if (empty($data['legend']) || empty($data['data']) || empty($data['data'][0]['value'])) {
+            return [];
+        }
+
         return [
             "tooltip" => [
                 "trigger" => "item",
@@ -13,7 +17,7 @@ class Charts
             "legend" => [
                 "bottom" => "10",
                 "left" => "center",
-                "data" => $data['legend'],
+                "data" => collect($data['legend'])->values(),
             ],
             "series" => [
                 [
@@ -35,10 +39,10 @@ class Charts
                     "labelLine" => [
                         "show" => false,
                     ],
-                    "data" => collect($data['data'])->map(function($get) {
+                    "data" => collect($data['data'])->map(function($get) use ($data) {
                         return [
                             "value" => $get['value'],
-                            "name" => "Savings",
+                            "name" => $data['legend'][$get['key']],
                             "itemStyle" => [
                                 "color" => $get['color'],
                             ],

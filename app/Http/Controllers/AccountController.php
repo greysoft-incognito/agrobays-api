@@ -160,14 +160,19 @@ class AccountController extends Controller
         })->sum();
 
         $data = (new Charts)->pie(array(
-            'legend' => ["Savings", "Fruit Orders"],
+            'legend' => [
+                "savings" => "Savings", 
+                "fruit_orders" => "Fruit Orders"
+            ],
             'data' => [
                 [
-                    ["color" => "#546bfa"],
-                    ["value" => floor($savings)]
+                    "key" => "savings",
+                    "color" => "#546bfa",
+                    "value" => floor($savings)
                 ], [
-                    ["color" => "#f88c2b"],
-                    ["value" => 135]
+                    "key" => "fruit_orders",
+                    "color" => "#f88c2b",
+                    "value" => 135
                 ]
             ]
         ));
