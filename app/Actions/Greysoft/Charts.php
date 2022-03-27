@@ -120,7 +120,7 @@ class Charts
         ];
     }
 
-    public function transactions($period = 'year')
+    public function totalTransactions($for = 'user', $period = 'year')
     {
         if ($period === 'year') {
             $start = Carbon::now()->startOfYear();
@@ -129,7 +129,9 @@ class Charts
             $start = Carbon::now()->startOfMonth();
             $end = Carbon::now()->endOfMonth();
         }
-        return Auth::user()->transactions()->whereBetween('created_at', [$start, $end])->sum('amount');
+
+        return (($for === 'user') ? Auth::user()->transactions() : Transaction::query())
+            ->whereBetween('created_at', [$start, $end])->sum('amount');
     }
 
     /**

@@ -162,7 +162,7 @@ class AccountController extends Controller
             'charts' => [
                 "pie" => (new Charts)->getPie('user'),
                 "bar" => (new Charts)->getBar('user'),
-                "transactions" => ""
+                "transactions" => (new Charts)->totalTransactions('user', 'month')
             ],
         ]);
     }
