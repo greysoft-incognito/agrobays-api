@@ -159,6 +159,10 @@ class AccountController extends Controller
             return $value->total ?? 0;
         })->sum();
 
+        $orders = Auth::user()->orders()->get()->map(function($value, $key) {
+            return $value->amount;
+        })->sum();
+
         $data = (new Charts)->pie(array(
             'legend' => [
                 "savings" => "Savings", 
@@ -172,7 +176,7 @@ class AccountController extends Controller
                 ], [
                     "key" => "fruit_orders",
                     "color" => "#f88c2b",
-                    "value" => 135
+                    "value" => floor($orders)
                 ]
             ]
         ));
