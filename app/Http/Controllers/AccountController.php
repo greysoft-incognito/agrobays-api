@@ -154,13 +154,15 @@ class AccountController extends Controller
 
     public function charts($type = 'pie')
     {
+        $savings = Auth::user()->savings()->get()->map(function($value, $key) {
+            return $value->total ?? 0;
+        })->sum();
+
         $data = array(
             'legend' => ["Savings", "Fruit Orders"],
             'data' => [
             [
-                'value' => Auth::user()->savings()->get()->map(function($value, $key) {
-                    return $value->total ?? 0;
-                })->sum(),
+                'value' => floor($savings),
                 'name' => 'Savings',
                 'itemStyle' => [
                     'color' => '#546bfa'
