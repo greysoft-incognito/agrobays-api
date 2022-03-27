@@ -64,7 +64,7 @@ class Charts
         return [
             "tooltip" => [
                 "trigger" => "axis",
-                "formatter" => "{a} <br/> {a0}: {c0}<br />{a1}: {c1}",
+                "formatter" => "{b} <br/> {a0}: {c0}<br />{a1}: {c1}",
                 "axisPointer" => [
                     "type" => "shadow", // The default is a straight line, optional:'line' |'shadow'
                 ],
