@@ -61,7 +61,7 @@ class Charts
             "tooltip" => [
                 "trigger" => "axis",
                 "axisPointer" => [
-                    "type": "shadow", // The default is a straight line, optional:'line' |'shadow'
+                    "type" => "shadow", // The default is a straight line, optional:'line' |'shadow'
                 ],
             ],
             "grid" => [
