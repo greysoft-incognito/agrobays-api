@@ -8,11 +8,13 @@ class Charts
         if (empty($data['legend']) || empty($data['data']) || empty($data['data'][0]['value'])) {
             return [];
         }
+        
+        $currency_symbol = config('settings.currency_symbol');
 
         return [
             "tooltip" => [
                 "trigger" => "item",
-                "formatter" => "{a} <br/>{b}: {c} ({d}%)",
+                "formatter" => "{a} <br/>{b}: {$currency_symbol}{c} ({d}%)",
             ],
             "legend" => [
                 "bottom" => "10",
