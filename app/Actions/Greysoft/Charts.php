@@ -60,11 +60,11 @@ class Charts
 
     public function bar(array $data)
     {
-        $currency_symbol = config('settings.currency_symbol');
+        $cs = config('settings.currency_symbol');
         return [
             "tooltip" => [
                 "trigger" => "axis",
-                "formatter" => "{b} <br/> {a0}: {c0}<br />{a1}: {c1} <br/> {a2}: {c2}<br />{a3}: {c4}",
+                "formatter" => "{b} <br/> {a0}: $cs{c0}<br />{a1}: $cs{c1} <br/> {a2}: $cs{c2}<br />{a3}: $cs{c3}",
                 "axisPointer" => [
                     "type" => "shadow", // The default is a straight line, optional:'line' |'shadow'
                 ],
