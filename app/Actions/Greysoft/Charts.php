@@ -141,12 +141,12 @@ class Charts
     public function getPie($for = 'user')
     {
 
-        $savings = ($for === 'user' ? Auth::user()->savings() : Saving::query())
+        $savings = (($for === 'user') ? Auth::user()->savings() : Saving::query())
         ->get()->map(function($value, $key) {
             return $value->total ?? 0;
         })->sum();
 
-        $orders = ($for === 'user' ? Auth::user()->orders() : Order::query())
+        $orders = (($for === 'user') ? Auth::user()->orders() : Order::query())
         ->get()->map(function($value, $key) {
             return $value->amount;
         })->sum();
@@ -178,10 +178,10 @@ class Charts
      */
     public function getBar($for = 'user')
     {
-        $transactions = $for = 'user' ? Auth::user()->transactions() : Transaction::query();
-        $subscriptions = $for = 'user' ? Auth::user()->subscriptions() : Subscription::query();
-        $orders = $for = 'user' ? Auth::user()->orders() : Order::query();
-        $savings = $for = 'user' ? Auth::user()->savings() : Saving::query();
+        $transactions  = ($for === 'user') ? Auth::user()->transactions() : Transaction::query();
+        $subscriptions = ($for === 'user') ? Auth::user()->subscriptions() : Subscription::query();
+        $orders  = ($for === 'user') ? Auth::user()->orders() : Order::query();
+        $savings = ($for === 'user') ? Auth::user()->savings() : Saving::query();
 
         return $this->bar([
             "transactions" =>collect(range(1,12))->map(function($get) use ($transactions) {
