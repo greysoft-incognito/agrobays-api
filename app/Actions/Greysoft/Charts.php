@@ -64,7 +64,7 @@ class Charts
         return [
             "tooltip" => [
                 "trigger" => "axis",
-                "formatter" => "{a} <br/>{b}: {$currency_symbol}{c} ({d}%)",
+                "formatter" => "{a1} <br/>{b}: {$currency_symbol}{c} ({d}%)",
                 "axisPointer" => [
                     "type" => "shadow", // The default is a straight line, optional:'line' |'shadow'
                 ],
