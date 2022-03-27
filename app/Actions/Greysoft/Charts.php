@@ -17,7 +17,7 @@ class Charts
         return [
             "tooltip" => [
                 "trigger" => "item",
-                "formatter" => "{a} <br/>{b}: {$currency_symbol}{c} ({d}%)",
+                // "formatter" => "{a} <br/>{b}: {$currency_symbol}{c} ({d}%)",
             ],
             "legend" => [
                 "bottom" => "10",
