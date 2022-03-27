@@ -171,5 +171,7 @@ class AccountController extends Controller
                 ]
             ],
         ]);
+
+        return $data;
     }
 }
