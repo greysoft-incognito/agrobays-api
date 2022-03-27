@@ -163,7 +163,7 @@ class AccountController extends Controller
             return $value->amount;
         })->sum();
 
-        $data = (new Charts)->pie(array(
+        $pie = (new Charts)->pie(array(
             'legend' => [
                 "savings" => "Savings", 
                 "fruit_orders" => "Fruit Orders"
@@ -181,11 +181,16 @@ class AccountController extends Controller
             ]
         ));
 
+        $bar = (new Charts)->bar([]);
+
         return $this->buildResponse([
             'message' => 'OK',
             'status' =>  'success',
             'response_code' => 200,
-            'charts' => $data,
+            'charts' => [
+                "pie" => $pie, 
+                "bar" => $bar
+            ],
         ]);
     }
 }
