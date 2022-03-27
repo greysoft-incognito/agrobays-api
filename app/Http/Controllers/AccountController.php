@@ -164,21 +164,24 @@ class AccountController extends Controller
         })->sum();
 
         $data = (new Charts)->pie(array(
-            'legend' => [
-                "savings" => "Savings", 
-                "fruit_orders" => "Fruit Orders"
-            ],
-            'data' => [
-                [
-                    "key" => "savings",
-                    "color" => "#546bfa",
-                    "value" => floor($savings)
-                ], [
-                    "key" => "fruit_orders",
-                    "color" => "#f88c2b",
-                    "value" => floor($orders)
+            "pie" => [
+                'legend' => [
+                    "savings" => "Savings", 
+                    "fruit_orders" => "Fruit Orders"
+                ],
+                'data' => [
+                    [
+                        "key" => "savings",
+                        "color" => "#546bfa",
+                        "value" => floor($savings)
+                    ], [
+                        "key" => "fruit_orders",
+                        "color" => "#f88c2b",
+                        "value" => floor($orders)
+                    ]
                 ]
             ]
+            "bar" => (new Charts)->bar([]);
         ));
 
         return $this->buildResponse([
