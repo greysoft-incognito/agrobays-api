@@ -151,4 +151,25 @@ class AccountController extends Controller
             'user' => $user,
         ]);
     }
+
+    public function charts($type = 'pie')
+    {
+        $data = array(
+            'legend' => ["Savings", "Fruit Orders"],
+            'data' => [
+            [
+                'value' => 335,
+                'name' => 'Savings',
+                'itemStyle' => [
+                    'color' => '#546bfa'
+                ]
+            ], [
+                'value' => 135,
+                'name' => 'Fruit Orders',
+                'itemStyle' => [
+                    'color' => '#f88c2b'
+                ]
+            ],
+        ]);
+    }
 }
