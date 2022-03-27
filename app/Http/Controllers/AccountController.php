@@ -165,7 +165,7 @@ class AccountController extends Controller
 
         $pie = (new Charts)->pie(array(
             'legend' => [
-                "savings" => "Savings", 
+                "savings" => "Savings",
                 "fruit_orders" => "Fruit Orders"
             ],
             'data' => [
@@ -188,7 +188,7 @@ class AccountController extends Controller
             'status' =>  'success',
             'response_code' => 200,
             'charts' => [
-                "pie" => $pie, 
+                "pie" => $pie,
                 "bar" => $bar
             ],
         ]);

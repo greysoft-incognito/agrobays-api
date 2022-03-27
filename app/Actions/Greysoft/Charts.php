@@ -1,14 +1,17 @@
-<?php 
+<?php
 namespace App\Actions\Greysoft;
 
-class Charts 
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+
+class Charts
 {
     public function pie(array $data)
     {
         if (empty($data['legend']) || empty($data['data']) || empty($data['data'][0]['value'])) {
             return [];
         }
-        
+
         $currency_symbol = config('settings.currency_symbol');
 
         return [
@@ -90,28 +93,40 @@ class Charts
                     "name" => "Transactions",
                     "type" => "bar",
                     "data" => collect(range(1,12))->map(function($get) {
-                            return rand(100, 1500);
-                        })->toArray(),
+                        $start = Carbon::now()->month($get)->startOfMonth();
+                        $end = Carbon::now()->month($get)->endOfMonth();
+                        return Auth::user()->transactions()->whereBetween('created_at', [$start, $end])->sum('amount');
+                    })->toArray(),
                     "color" => "#546bfa",
                 ], [
                     "name" => "Subscriptions",
                     "type" => "bar",
                     "data" => collect(range(1,12))->map(function($get) {
-                        return rand(100, 1500);
+                        $start = Carbon::now()->month($get)->startOfMonth();
+                        $end = Carbon::now()->month($get)->endOfMonth();
+                        return Auth::user()->subscriptions()
+                            ->whereBetween('created_at', [$start, $end])->get()->map(function($sub) {
+                                return num_reformat($sub->total_saved);
+                        })->sum();
                     })->toArray(),
                     "color" => "#3a9688",
                 ], [
                     "name" => "Food Orders",
                     "type" => "bar",
                     "data" => collect(range(1,12))->map(function($get) {
-                        return rand(100, 1500);
+                        $start = Carbon::now()->month($get)->startOfMonth();
+                        $end = Carbon::now()->month($get)->endOfMonth();
+                        return Auth::user()->orders()->whereBetween('created_at', [$start, $end])->sum('amount');
                     })->toArray(),
                     "color" => "#02a9f4",
                 ], [
                     "name" => "Savings",
                     "type" => "bar",
                     "data" => collect(range(1,12))->map(function($get) {
-                        return rand(100, 1500);
+                        $start = Carbon::now()->month($get)->startOfMonth();
+                        $end = Carbon::now()->month($get)->endOfMonth();
+                        return Auth::user()->savings()->where('status', 'complete')
+                            ->whereBetween('created_at', [$start, $end])->sum('amount');
                     })->toArray(),
                     "color" => "#f88c2b",
                 ]
