@@ -174,6 +174,11 @@ class AccountController extends Controller
             ],
         ]);
 
-        return $data;
+        return $this->buildResponse([
+            'message' => 'OK',
+            'status' =>  'success',
+            'response_code' => 200,
+            'charts' => $data,
+        ]);
     }
 }
