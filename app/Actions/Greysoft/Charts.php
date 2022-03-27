@@ -1,5 +1,5 @@
 <?php 
-namespace Actions\Greysoft;
+namespace App\Actions\Greysoft;
 
 class Charts 
 {
