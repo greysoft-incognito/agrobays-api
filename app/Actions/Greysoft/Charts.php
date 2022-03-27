@@ -64,7 +64,7 @@ class Charts
         return [
             "tooltip" => [
                 "trigger" => "axis",
-                "formatter" => "{b} <br/> {a0}: $cs{c0}<br />{a1}: $cs{c1} <br/> {a2}: $cs{c2}<br />{a3}: $cs{c3}",
+                "valueFormatter" => "(value) => $cs + value.toFixed(2)",
                 "axisPointer" => [
                     "type" => "shadow", // The default is a straight line, optional:'line' |'shadow'
                 ],
