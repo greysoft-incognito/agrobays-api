@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AdminFoodbagsController;
 use App\Http\Controllers\Admin\AdminFoodsController;
 use App\Http\Controllers\Admin\AdminFruitBayCategoryController;
@@ -54,6 +55,9 @@ Route::middleware(['auth:sanctum'])->group(function() {
     Route::middleware(['admin'])
     ->prefix('admin')->name('admin.')
     ->group(function() {
+
+        Route::get('/charts/{type?}', [AdminController::class, 'charts'])->name('charts');
+
         // Load admin food bay
         Route::controller(AdminFruitBayController::class)
         ->prefix('fruitbay')

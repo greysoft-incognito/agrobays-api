@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Saving;
+use App\Models\Transaction;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -93,7 +94,7 @@ class AdminSavingController extends Controller
      */
     public function destroy($item = null)
     {
-        $food = Transaction::whereId($item)->first();
+        $food = Saving::whereId($item)->first();
 
         if ($food)
         {

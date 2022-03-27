@@ -1,6 +1,10 @@
 <?php
 namespace App\Actions\Greysoft;
 
+use App\Models\Order;
+use App\Models\Saving;
+use App\Models\Subscription;
+use App\Models\Transaction;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -26,7 +30,7 @@ class Charts
             ],
             "series" => [
                 [
-                    "name" => "Sales",
+                    "name" => "Transactions",
                     "type" => "pie",
                     "radius" => ["50%", "70%"],
                     "avoidLabelOverlap" => false,
@@ -58,7 +62,7 @@ class Charts
         ];
     }
 
-    public function bar(array $data)
+    protected function bar(array $data)
     {
         $cs = config('settings.currency_symbol');
         return [
@@ -94,45 +98,115 @@ class Charts
                 [
                     "name" => "Transactions",
                     "type" => "bar",
-                    "data" => collect(range(1,12))->map(function($get) {
-                        $start = Carbon::now()->month($get)->startOfMonth();
-                        $end = Carbon::now()->month($get)->endOfMonth();
-                        return Auth::user()->transactions()->whereBetween('created_at', [$start, $end])->sum('amount');
-                    })->toArray(),
+                    "data" => $data['transactions'],
                     "color" => "#546bfa",
                 ], [
                     "name" => "Subscriptions",
                     "type" => "bar",
-                    "data" => collect(range(1,12))->map(function($get) {
-                        $start = Carbon::now()->month($get)->startOfMonth();
-                        $end = Carbon::now()->month($get)->endOfMonth();
-                        return Auth::user()->subscriptions()
-                            ->whereBetween('created_at', [$start, $end])->get()->map(function($sub) {
-                                return num_reformat($sub->total_saved);
-                        })->sum();
-                    })->toArray(),
+                    "data" => $data['subscriptions'],
                     "color" => "#3a9688",
                 ], [
                     "name" => "Food Orders",
                     "type" => "bar",
-                    "data" => collect(range(1,12))->map(function($get) {
-                        $start = Carbon::now()->month($get)->startOfMonth();
-                        $end = Carbon::now()->month($get)->endOfMonth();
-                        return Auth::user()->orders()->whereBetween('created_at', [$start, $end])->sum('amount');
-                    })->toArray(),
+                    "data" => $data['fruit_orders'],
                     "color" => "#02a9f4",
                 ], [
                     "name" => "Savings",
                     "type" => "bar",
-                    "data" => collect(range(1,12))->map(function($get) {
-                        $start = Carbon::now()->month($get)->startOfMonth();
-                        $end = Carbon::now()->month($get)->endOfMonth();
-                        return Auth::user()->savings()->where('status', 'complete')
-                            ->whereBetween('created_at', [$start, $end])->sum('amount');
-                    })->toArray(),
+                    "data" => $data['savings'],
                     "color" => "#f88c2b",
                 ]
             ],
         ];
+    }
+
+    public function transactions($period = 'year')
+    {
+        if ($period === 'year') {
+            $start = Carbon::now()->startOfYear();
+            $end = Carbon::now()->endOfYear();
+        } else {
+            $start = Carbon::now()->startOfMonth();
+            $end = Carbon::now()->endOfMonth();
+        }
+        return Auth::user()->transactions()->whereBetween('created_at', [$start, $end])->sum('amount');
+    }
+
+    /**
+     * Get the bar chart
+     *
+     * @param string $for
+     * @return App\Actions\Greysoft\Charts::getBar
+     */
+    public function getPie($for = 'user')
+    {
+
+        $savings = ($for === 'user' ? Auth::user()->savings() : Saving::query())
+        ->get()->map(function($value, $key) {
+            return $value->total ?? 0;
+        })->sum();
+
+        $orders = ($for === 'user' ? Auth::user()->orders() : Order::query())
+        ->get()->map(function($value, $key) {
+            return $value->amount;
+        })->sum();
+
+        return $this->pie(array(
+            'legend' => [
+                "savings" => "Savings",
+                "fruit_orders" => "Fruit Orders"
+            ],
+            'data' => [
+                [
+                    "key" => "savings",
+                    "color" => "#546bfa",
+                    "value" => floor($savings)
+                ], [
+                    "key" => "fruit_orders",
+                    "color" => "#f88c2b",
+                    "value" => floor($orders)
+                ]
+            ]
+        ), true);
+    }
+
+    /**
+     * Get the bar chart
+     *
+     * @param string $for
+     * @return App\Actions\Greysoft\Charts::getBar
+     */
+    public function getBar($for = 'user')
+    {
+        $transactions = $for = 'user' ? Auth::user()->transactions() : Transaction::query();
+        $subscriptions = $for = 'user' ? Auth::user()->subscriptions() : Subscription::query();
+        $orders = $for = 'user' ? Auth::user()->orders() : Order::query();
+        $savings = $for = 'user' ? Auth::user()->savings() : Saving::query();
+
+        return $this->bar([
+            "transactions" =>collect(range(1,12))->map(function($get) use ($transactions) {
+                $start = Carbon::now()->month($get)->startOfMonth();
+                $end = Carbon::now()->month($get)->endOfMonth();
+                return $transactions->whereBetween('created_at', [$start, $end])->sum('amount');
+            })->toArray(),
+            "subscriptions" => collect(range(1,12))->map(function($get) use ($subscriptions) {
+                $start = Carbon::now()->month($get)->startOfMonth();
+                $end = Carbon::now()->month($get)->endOfMonth();
+                return $subscriptions->whereBetween('created_at', [$start, $end])->get()->map(function($sub) {
+                        return num_reformat($sub->total_saved);
+                })->sum();
+            })->toArray(),
+            "fruit_orders" => collect(range(1,12))->map(function($get) use ($orders) {
+                $start = Carbon::now()->month($get)->startOfMonth();
+                $end = Carbon::now()->month($get)->endOfMonth();
+                return $orders->whereBetween('created_at', [$start, $end])->sum('amount');
+            })->toArray(),
+            "savings" => collect(range(1,12))->map(function($get) use ($savings) {
+                $start = Carbon::now()->month($get)->startOfMonth();
+                $end = Carbon::now()->month($get)->endOfMonth();
+                return $savings->where('status', 'complete')
+                    ->whereBetween('created_at', [$start, $end])->sum('amount');
+            })->toArray()
+        ], true);
     }
 }
