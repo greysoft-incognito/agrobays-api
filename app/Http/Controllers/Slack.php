@@ -18,18 +18,13 @@ class Slack extends Controller
         $sig_basestring = 'v0:' . $timestamp . ':' . $request->getContent();
         
         $hash = 'v0='.hash_hmac('sha256', $sig_basestring, env('SLACK_SECRET'));
+        
         if (time() - $timestamp > 60*5 || !hash_equals($hash, $signature)) {
-            return response([
-                "response_type" => "ephemeral", 
-                "text" => "Invalid Request."
-            ], 200)->header('Content-Type', 'application/json');
+            return $this->msg("Invalid Request.");
         }
 
         if (!in_array($request->user_id, $this->uids)) {
-            return response([
-                "response_type" => "ephemeral", 
-                "text" => "Sorry, you do not have permision to perform this action."
-            ], 200)->header('Content-Type', 'application/json');
+            return $this->msg("Sorry, you do not have permision to perform this action.");
         }
 
         return $this->{$action}($request);
