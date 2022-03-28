@@ -313,13 +313,13 @@ class Settings
         foreach (array_reverse($configs) as $config => $value) 
         {
             $conf_val = $this->group ? config($this->settings.'.'.$this->group.'.'.$config) : config($this->settings.'.'.$config);
-            $curr_val = \Str::isBool($conf_val) || in_array($config, $this->form_control['checkbox']) 
-                ? (in_array($conf_val, [1, '1', true, 'true']) ? 'true' : 'false') 
-                : "'$conf_val'";
+            $curr_val = \Str::isBool($conf_val??'false') || in_array($config, $this->form_control['checkbox']) || $conf_val === false 
+                ? (in_array($conf_val, [1, '1', true, 'true'], true) ? 'true' : 'false') 
+                : "'$conf_val's";
 
             $value    = \Str::of($value)->replace("'", "\'")->trim();
-            $new_val  = \Str::isBool($value) || in_array($config, $this->form_control['checkbox']) 
-                ? (in_array($value->__toString(), [1, '1', true, 'true']) ? 'true' : 'false') 
+            $new_val  = \Str::isBool($value??'false') || in_array($config, $this->form_control['checkbox']) || $value === false 
+                ? (in_array($value->__toString(), [1, '1', true, 'true'], true) ? 'true' : 'false') 
                 : "'$value'";
 
             if (in_array($config, $this->enviable)) 
@@ -338,7 +338,7 @@ class Settings
                 $lastGroupKey = collect(config($this->settings.'.'.$this->group))->keys()->last();
                 $lastGroupVal = collect(config($this->settings.'.'.$this->group))->values()->last();
                 $lastGroupVal = \Str::of($lastGroupVal)->replace("'", "\'")->trim();
-                $raw_val      = \Str::isBool($lastGroupVal) || in_array($config, $this->form_control['checkbox']) 
+                $raw_val      = \Str::isBool($lastGroupVal??'false') || in_array($config, $this->form_control['checkbox']) 
                     ? (in_array($lastGroupVal->__toString(), [1, '1', true, 'true']) ? 'true' : 'false') 
                     : "'$lastGroupVal'";
 

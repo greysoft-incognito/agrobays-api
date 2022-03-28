@@ -8,7 +8,7 @@ class SettingsFacade extends Facade
 { 
     protected static function getFacadeAccessor()
     {
-        return 'settings';
+        return Settings::class;
     }
 
     /**

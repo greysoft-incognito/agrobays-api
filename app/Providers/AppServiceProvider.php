@@ -6,6 +6,8 @@ require_once base_path('vendor/matomo/device-detector/autoload.php');
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Stringable;
+use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,6 +33,14 @@ class AppServiceProvider extends ServiceProvider
             if ($file->getExtension() === 'php' && stripos($file->getFileName(), 'helper') !== false) {
                 require_once app_path('Helpers/' . $file->getFileName());
             }
+        });
+
+        Str::macro('isBool', function (string $value) {
+            return preg_match('/^[0-1]{1}+$|^(?:true|false|on|off)+$/', $value) || is_bool($value);
+        });
+
+        Stringable::macro('isBool', function () {
+            return new Stringable(Str::isBool($this->value));
         });
     }
 }

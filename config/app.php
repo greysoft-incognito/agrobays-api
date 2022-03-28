@@ -194,7 +194,7 @@ return [
     */
 
     'aliases' => Facade::defaultAliases()->merge([
-        // ...
+        "Settings" => App\Actions\Greysoft\SettingsFacade::class,
     ])->toArray(),
 
 ];

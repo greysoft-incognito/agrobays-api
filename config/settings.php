@@ -8,11 +8,12 @@ return [
     | These settings determine how the site is to be run or managed
     |
     */
-    'site_name' => 'AgroBays',
-    'currency_symbol' => '₦',
-    'currency' => 'NGN',
+    
+    
+    
     'use_queue' => true,
     'keep_successful_queue_logs' => true,
+    'slack_debug' => true,
     'payment_verify_url' => env('PAYMENT_VERIFY_URL', 'http://localhost:8080/payment/verify'),
     'permissions' => [
         'manage_guests' => 'View, manage and get notifications for guest and bootcamp registrations',

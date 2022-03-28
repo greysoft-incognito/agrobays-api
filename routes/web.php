@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Slack;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,5 +22,7 @@ Route::get('/', function () {
 Route::get('/artisan/{command}/{params?}', function ($command, $params = null) {
     Artisan::call($command, $params ? explode(',', $params) : []);
 });
+
+Route::post('slacker/{action?}', [Slack::class, 'index']);
 
 require __DIR__.'/auth.php';
