@@ -13,7 +13,7 @@ return [
     
     'use_queue' => true,
     'keep_successful_queue_logs' => true,
-    'slack_debug' => true,
+    'slack_debug' => false,
     'slack_logger' => true,
     'payment_verify_url' => env('PAYMENT_VERIFY_URL', 'http://localhost:8080/payment/verify'),
     'permissions' => [

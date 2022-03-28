@@ -10,18 +10,20 @@ use Spatie\SlashCommand\Attachment;
 
 class AgrobaysDebug extends SignatureHandler
 {
-    protected $description = 'Toggle slack debug logs on or off. This action accepts one of two parameters: {on|off}.';
+    protected $signature = "agrobays-debug {action? : This command accepts one of two parameters: {on|off}.}";
+    protected $description = 'Toggle slack debug logs on or off.';
 
     public function canHandle(Request $request): bool
     {
-        return str_is($request->command, 'agrobays-debug') && in_array($request->text, ['on', 'off']);
+        return in_array($request->text, ['on', 'off']);
     }
 
     public function handle(Request $request): Response
     {   
+        $action = $this->getArgument('action');
         $settings = \Settings::options(['settings' => 'settings']);
         $json = \Settings::fresh()->json()->options(['settings' => 'settings'])->get();
-        $settings->saveConfigFile(['slack_debug' => ($request->text === 'on' ? 'true' : 'false')], $json);
+        $settings->saveConfigFile(['slack_debug' => ($action === 'on' ? 'true' : 'false')], $json);
 
         return $this->respondToSlack('')
             ->withAttachment(Attachment::create()
