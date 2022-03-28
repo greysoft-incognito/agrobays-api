@@ -20,26 +20,25 @@ class GreyLogWriter implements LogWriter
         $uri = $request->getPathInfo();
 
         if ($uri !== '/slacker/debug' || config('settings.slack_logger')) {
-            // code...
-        }
-        $fullUrl = $request->fullUrl();
-        $getHost = $request->getHost();
-        $headers = json_encode($request->header(), JSON_UNESCAPED_SLASHES);
-        $bodyAsJson  = json_encode($request->except(config('http-logger.except')));
-        $status      = $r->statusText();
-        $status_code = $r->status();
+            $fullUrl = $request->fullUrl();
+            $getHost = $request->getHost();
+            $headers = json_encode($request->header(), JSON_UNESCAPED_SLASHES);
+            $bodyAsJson  = json_encode($request->except(config('http-logger.except')));
+            $status      = $r->statusText();
+            $status_code = $r->status();
 
-        $message = "
-        *[$status_code $status]* \n 
-        {$method} _{$uri}_ - `{$bodyAsJson}` > *$getHost* \n 
-        *Request URL*: {$fullUrl} \n 
-        *Headers:*
-        ```$headers``` 
-        ";
+            $message = "
+            *[$status_code $status]* \n 
+            {$method} _{$uri}_ - `{$bodyAsJson}` > *$getHost* \n 
+            *Request URL*: {$fullUrl} \n 
+            *Headers:*
+            ```$headers``` 
+            ";
 
-        // Log::channel(config('http-logger.log_channel'))->info($message);
-        if (config('settings.slack_debug') === true) {
-            SlackAlert::message($message);
+            // Log::channel(config('http-logger.log_channel'))->info($message);
+            if (config('settings.slack_debug') === true) {
+                SlackAlert::message($message);
+            }
         }
     }
 }
