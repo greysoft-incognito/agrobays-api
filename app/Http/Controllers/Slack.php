@@ -42,6 +42,18 @@ class Slack extends Controller
             $msg = 'Sorry, you do not have permision to perform this action!';
         }
 
+        if ($request->response_url) {
+            $client = new \GuzzleHttp\Client(['base_uri' => $request->response_url]);
+            $client->request('POST', '/', [
+                'headers'     => ['Content-type' => 'application/json'],
+                'form_params' => [
+                    'text' => $msg,
+                    'response_type' => 'ephemeral',
+                ]
+            ]);
+            return response("OK", 200)->header('Content-Type', 'application/json');
+        }
+
         return response(["response_type" => "ephemeral", "text" => $msg], 200)
                   ->header('Content-Type', 'application/json');
 
