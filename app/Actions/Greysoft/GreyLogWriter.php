@@ -28,7 +28,7 @@ class GreyLogWriter implements LogWriter
         $message = "
         *[$status_code $status]* \n 
         {$method} _{$uri}_ - `{$bodyAsJson}` > *$getHost* \n 
-        *Request URL*: [{$fullUrl}]({$fullUrl}) \n 
+        *Request URL*: {$fullUrl} \n 
         *Headers:*
         ```$headers``` 
         ";
