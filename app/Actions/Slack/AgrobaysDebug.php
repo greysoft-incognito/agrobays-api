@@ -15,7 +15,7 @@ class AgrobaysDebug extends SignatureHandler
 
     public function canHandle(Request $request): bool
     {
-        return in_array($request->text, ['on', 'off']);
+        return str_is($request->command, 'agrobays-debug') || in_array($request->text, ['on', 'off']);
     }
 
     public function handle(Request $request): Response
