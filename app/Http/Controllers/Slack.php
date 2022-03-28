@@ -74,15 +74,13 @@ class Slack extends Controller
 
         if ($request->response_url) {
             $client = new \GuzzleHttp\Client();
-            $client->request('POST', $request->response_url, [
+            $res = $client->request('POST', $request->response_url, [
                 'headers'     => ['Content-type' => 'application/json'],
                 'form_params' => [
                     'text' => $msg,
                     'response_type' => 'ephemeral',
                 ]
-            ]);
-            return;
-            // return response("OK", 200)->header('Content-Type', 'application/json');
+            ]); 
         }
 
         return response(["response_type" => "ephemeral", "text" => $msg], 200)
