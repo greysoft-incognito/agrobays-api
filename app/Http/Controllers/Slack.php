@@ -18,7 +18,7 @@ class Slack extends Controller
         $sig_basestring = 'v0:' . $timestamp . ':' . $request->getContent();
         
         $hash = 'v0='.hash_hmac('sha256', $sig_basestring, env('SLACK_SECRET'));
-        
+
         if (time() - $timestamp > 60*5 || !hash_equals($hash, $signature)) {
             return $this->msg("Invalid Request.");
         }
@@ -70,6 +70,8 @@ class Slack extends Controller
 
     protected function msg($msg) 
     {
+        $request = $this->request;
+        
         if ($request->response_url) {
             $client = new \GuzzleHttp\Client(['base_uri' => $request->response_url]);
             $client->request('POST', '/', [
