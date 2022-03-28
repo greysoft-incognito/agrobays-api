@@ -5,9 +5,10 @@ namespace App\Actions\Slack;
 use Spatie\SlashCommand\Request;
 use Spatie\SlashCommand\Response;
 use Spatie\SlashCommand\Handlers\BaseHandler;
+use Spatie\SlashCommand\Handlers\SignatureHandler;
 use Spatie\SlashCommand\Attachment;
 
-class AgrobaysDebug extends BaseHandler
+class AgrobaysDebug extends SignatureHandler
 {
     protected $description = 'Toggle slack debug logs on or off. This action accepts one of two parameters: {on|off}.';
 
