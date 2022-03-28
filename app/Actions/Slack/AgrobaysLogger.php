@@ -5,6 +5,7 @@ namespace App\Actions\Slack;
 use Spatie\SlashCommand\Request;
 use Spatie\SlashCommand\Response;
 use Spatie\SlashCommand\Handlers\BaseHandler;
+use Spatie\SlashCommand\Attachment;
 
 class AgrobaysLogger extends BaseHandler
 {
