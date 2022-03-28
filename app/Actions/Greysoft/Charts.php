@@ -13,7 +13,7 @@ class Charts
 {
     public function pie(array $data)
     {
-        if (empty($data['legend']) || empty($data['data']) || empty($data['data'][0]['value'])) {
+        if (empty($data['legend']) || empty($data['data'])) {
             return [];
         }
 
