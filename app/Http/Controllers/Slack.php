@@ -17,10 +17,21 @@ class Slack extends Controller
         $signature = $request->header('X-Slack-Signature');
         $sig_basestring = 'v0:' . $timestamp . ':' . $request->getContent();
         
-        $hash = 'v0='.hash_hmac('sha256', $sig_basestring, env('453712b724e4d873f664725026312706'));
+        $hash = 'v0='.hash_hmac('sha256', $sig_basestring, env('SLACK_SECRET'));
         if (time() - $timestamp > 60*5 || !hash_equals($hash, $signature)) {
-            return response("Invalid Request.", 200)->header('Content-Type', 'application/json');
+            return response([
+                "response_type" => "ephemeral", 
+                "text" => "Invalid Request."
+            ], 200)->header('Content-Type', 'application/json');
         }
+
+        if (!in_array($request->user_id, $this->uids)) {
+            return response([
+                "response_type" => "ephemeral", 
+                "text" => "Sorry, you do not have permision to perform this action."
+            ], 200)->header('Content-Type', 'application/json');
+        }
+
         return $this->{$action}($request);
     }
 
@@ -32,16 +43,38 @@ class Slack extends Controller
     {
         if (!in_array($request->text, ['on', 'off'])) {
             $msg = "Invalid parameter.";
-        } elseif (in_array($request->user_id, $this->uids)) {
+        } else {
             $settings = \Settings::options(['settings' => 'settings']);
             $json = \Settings::fresh()->json()->options(['settings' => 'settings'])->get();
             $settings->saveConfigFile(['slack_debug' => ($request->text === 'on' ? 'true' : 'false')], $json);
 
             $msg = "Slack debugs are now turned {$request->text}!";
-        } else {
-            $msg = 'Sorry, you do not have permision to perform this action!';
         }
 
+        return $this->msg($msg);
+    }
+
+    /**
+     * Enable or disable debugging
+     * @return void
+     */
+    protected function logger(Request $request) 
+    {
+        if (!in_array($request->text, ['on', 'off'])) {
+            $msg = "Invalid parameter.";
+        } else {
+            $settings = \Settings::options(['settings' => 'settings']);
+            $json = \Settings::fresh()->json()->options(['settings' => 'settings'])->get();
+            $settings->saveConfigFile(['slack_logger' => ($request->text === 'on' ? 'true' : 'false')], $json);
+
+            $msg = "Slack request logs are now turned {$request->text}!";
+        }
+
+        return $this->msg($msg);
+    }
+
+    protected function msg($msg) 
+    {
         if ($request->response_url) {
             $client = new \GuzzleHttp\Client(['base_uri' => $request->response_url]);
             $client->request('POST', '/', [
@@ -56,6 +89,5 @@ class Slack extends Controller
 
         return response(["response_type" => "ephemeral", "text" => $msg], 200)
                   ->header('Content-Type', 'application/json');
-
     }
 }

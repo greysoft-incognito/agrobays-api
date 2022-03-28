@@ -18,6 +18,10 @@ class GreyLogWriter implements LogWriter
         $method = strtoupper($request->getMethod());
         
         $uri = $request->getPathInfo();
+
+        if ($uri !== '/slacker/debug' || config('settings.slack_logger')) {
+            // code...
+        }
         $fullUrl = $request->fullUrl();
         $getHost = $request->getHost();
         $headers = json_encode($request->header(), JSON_UNESCAPED_SLASHES);
