@@ -23,6 +23,6 @@ Route::get('/artisan/{command}/{params?}', function ($command, $params = null) {
     Artisan::call($command, $params ? explode(',', $params) : []);
 });
 
-Route::post('slacker/{action?}', [Slack::class, 'index']);
+// Route::post('slacker/{action?}', [Slack::class, 'index']);
 
 require __DIR__.'/auth.php';

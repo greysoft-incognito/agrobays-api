@@ -170,6 +170,7 @@ return [
          * Package Service Providers...
          */
         Yajra\DataTables\DataTablesServiceProvider::class,
+        Spatie\SlashCommand\SlashCommandServiceProvider::class,
 
         /*
          * Application Service Providers...
