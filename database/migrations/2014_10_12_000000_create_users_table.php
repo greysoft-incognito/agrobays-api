@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('firstname');
             $table->string('lastname');
-            $table->string('image');
+            $table->string('image')->nullable();
             $table->enum('gender', ['male', 'female', 'non-binary', 'transgender', 'bisexual', 'other'])->default('male');
             $table->string('nextofkin')->nullable();
             $table->string('nextofkin_relationship')->nullable();
