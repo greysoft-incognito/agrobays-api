@@ -81,7 +81,8 @@ class Slack extends Controller
                     'response_type' => 'ephemeral',
                 ]
             ]);
-            return response("OK", 200)->header('Content-Type', 'application/json');
+            return;
+            // return response("OK", 200)->header('Content-Type', 'application/json');
         }
 
         return response(["response_type" => "ephemeral", "text" => $msg], 200)
