@@ -71,10 +71,10 @@ class Slack extends Controller
     protected function msg($msg) 
     {
         $request = request();
-dd($request->response_url);
+
         if ($request->response_url) {
-            $client = new \GuzzleHttp\Client(['base_uri' => $request->response_url]);
-            $client->request('POST', '/', [
+            $client = new \GuzzleHttp\Client();
+            $client->request('POST', $request->response_url, [
                 'headers'     => ['Content-type' => 'application/json'],
                 'form_params' => [
                     'text' => $msg,
