@@ -22,7 +22,6 @@ class AgrobaysDebug extends BaseHandler
         $json = \Settings::fresh()->json()->options(['settings' => 'settings'])->get();
         $settings->saveConfigFile(['slack_debug' => ($request->text === 'on' ? 'true' : 'false')], $json);
 
-        return $this->respondToSlack('Slack debugs are now turned {$request->text}!');//
         return $this->respondToSlack('')
             ->withAttachment(Attachment::create()
                 ->setColor('good')
