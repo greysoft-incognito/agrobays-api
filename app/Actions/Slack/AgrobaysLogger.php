@@ -10,7 +10,7 @@ use Spatie\SlashCommand\Attachment;
 
 class AgrobaysLogger extends SignatureHandler
 {
-    protected $signature = "agrobays-logger {action? : This command accepts one of two parameters: {on|off}.}";
+    protected $signature = "agrobays-logger {action? : This command accepts one of two arguments: on|off.}";
     protected $description = 'Toggle debug logs on or off for requests originating from Slack. [Arguments: on|off]';
 
     public function canHandle(Request $request): bool
