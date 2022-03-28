@@ -18,7 +18,7 @@ class Slack extends Controller
         $sig_basestring = 'v0:' . $timestamp . ':' . $request->getContent();
         
         $hash = 'v0='.hash_hmac('sha256', $sig_basestring, env('453712b724e4d873f664725026312706'));
-        if (time() - $timestamp > 60*5){// || !hash_equals($hash, $signature)) {
+        if (time() - $timestamp > 60*5 || !hash_equals($hash, $signature)) {
             return response("Invalid Request.", 200)->header('Content-Type', 'application/json');
         }
         return $this->{$action}($request);
@@ -30,19 +30,17 @@ class Slack extends Controller
      */
     protected function debug(Request $request) 
     {
-        if (in_array($request->user_id, $this->uids) && in_array($request->text, ['on', 'off'])) {
+        if (!in_array($request->text, ['on', 'off'])) {
+            $msg = "Invalid parameter.";
+        } elseif (in_array($request->user_id, $this->uids)) {
             $settings = \Settings::options(['settings' => 'settings']);
             $json = \Settings::fresh()->json()->options(['settings' => 'settings'])->get();
-            $settings->saveConfigFile(['slack_debug' => 'true'], $json);
+            $settings->saveConfigFile(['slack_debug' => ($request->text === 'on' ? 'true' : 'false')], $json);
 
             $msg = "Slack debugs are now turned {$request->text}!";
-        } elseif (!in_array($request->text, ['on', 'off'])) {
-            $msg = "Invalid parameter.";
         } else {
             $msg = 'Sorry, you do not have permision to perform this action!';
         }
-
-        return SlackAlert::to($request->response_url)->message(json_encode(["response_type" => "ephemeral", "text" => $msg]));
 
         return response(["response_type" => "ephemeral", "text" => $msg], 200)
                   ->header('Content-Type', 'application/json');
