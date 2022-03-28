@@ -82,7 +82,7 @@ class Slack extends Controller
                         'response_type' => 'ephemeral',
                     ]
                 ]); 
-            } catch (GuzzleHttp\Exception\ServerException $e) {
+            } catch (\GuzzleHttp\Exception\ServerException $e) {
                 $msg = $e->getMessage();
             }
         }
