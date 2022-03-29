@@ -43,7 +43,8 @@ Route::get('/get/settings', function() {
             "settings" => collect(config("settings"))->except(['permissions', 'messages']),
             "fruitbay_categories" => \App\Models\FruitBayCategory::all(),
             "foodbags" => \App\Models\FoodBag::all(),
-            "plans" => \App\Models\Plan::all()
+            "plans" => \App\Models\Plan::all(),
+            "csrf_token" => csrf_token()
         ],
     ]);
 });
