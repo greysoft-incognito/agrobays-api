@@ -7,6 +7,7 @@ use App\Models\FoodBag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
+use Nette\Utils\Html;
 
 class AdminFoodbagsController extends Controller
 {
@@ -21,7 +22,10 @@ class AdminFoodbagsController extends Controller
                 return Str::words($item->description, '8');
             })
             ->addColumn('action', function (FoodBag $item) {
-                return '<a href="#edit-'.$item->id.'" class="btn btn-xs btn-primary"><i class="fa fa-pen-alt"></i> Edit</a>';
+                return implode([
+                    Html::el('a')->title(__('Edit'))->href('transactions/invoice/'.$item->id)->setHtml(Html::el('i')->class('ri-edit-circle-fill ri-2x text-primary')),
+                    Html::el('a')->title(__('Delete'))->href('transactions/invoice/'.$item->id)->setHtml(Html::el('i')->class('ri-delete-bin-2-fill ri-2x text-primary'))
+                ]);
             })
             ->removeColumn('updated_at')->toJson();
 
@@ -51,7 +55,7 @@ class AdminFoodbagsController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'title' => 'required|min:3|max:15|unique:food_bags',
-            'description' => 'nullable|min:10|max:150',
+            'description' => 'nullable|min:10|max:550',
         ]);
 
         if ($validator->fails()) {

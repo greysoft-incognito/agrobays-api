@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Subscription;
 use Illuminate\Support\Facades\Validator;
+use Nette\Utils\Html;
 
 class AdminSubscriptionController extends Controller
 {
@@ -17,7 +18,10 @@ class AdminSubscriptionController extends Controller
                 return $item->created_at->format('Y-m-d H:i');
             })
             ->addColumn('action', function (Subscription $item) {
-                return '<a href="#edit-'.$item->id.'" class="btn btn-xs btn-primary"><i class="fa fa-pen-alt"></i> Edit</a>';
+                return implode([
+                    Html::el('a')->title(__('Edit'))->href('transactions/invoice/'.$item->id)->setHtml(Html::el('i')->class('ri-edit-circle-fill ri-2x text-primary')),
+                    Html::el('a')->title(__('Delete'))->href('transactions/invoice/'.$item->id)->setHtml(Html::el('i')->class('ri-delete-bin-2-fill ri-2x text-primary'))
+                ]);
             })
             ->removeColumn('updated_at')->toJson();
 

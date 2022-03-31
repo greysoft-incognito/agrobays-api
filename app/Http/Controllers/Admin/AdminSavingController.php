@@ -8,6 +8,7 @@ use App\Models\Saving;
 use App\Models\Transaction;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Nette\Utils\Html;
 
 class AdminSavingController extends Controller
 {
@@ -19,7 +20,10 @@ class AdminSavingController extends Controller
                 return $item->created_at->format('Y-m-d H:i');
             })
             ->addColumn('action', function (Saving $item) {
-                return '<a href="#edit-'.$item->id.'" class="btn btn-xs btn-primary"><i class="fa fa-pen-alt"></i> Edit</a>';
+                return implode([
+                    Html::el('a')->title(__('Edit'))->href('transactions/invoice/'.$item->id)->setHtml(Html::el('i')->class('ri-edit-circle-fill ri-2x text-primary')),
+                    Html::el('a')->title(__('Delete'))->href('transactions/invoice/'.$item->id)->setHtml(Html::el('i')->class('ri-delete-bin-2-fill ri-2x text-primary'))
+                ]);
             })
             ->removeColumn('updated_at')->toJson();
 

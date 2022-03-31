@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Nette\Utils\Html;
 
 class AdminPlansController extends Controller
 {
@@ -23,7 +24,10 @@ class AdminPlansController extends Controller
                 return Str::words($item->description, '8');
             })
             ->addColumn('action', function (Plan $item) {
-                return '<a href="#edit-'.$item->id.'" class="btn btn-xs btn-primary"><i class="fa fa-pen-alt"></i> Edit</a>';
+                return implode([
+                    Html::el('a')->title(__('Edit'))->href('transactions/invoice/'.$item->id)->setHtml(Html::el('i')->class('ri-edit-circle-fill ri-2x text-primary')),
+                    Html::el('a')->title(__('Delete'))->href('transactions/invoice/'.$item->id)->setHtml(Html::el('i')->class('ri-delete-bin-2-fill ri-2x text-primary'))
+                ]);
             })
             ->removeColumn('updated_at')->toJson();
 
@@ -56,7 +60,7 @@ class AdminPlansController extends Controller
             'amount' => 'required|numeric|min:1',
             'duration' => 'required|numeric|min:1',
             'icon' => 'nullable|string',
-            'description' => 'nullable|min:10|max:150',
+            'description' => 'nullable|min:10|max:550',
         ]);
 
         if ($validator->fails()) {

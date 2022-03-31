@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Nette\Utils\Html;
 
 class AdminFoodsController extends Controller
 {
@@ -24,7 +25,10 @@ class AdminFoodsController extends Controller
                 return Str::words($item->description, '8');
             })
             ->addColumn('action', function (Food $item) {
-                return '<a href="#edit-'.$item->id.'" class="btn btn-xs btn-primary"><i class="fa fa-pen-alt"></i> Edit</a>';
+                return implode([
+                    Html::el('a')->title(__('Edit'))->href('transactions/invoice/'.$item->id)->setHtml(Html::el('i')->class('ri-edit-circle-fill ri-2x text-primary')),
+                    Html::el('a')->title(__('Delete'))->href('transactions/invoice/'.$item->id)->setHtml(Html::el('i')->class('ri-delete-bin-2-fill ri-2x text-primary'))
+                ]);
             })
             ->removeColumn('updated_at')->toJson();
 
@@ -57,7 +61,7 @@ class AdminFoodsController extends Controller
             'food_bag_id' => 'required|numeric|min:1',
             'weight' => 'nullable|string|min:1',
             'image' => 'nullable|mimes:jpg,jpeg,png',
-            'description' => 'nullable|min:10|max:150',
+            'description' => 'nullable|min:10|max:550',
         ]);
 
         if ($validator->fails()) {

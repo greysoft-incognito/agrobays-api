@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\DataTables;
+use Nette\Utils\Html;
 
 class AdminFruitBayCategoryController extends Controller
 {
@@ -26,7 +27,10 @@ class AdminFruitBayCategoryController extends Controller
                 return Str::words($cat->description, '8');
             })
             ->addColumn('action', function (FruitBayCategory $cat) {
-                return '<q-btn @click="alert("muta fucker")">Hello</q-btn><a @click="alert("muta fucker")" href="#edit-'.$cat->id.'" class="btn btn-xs btn-primary"><i class="fa fa-pen-alt"></i> Edit</a>';
+                return implode([
+                    Html::el('a')->title(__('Edit'))->href('transactions/invoice/'.$cat->id)->setHtml(Html::el('i')->class('ri-edit-circle-fill ri-2x text-primary')),
+                    Html::el('a')->title(__('Delete'))->href('transactions/invoice/'.$cat->id)->setHtml(Html::el('i')->class('ri-delete-bin-2-fill ri-2x text-primary'))
+                ]);
             })
             ->removeColumn('updated_at')->toJson();
 
@@ -56,7 +60,7 @@ class AdminFruitBayCategoryController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'title' => 'required|min:3|max:15',
-            'description' => 'nullable|min:10|max:150',
+            'description' => 'nullable|min:10|max:550',
         ]);
 
         if ($validator->fails()) {
