@@ -189,7 +189,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
                 Route::get('/get-plans', 'plans');
                 Route::get('/get-plans/{plan}', 'getPlan');
                 Route::get('/get-plans/{plan}/foodbags/{id?}', 'getBags');
-                Route::post('/activate-plan/{id}', 'store');
+                Route::post('/activate-plan/{id}', 'store'); 
             });
 
             // Savings Controller Routes

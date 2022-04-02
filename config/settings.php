@@ -15,6 +15,7 @@ return [
     'keep_successful_queue_logs' => true,
     'slack_debug' => false,
     'slack_logger' => true,
+    'default_banner' => 'media/default_banner2.png',
     'payment_verify_url' => env('PAYMENT_VERIFY_URL', 'http://localhost:8080/payment/verify'),
     'permissions' => [
         'manage_guests' => 'View, manage and get notifications for guest and bootcamp registrations',

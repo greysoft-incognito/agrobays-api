@@ -81,8 +81,6 @@ if (!function_exists('img')) {
             $photo = asset((config('filesystems.default') === 'local' ? $fpath : Storage::url($image)));
         } else {
             if ($no_default === true) return null;
-
-            $default = Storage::exists($image);
             $photo = asset((config('filesystems.default') === 'local'
                 ? env('default_' . $type, 'media/' . $type . (in_array($type, ['logo', 'avatar']) ? '.svg' : '.png'))
                 : Storage::url(env('default_' . $type, 'media/' . $type . (in_array($type, ['logo', 'avatar']) ? '.svg' : '.png')))));
