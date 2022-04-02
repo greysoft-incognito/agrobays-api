@@ -44,13 +44,13 @@ class AdminFoodsController extends Controller
 
     public function getItem(Request $request, $item)
     {
-        $plan = Food::whereId($item)->first();
+        $food = Food::whereId($item)->first();
 
         return $this->buildResponse([
-            'message' => !$plan ? 'The requested food no longer exists' : 'OK',
-            'status' =>  !$plan ? 'info' : 'success',
-            'response_code' => !$plan ? 404 : 200,
-            'plan' => $plan,
+            'message' => !$food ? 'The requested food no longer exists' : 'OK',
+            'status' =>  !$food ? 'info' : 'success',
+            'response_code' => !$food ? 404 : 200,
+            'food' => $food,
         ]);
     }
 
