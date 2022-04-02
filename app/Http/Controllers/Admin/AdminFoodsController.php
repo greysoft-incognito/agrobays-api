@@ -59,9 +59,11 @@ class AdminFoodsController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|min:3|max:15', Rule::unique('foods')->ignore($item),
             'food_bag_id' => 'required|numeric|min:1',
-            'weight' => 'nullable|string|min:1',
+            'weight' => 'required|string|min:1',
             'image' => 'nullable|mimes:jpg,jpeg,png',
             'description' => 'nullable|min:10|max:550',
+        ], [], [
+            'food_bag_id' => 'Food Bag'
         ]);
 
         if ($validator->fails()) {
