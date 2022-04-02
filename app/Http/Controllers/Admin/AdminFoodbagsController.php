@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use Nette\Utils\Html;
+use Illuminate\Validation\Rule;
 
 class AdminFoodbagsController extends Controller
 {
@@ -54,7 +55,7 @@ class AdminFoodbagsController extends Controller
     public function store(Request $request, $item = null)
     {
         $validator = Validator::make($request->all(), [
-            'title' => 'required|min:3|max:15|unique:food_bags',
+            'title' => ['required|min:3|max:15', Rule::unique('food_bags')->ignore($item)],
             'description' => 'nullable|min:10|max:550',
         ]);
 
