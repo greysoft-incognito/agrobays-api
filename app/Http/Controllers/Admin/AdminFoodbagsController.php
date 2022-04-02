@@ -23,7 +23,7 @@ class AdminFoodbagsController extends Controller
             })
             ->addColumn('action', function (FoodBag $item) {
                 return implode([
-                    Html::el('a', ["onclick"=>"hotLink('/admin/foodbag/".$item->id."')", "href"=>"javascript:void(0)"])->title(__('Edit'))->setHtml(Html::el('i')->class('ri-edit-circle-fill ri-2x text-primary')),
+                    Html::el('a', ["onclick"=>"hotLink('/admin/edit-foodbag/".$item->id."')", "href"=>"javascript:void(0)"])->title(__('Edit'))->setHtml(Html::el('i')->class('ri-edit-circle-fill ri-2x text-primary')),
                     Html::el('a', ["onclick"=>"hotLink('/admin/foodbag/delete/".$item->id."')", "href"=>"javascript:void(0)"])->title(__('Delete'))->setHtml(Html::el('i')->class('ri-delete-bin-2-fill ri-2x text-negative'))
                 ]);
             })
