@@ -56,7 +56,10 @@ class AdminFoodbagsController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'title' => ['required', 'min:3', 'max:15', Rule::unique('food_bags')->ignore($item)],
+            'plan_id' => 'required|numeric'
             'description' => 'nullable|min:10|max:550',
+        ], [], [
+            'plan_id' => 'Plan'
         ]);
 
         if ($validator->fails()) {
