@@ -26,8 +26,8 @@ class AdminFoodsController extends Controller
             })
             ->addColumn('action', function (Food $item) {
                 return implode([
-                    Html::el('a')->title(__('Edit'))->href('transactions/invoice/'.$item->id)->setHtml(Html::el('i')->class('ri-edit-circle-fill ri-2x text-primary')),
-                    Html::el('a')->title(__('Delete'))->href('transactions/invoice/'.$item->id)->setHtml(Html::el('i')->class('ri-delete-bin-2-fill ri-2x text-primary'))
+                    Html::el('a', ["onclick"=>"hotLink('/admin/edit-food/".$item->id."')", "href"=>"javascript:void(0)"])->title(__('Edit'))->setHtml(Html::el('i')->class('ri-edit-circle-fill ri-2x text-primary')),
+                    Html::el('a', ["onclick"=>"hotLink('/admin/food/delete/".$item->id."')", "href"=>"javascript:void(0)"])->title(__('Delete'))->setHtml(Html::el('i')->class('ri-delete-bin-2-fill ri-2x text-negative'))
                 ]);
             })
             ->removeColumn('updated_at')->toJson();
