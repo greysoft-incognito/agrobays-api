@@ -51,7 +51,7 @@ class Plan extends Model
     protected function imageUrl(): Attribute
     {
         $image = $this->image
-            ? img($this->image, 'banner', 'original')
+            ? img($this->image, 'banner', 'large')
             : 'https://loremflickr.com/320/320/'.urlencode($this->title??'fruit');
 
         return Attribute::make(
