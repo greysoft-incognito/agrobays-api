@@ -60,8 +60,6 @@ class PaymentController extends Controller
                   'amount' => ($due * $request->days)*100,       // in kobo
                   'email' => Auth::user()->email,         // unique to customers
                   'reference' => $reference,         // unique to transactions
-                  'items' => [$subscription],
-                  'amount' => $due,
                   'callback_url' => config('settings.payment_verify_url', route('payment.paystack.verify'))
                 ]);
 
@@ -156,8 +154,6 @@ class PaymentController extends Controller
                   'amount' => $due*100,       // in kobo
                   'email' => Auth::user()->email,         // unique to customers
                   'reference' => $reference,         // unique to transactions
-                  'items' => $cart,
-                  'amount' => $due,
                   'callback_url' => config('settings.payment_verify_url', route('payment.paystack.verify'))
                 ]);
 
@@ -201,6 +197,8 @@ class PaymentController extends Controller
             'status' =>  $code !== 200 ? 'error' : 'success',
             'response_code' => $code ?? 200, //202
             'payload' => $payload??[],
+            'items' => $cart ?? [$subscription ?? null],
+            'amount' => $due,
         ]);
     }
 
