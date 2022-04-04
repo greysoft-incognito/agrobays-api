@@ -243,7 +243,7 @@ class PaymentController extends Controller
             'status' => $status ?? 'success',
             'response_code' => $code ?? 200,
             'payload' => $tranx??[],
-            'deposit' => $subscription??[]
+            'deposit' => $subscription??[$processSaving]
         ]);
     }
 
