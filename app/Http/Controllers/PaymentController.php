@@ -246,7 +246,6 @@ class PaymentController extends Controller
             'response_code' => $code ?? 200,
             'payload' => $tranx??[],
             $set_type => $subscription??$order??[],
-            'test' => $transactable
         ]);
     }
 
