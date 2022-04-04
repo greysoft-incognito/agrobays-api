@@ -264,8 +264,8 @@ class PaymentController extends Controller
         $code = 422;
         $status = 'error';
         $subscription = [];
-        $saving = Saving::where('payment_ref', $request->reference)->where('status', 'pending')->first();
-        if ($saving) {
+        // $saving = Saving::where('payment_ref', $request->reference)->where('status', 'pending')->first();
+        if ($saving && $saving->status === 'pending') {
             $subscription = User::find($saving->user_id)->subscription()->where('id', $saving->subscription_id)->first();
             $_amount = money($tranx->data->amount/100);
             $_left = $subscription->days_left - $request->duration;
@@ -320,8 +320,7 @@ class PaymentController extends Controller
         $msg = "An unrecoverable error occured";
         $code = 422;
         $status = 'error';
-        $order = $order->where('status', 'pending')->first();
-        if ($order)
+        if ($order && $order->payment === 'pending')
         {
             $trns = $order->transaction;
             if ('success' === $tranx->data->status) {
