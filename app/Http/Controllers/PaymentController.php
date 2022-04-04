@@ -100,6 +100,8 @@ class PaymentController extends Controller
             'status' =>  !$subscription ? 'info' : 'success',
             'response_code' => $code ?? 200, //202
             'payload' => $tranx??[],
+            'transaction' => $transaction??[],
+            'due' => $due,
         ]);
     }
 
