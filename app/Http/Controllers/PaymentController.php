@@ -331,7 +331,6 @@ class PaymentController extends Controller
                 $trns->status = 'rejected';
             }
             $order->save();
-            print_r($order);
             $trns->save();
             $status = 'success';
             $code = 200;
