@@ -84,9 +84,6 @@ class PaymentController extends Controller
                     'amount' => $due * $request->days,
                     'due' => $due * $request->days,
                 ]);
-
-                $payload = $tranx;
-
             } catch (ApiException | \InvalidArgumentException $e) {
                 return $this->buildResponse([
                     'message' => $e->getMessage(),
@@ -102,7 +99,7 @@ class PaymentController extends Controller
             'message' => $msg??'OK',
             'status' =>  !$subscription ? 'info' : 'success',
             'response_code' => $code ?? 200, //202
-            'payload' => $payload??[],
+            'payload' => $tranx??[],
         ]);
     }
 
@@ -178,9 +175,6 @@ class PaymentController extends Controller
                     'amount' => $due,
                     'due' => $due,
                 ]);
-
-                $payload = $tranx;
-
             } catch (ApiException | \InvalidArgumentException $e) {
                 return $this->buildResponse([
                     'message' => $e->getMessage(),
@@ -196,7 +190,7 @@ class PaymentController extends Controller
             'message' => $msg??'OK',
             'status' =>  $code !== 200 ? 'error' : 'success',
             'response_code' => $code ?? 200, //202
-            'payload' => $payload??[],
+            'payload' => $tranx??[],
             'items' => $cart ?? [$subscription ?? null],
             'amount' => $due,
         ]);
@@ -248,7 +242,7 @@ class PaymentController extends Controller
             'message' => $msg??'OK',
             'status' => $status ?? 'success',
             'response_code' => $code ?? 200,
-            'payload' => $payload??[],
+            'payload' => $tranx??[],
             'deposit' => $subscription??[]
         ]);
     }
@@ -266,7 +260,7 @@ class PaymentController extends Controller
         $msg = "An unrecoverable error occured";
         $code = 422;
         $status = 'error';
-        $subscription = $payload = [];
+        $subscription = [];
         $saving = Saving::where('payment_ref', $request->reference)->where('status', 'pending')->first();
         if ($saving) {
             $subscription = User::find($saving->user_id)->subscription()->where('id', $saving->subscription_id)->first();
@@ -297,7 +291,6 @@ class PaymentController extends Controller
             }
             $saving->save();
             $trns->save();
-            $payload = $tranx;
             $status = 'success';
             $code = 200;
         }
@@ -306,7 +299,7 @@ class PaymentController extends Controller
             'msg' => $msg,
             'code' => $code,
             'status' => $status,
-            'payload' => $payload,
+            'payload' => $tranx ?? [],
             'subscription' => $subscription,
         ];
     }
@@ -331,10 +324,7 @@ class PaymentController extends Controller
             if ('success' === $tranx->data->status) {
                 $order->payment = 'complete';
                 $trns->status = 'complete';
-
                 $msg = "Your order has been placed successfully, you will be notified whenever it is ready for pickup or delivery.";
-                $order->save();
-
             } else {
                 $order->payment = 'rejected';
                 $order->status = 'rejected';
@@ -342,7 +332,6 @@ class PaymentController extends Controller
             }
             $order->save();
             $trns->save();
-            $payload = $tranx;
             $status = 'success';
             $code = 200;
         }
@@ -351,7 +340,7 @@ class PaymentController extends Controller
             'msg' => $msg,
             'code' => $code,
             'status' => $status,
-            'payload' => $payload,
+            'payload' => $tranx,
             'order' => $order,
         ];
     }
