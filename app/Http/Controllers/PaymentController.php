@@ -208,6 +208,7 @@ class PaymentController extends Controller
     {
         $msg = 'Invalid Transaction.';
         $status = 'error';
+        $set_type = 'deposit';
         $code = 403;
         if(!$request->reference){
             $msg = 'No reference supplied';
@@ -227,6 +228,7 @@ class PaymentController extends Controller
             }
             elseif (($transactable = $transaction->transactable) instanceof Order) {
                 $processSaving = $this->processOrder($request, $tranx, $transactable);
+                $set_type = 'order';
             }
             extract($processSaving);
         } catch (ApiException | \InvalidArgumentException $e) {
@@ -243,7 +245,7 @@ class PaymentController extends Controller
             'status' => $status ?? 'success',
             'response_code' => $code ?? 200,
             'payload' => $tranx??[],
-            'deposit' => $subscription??[$processSaving]
+            $set_type => $subscription??$order??[]
         ]);
     }
 
