@@ -48,7 +48,7 @@ class FoodBag extends Model
     public function plan(): Attribute
     {
         return Attribute::make(
-            get: fn()=> $this->getPlan()->get()
+            get: fn()=> Plan::first()
         );
     }
 }
