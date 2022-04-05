@@ -57,7 +57,7 @@ class AdminFruitBayController extends Controller
     public function store(Request $request, $item = null)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|min:3|max:15',
+            'name' => 'required|min:3|max:25',
             'price' => 'required|numeric|min:1',
             'description' => 'nullable|min:10|max:550',
         ]);
@@ -102,7 +102,24 @@ class AdminFruitBayController extends Controller
      */
     public function destroy($item = null)
     {
-        $item = FruitBay::whereId($item)->first();
+        if ($request->items) 
+        {
+            $count = collect($request->items)->each(function($item) {
+                $item = FruitBay::whereId($item)->first();
+                $item->image && Storage::delete($item->image);
+                $item->delete();
+
+                return $this->buildResponse([
+                    'message' => "{$count} items have been deleted.",
+                    'status' =>  'success',
+                    'response_code' => 200,
+                ]);
+            })->count();
+        }
+        else
+        {
+            $item = FruitBay::whereId($item)->first();
+        }
 
         if ($item)
         {

@@ -55,7 +55,7 @@ class AdminFoodbagsController extends Controller
     public function store(Request $request, $item = null)
     {
         $validator = Validator::make($request->all(), [
-            'title' => ['required', 'min:3', 'max:15', Rule::unique('food_bags')->ignore($item)],
+            'title' => ['required', 'min:3', 'max:25', Rule::unique('food_bags')->ignore($item)],
             'plan_id' => 'required|numeric',
             'description' => 'nullable|min:10|max:550',
         ], [], [
@@ -93,7 +93,24 @@ class AdminFoodbagsController extends Controller
      */
     public function destroy($item = null)
     {
-        $bag = FoodBag::whereId($item)->first();
+        if ($request->items) 
+        {
+            $count = collect($request->items)->each(function($item) {
+                $bag = FoodBag::whereId($item)->first();
+                $bag->image && Storage::delete($bag->image);
+                $bag->delete();
+
+                return $this->buildResponse([
+                    'message' => "{$count} foods bags have been deleted.",
+                    'status' =>  'success',
+                    'response_code' => 200,
+                ]);
+            })->count();
+        }
+        else
+        {
+            $bag = FoodBag::whereId($item)->first();
+        }
 
         if ($bag)
         {

@@ -59,7 +59,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
 
         Route::get('/charts/{type?}', [AdminController::class, 'charts'])->name('charts');
 
-        // Load admin food bay
+        // Load admin fruitbay
         Route::controller(AdminFruitBayController::class)
         ->prefix('fruitbay')
         ->name('fruitbay.')

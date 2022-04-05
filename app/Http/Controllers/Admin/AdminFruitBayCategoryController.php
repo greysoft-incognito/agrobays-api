@@ -59,7 +59,7 @@ class AdminFruitBayCategoryController extends Controller
     public function store(Request $request, $item = null)
     {
         $validator = Validator::make($request->all(), [
-            'title' => 'required|min:3|max:15',
+            'title' => 'required|min:3|max:25',
             'description' => 'nullable|min:10|max:550',
         ]);
 
@@ -101,7 +101,24 @@ class AdminFruitBayCategoryController extends Controller
      */
     public function destroy($item = null)
     {
-        $item = FruitBayCategory::whereId($item)->first();
+        if ($request->items) 
+        {
+            $count = collect($request->items)->each(function($item) {
+                $item = FruitBayCategory::whereId($item)->first();
+                $item->image && Storage::delete($item->image);
+                $item->delete();
+
+                return $this->buildResponse([
+                    'message' => "{$count} fruit bay categories have been deleted.",
+                    'status' =>  'success',
+                    'response_code' => 200,
+                ]);
+            })->count();
+        }
+        else
+        {
+            $item = FruitBayCategory::whereId($item)->first();
+        }
 
         if ($item)
         {

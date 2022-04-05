@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Nette\Utils\Html;
 
 class AdminPlansController extends Controller
@@ -56,7 +57,7 @@ class AdminPlansController extends Controller
     public function store(Request $request, $item = null)
     {
         $validator = Validator::make($request->all(), [
-            'title' => 'required|min:3|max:15|unique:plans',
+            'title' => ['required', 'min:3', 'max:25', Rule::unique('plans')->ignore($item)],
             'amount' => 'required|numeric|min:1',
             'duration' => 'required|numeric|min:1',
             'icon' => 'nullable|string',
@@ -105,12 +106,28 @@ class AdminPlansController extends Controller
      */
     public function destroy($item = null)
     {
-        $plan = Plan::whereId($item)->first();
+        if ($request->items) 
+        {
+            $count = collect($request->items)->each(function($item) {
+                $plan = Plan::whereId($item)->first();
+                $plan->image && Storage::delete($plan->image);
+                $plan->delete();
+
+                return $this->buildResponse([
+                    'message' => "{$count} plans have been deleted.",
+                    'status' =>  'success',
+                    'response_code' => 200,
+                ]);
+            })->count();
+        }
+        else
+        {
+            $plan = Plan::whereId($item)->first();
+        }
 
         if ($plan)
         {
             $plan->image && Storage::delete($plan->image);
-
             $plan->delete();
 
             return $this->buildResponse([
