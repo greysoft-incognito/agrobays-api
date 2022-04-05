@@ -22,9 +22,6 @@ class AdminFoodbagsController extends Controller
             ->editColumn('description', function(FoodBag $item) {
                 return Str::words($item->description, '8');
             })
-            ->addColumn('plan', function(FoodBag $item) {
-                return $item->get_pan;
-            })
             ->addColumn('action', function (FoodBag $item) {
                 return implode([
                     Html::el('a', ["onclick"=>"hotLink('/admin/edit-foodbag/".$item->id."')", "href"=>"javascript:void(0)"])->title(__('Edit'))->setHtml(Html::el('i')->class('ri-edit-circle-fill ri-2x text-primary')),
