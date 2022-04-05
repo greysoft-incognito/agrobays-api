@@ -35,7 +35,7 @@ class FoodBag extends Model
      */
     public function getPlan(): BelongsTo
     {
-        return $this->belong(Plan::class);
+        return $this->belongsTo(Plan::class);
     }
 
     public function foods(): Attribute
