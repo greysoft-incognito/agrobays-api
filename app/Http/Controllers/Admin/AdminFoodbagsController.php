@@ -19,6 +19,9 @@ class AdminFoodbagsController extends Controller
             ->editColumn('created_at', function(FoodBag $item) {
                 return $item->created_at->format('Y-m-d H:i');
             })
+            ->editColumn('plan', function(FoodBag $item) {
+                return $item->get_plan;
+            })
             ->editColumn('description', function(FoodBag $item) {
                 return Str::words($item->description, '8');
             })

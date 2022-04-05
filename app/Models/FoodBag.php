@@ -15,7 +15,6 @@ class FoodBag extends Model
 
     public $appends = [
         'foods',
-        'plan',
     ];
 
     /**
@@ -43,12 +42,5 @@ class FoodBag extends Model
     public function getPlan(): BelongsTo
     {
         return $this->belongsTo(Plan::class);
-    }
-
-    public function plan(): Attribute
-    {
-        return Attribute::make(
-            get: fn()=> $this->getPlan()
-        );
     }
 }
