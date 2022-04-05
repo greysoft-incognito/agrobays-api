@@ -14,7 +14,8 @@ class FoodBag extends Model
     use HasFactory;
 
     public $appends = [
-        'foods'
+        'foods',
+        'plan',
     ];
 
     /**
@@ -41,6 +42,13 @@ class FoodBag extends Model
     {
         return Attribute::make(
             get: fn()=> $this->getFoods()->get()
+        );
+    }
+
+    public function plan(): Attribute
+    {
+        return Attribute::make(
+            get: fn()=> $this->getPlan()->get()
         );
     }
 }
