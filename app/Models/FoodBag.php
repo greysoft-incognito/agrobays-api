@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class FoodBag extends Model
 {
@@ -24,6 +25,16 @@ class FoodBag extends Model
     public function getFoods(): HasMany
     {
         return $this->hasMany(Food::class);
+    }
+
+    /**
+     * Get the plan that owns the foodbag
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function getPlan(): BelongsTo
+    {
+        return $this->belong(Plan::class);
     }
 
     public function foods(): Attribute
