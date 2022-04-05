@@ -15,7 +15,7 @@ class FoodBag extends Model
 
     public $appends = [
         'foods',
-        'plan'
+        // 'plan'
     ];
 
     /**
