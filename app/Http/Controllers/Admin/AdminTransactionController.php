@@ -95,11 +95,27 @@ class AdminTransactionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function destroy($item = null)
+    public function destroy(Request $request, $item = null)
     {
-        $food = Transaction::whereId($item)->first();
+        if ($request->items) 
+        {
+            $count = collect($request->items)->each(function($item) {
+                $transaction = Transaction::whereId($item)->first();
+                $transaction->delete();
 
-        if ($food)
+                return $this->buildResponse([
+                    'message' => "{$count} transaction have been deleted.",
+                    'status' =>  'success',
+                    'response_code' => 200,
+                ]);
+            })->count();
+        }
+        else
+        {
+            $transaction = Transaction::whereId($item)->first();
+        }
+
+        if ($transaction)
         {
             $food->delete();
 

@@ -105,7 +105,7 @@ class AdminFoodsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function destroy($item = null)
+    public function destroy(Request $request, $item = null)
     {
         if ($request->items) 
         {

@@ -94,23 +94,39 @@ class AdminSubscriptionController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function destroy($item = null)
+    public function destroy(Request $request, $item = null)
     {
-        $food = Transaction::whereId($item)->first();
+        if ($request->items) 
+        {
+            $count = collect($request->items)->each(function($item) {
+                $subscription = Subscription::whereId($item)->first();
+                $subscription->delete();
 
-        if ($food)
+                return $this->buildResponse([
+                    'message' => "{$count} subscriptions have been deleted.",
+                    'status' =>  'success',
+                    'response_code' => 200,
+                ]);
+            })->count();
+        }
+        else
+        {
+            $subscription = Subscription::whereId($item)->first();
+        }
+
+        if ($subscription)
         {
             $food->delete();
 
             return $this->buildResponse([
-                'message' => "Transaction has been deleted.",
+                'message' => "Subscription has been deleted.",
                 'status' =>  'success',
                 'response_code' => 200,
             ]);
         }
 
         return $this->buildResponse([
-            'message' => 'The requested transaction no longer exists.',
+            'message' => 'The requested subscription no longer exists.',
             'status' => 'error',
             'response_code' => 404,
         ]);

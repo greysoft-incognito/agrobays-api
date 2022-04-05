@@ -99,7 +99,7 @@ class AdminFruitBayCategoryController extends Controller
      * @param  \App\Models\FruitBayCategory  $category
      * @return \Illuminate\Http\Response
      */
-    public function destroy($item = null)
+    public function destroy(Request $request, $item = null)
     {
         if ($request->items) 
         {

@@ -96,23 +96,37 @@ class AdminSavingController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function destroy($item = null)
+    public function destroy(Request $request, $item = null)
     {
-        $food = Saving::whereId($item)->first();
-
-        if ($food)
+        if ($request->items) 
         {
-            $food->delete();
+            $count = collect($request->items)->each(function($item) {
+                $saving = Saving::whereId($item)->first();
+                $saving->delete();
 
+                return $this->buildResponse([
+                    'message' => "{$count} savings have been deleted.",
+                    'status' =>  'success',
+                    'response_code' => 200,
+                ]);
+            })->count();
+        }
+        else
+        {
+            $saving = Saving::whereId($item)->first();
+        }
+
+        if ($saving)
+        {
             return $this->buildResponse([
-                'message' => "Transaction has been deleted.",
+                'message' => "Saving has been deleted.",
                 'status' =>  'success',
                 'response_code' => 200,
             ]);
         }
 
         return $this->buildResponse([
-            'message' => 'The requested transaction no longer exists.',
+            'message' => 'The requested savings no longer exists.',
             'status' => 'error',
             'response_code' => 404,
         ]);
