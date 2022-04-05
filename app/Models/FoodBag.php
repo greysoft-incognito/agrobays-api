@@ -28,6 +28,13 @@ class FoodBag extends Model
         return $this->hasMany(Food::class);
     }
 
+    public function foods(): Attribute
+    {
+        return Attribute::make(
+            get: fn()=> $this->getFoods()->get()
+        );
+    }
+
     /**
      * Get the plan that owns the foodbag
      *
@@ -36,13 +43,6 @@ class FoodBag extends Model
     public function getPlan(): BelongsTo
     {
         return $this->belongsTo(Plan::class);
-    }
-
-    public function foods(): Attribute
-    {
-        return Attribute::make(
-            get: fn()=> $this->getFoods()->get()
-        );
     }
 
     public function plan(): Attribute
