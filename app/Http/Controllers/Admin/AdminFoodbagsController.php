@@ -20,7 +20,7 @@ class AdminFoodbagsController extends Controller
                 return $item->created_at->format('Y-m-d H:i');
             })
             ->editColumn('plan', function(FoodBag $item) {
-                return $item->get_plan;
+                return $item->getPlan();
             })
             ->editColumn('description', function(FoodBag $item) {
                 return Str::words($item->description, '8');
