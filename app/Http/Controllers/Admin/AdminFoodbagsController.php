@@ -23,7 +23,7 @@ class AdminFoodbagsController extends Controller
                 return Str::words($item->description, '8');
             })
             ->addColumn('plan', function(FoodBag $item) {
-                return $item->getPlan();
+                return $item->get_pan;
             })
             ->addColumn('action', function (FoodBag $item) {
                 return implode([
