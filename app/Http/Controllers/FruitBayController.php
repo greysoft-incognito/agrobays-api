@@ -21,8 +21,8 @@ class FruitBayController extends Controller
     public function index(Request $request, $category = null)
     {
         $get_cat = (((request()->segment(1) !== 'api' && request()->segment(2) === 'category') ||
-                    request()->segment(3) === 'category')
-                    || $category);
+            request()->segment(3) === 'category')
+            || $category);
         if ($get_cat)
         {
             $getCategory = FruitBayCategory::where(['id' => $category])->orWhere(['slug' => $category])->first();

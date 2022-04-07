@@ -13,10 +13,10 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Yabacon\Paystack;
 use Yabacon\Paystack\Exception\ApiException;
+use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
-
     /**
      * Initialize Payment.
      *
@@ -234,11 +234,13 @@ class PaymentController extends Controller
             }
             extract($processSaving);
         } catch (ApiException | \InvalidArgumentException $e) {
+            $payload = $e instanceof ApiException ? $e->getResponseObject() : [];
+            Log::error($e->getMessage(), $payload);
             return $this->buildResponse([
                 'message' => $e->getMessage(),
                 'status' => 'error',
                 'response_code' => 422,
-                'payload' => $e instanceof ApiException ? $e->getResponseObject() : [],
+                'payload' => $payload,
             ]);
         }
 
