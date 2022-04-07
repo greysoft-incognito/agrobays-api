@@ -235,7 +235,7 @@ class PaymentController extends Controller
             extract($processSaving);
         } catch (ApiException | \InvalidArgumentException $e) {
             $payload = $e instanceof ApiException ? $e->getResponseObject() : [];
-            Log::error($e->getMessage(), (Array)$payload);
+            Log::error($e->getMessage(), ['transaction' => $transaction, 'request' => $request->all()]);
             return $this->buildResponse([
                 'message' => $e->getMessage(),
                 'status' => 'error',
