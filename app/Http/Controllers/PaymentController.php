@@ -211,7 +211,7 @@ class PaymentController extends Controller
         $msg = 'Invalid Transaction.';
         $status = 'error';
         $set_type = 'deposit';
-        $code = 403;
+     $code = 403;
         if(!$request->reference){
             $msg = 'No reference supplied';
         }
@@ -235,7 +235,7 @@ class PaymentController extends Controller
             extract($processSaving);
         } catch (ApiException | \InvalidArgumentException $e) {
             $payload = $e instanceof ApiException ? $e->getResponseObject() : [];
-            Log::error($e->getMessage(), ['request' => $request->all()]);
+            Log::error($e->getMessage(), ['url'=>url()->full(), 'request' => $request->all()]);
             return $this->buildResponse([
                 'message' => $e->getMessage(),
                 'status' => 'error',
