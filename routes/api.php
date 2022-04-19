@@ -186,7 +186,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
             // Savings Controller Routes
             Route::controller(SavingsController::class)
             ->group(function() {
-                Route::get('/get-all/{sub_id?}/{limit?}', 'index')->name('all');
+                Route::get('/list/{sub_id?}/{limit?}', 'index')->name('all');
                 Route::get('/get-plans', 'plans');
                 Route::get('/get-plans/{plan}', 'getPlan');
                 Route::get('/get-plans/{plan}/foodbags/{id?}', 'getBags');
