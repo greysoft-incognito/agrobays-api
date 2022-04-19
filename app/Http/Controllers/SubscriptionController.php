@@ -4,10 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\FoodBag;
 use App\Models\Subscription;
-use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
+use Carbon\CarbonImmutable as Carbon;
 use Nette\Utils\Html;
 
 class SubscriptionController extends Controller
@@ -15,7 +14,7 @@ class SubscriptionController extends Controller
     /**
      * List all the authenticated user's subscriptions.
      *
-     * @param  \Illuminate\Http\Client\Request  $request
+     * @param  \Illuminate\Http\Request  $request
      * @param  String $action
      * @return \Illuminate\Http\Response
      */
@@ -31,6 +30,14 @@ class SubscriptionController extends Controller
         if ($status !== null && in_array($status, ['active', 'pending', 'complete']))
         {
             $subs->where('status', $status);
+        }
+
+        if ($p = $request->query('period'))
+        {
+            $period = explode('-', $p);
+            $from = new Carbon($period[0]);
+            $to = new Carbon($period[1]);
+            $subs->betweenCreatedAt($from, $to);
         }
 
         $subscriptions = $subs->get();
@@ -91,7 +98,7 @@ class SubscriptionController extends Controller
     /**
      * List all the authenticated user's subscriptions.
      *
-     * @param  \Illuminate\Http\Client\Request  $request
+     * @param  \Illuminate\Http\Request  $request
      * @param  String $action
      * @return \Illuminate\Http\Response
      */
