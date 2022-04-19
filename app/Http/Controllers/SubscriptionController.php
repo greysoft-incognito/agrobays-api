@@ -50,7 +50,7 @@ class SubscriptionController extends Controller
             'message' => $msg,
             'status' =>  !$subscriptions->isNotEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'subscriptions' => $subscriptions->isNotEmpty()??[],
+            'subscriptions' => $subscriptions??[],
             'period' => $p ? urldecode($p) : $_period
         ]);
     }
