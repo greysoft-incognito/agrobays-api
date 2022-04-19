@@ -49,7 +49,7 @@ class SubscriptionController extends Controller
             'status' =>  !$subscriptions ? 'info' : 'success',
             'response_code' => 200,
             'subscriptions' => $subscriptions??[],
-            'period' => $subscriptions ? $subscriptions->first() : ""
+            'period' => $subscriptions ? ($subscriptions->first()->created_at . '-' . $subscriptions->last()->created_at) : ""
         ]);
     }
 
