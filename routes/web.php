@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Slack;
+use Symfony\Component\Console\Exception\CommandNotFoundException;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,7 +20,11 @@ Route::get('/', function () {
 });
 
 Route::get('/artisan/{command}/{params?}', function ($command, $params = null) {
-    Artisan::call($command, $params ? explode(',', $params) : []);
+    try {
+        Artisan::call($command, $params ? explode(',', $params) : []);
+    } catch (CommandNotFoundException $e) {
+        echo $e->getMessage();
+    }
 });
 
 // Route::post('slacker/{action?}', [Slack::class, 'index']);
