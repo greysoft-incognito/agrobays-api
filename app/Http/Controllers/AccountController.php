@@ -16,6 +16,18 @@ use App\Actions\Greysoft\Charts;
 class AccountController extends Controller
 {
     /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'firstname',
+        'lastname',
+        'address',
+        'image',
+    ];
+
+    /**
      * Display a listing of the resource.
      *
      * @param \Illuminate\Support\Facades\Auth $auth
@@ -76,6 +88,54 @@ class AccountController extends Controller
             'status' => 'success',
             'response_code' => 200,
             $id ? 'saving' : 'savings' => $id ? $saving : $savings->paginate(15),
+        ]);
+    }
+
+    public function updateField(Request $request, $field = 'image')
+    {
+        $allow = in_array($field, $this->fillable);
+
+        $user = User::find(Auth::id());
+        if (!$user) {
+            return $this->buildResponse([
+                'message' => 'The requested user does not exists',
+                'status' => 'error',
+                'response_code' => 404,
+            ]);
+        }
+
+        $validator = Validator::make($request->all(), [
+            $field == 'image' ? 'image' : $field => ['required', $field == 'image' ? 'mimes:png,jpg' : 'string'],
+        ]);
+
+        if ($validator->fails() || !$allow) {
+            return $this->buildResponse([
+                'message' => !$allow ? 'An error occured!' : $validator->errors()->first($field),
+                'status' => 'error',
+                'response_code' => 422,
+                'errors' => !$allow ? ["You are not allowed to update $field"] : $validator->errors(),
+            ]);
+        }
+
+        if ($request->hasFile('image'))
+        {
+            $user->image && Storage::delete($user->image??'');
+            $user->image = $request->file('image')->storeAs(
+                'public/uploads/images', rand() . '_' . rand() . '.' . $request->file('image')->extension()
+            );
+        }
+        else
+        {
+            $user->{$field} = $request->{$field};
+        }
+
+        $user->save();
+
+        return $this->buildResponse([
+            'message' => "Your profile $field has been successfully updated.",
+            'status' =>  'success',
+            'response_code' => 200,
+            'user' => $user,
         ]);
     }
 

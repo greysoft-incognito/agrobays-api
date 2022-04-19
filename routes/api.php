@@ -169,6 +169,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
     ->group(function() {
         Route::get('/', 'index')->name('index');
         Route::post('/update', 'store')->name('update');
+        Route::post('/update/field/{field}', 'updateField')->name('update.field');
         Route::get('/savings/get/{id?}/{planned?}', 'savings')->name('savings');
         Route::get('/charts/{type?}', 'charts')->name('charts');
 
