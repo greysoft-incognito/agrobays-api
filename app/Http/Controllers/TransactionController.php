@@ -78,8 +78,9 @@ class TransactionController extends Controller
         $transactions = $trans->get();
 
         if ($transactions->isNotEmpty()) {
-            $transactions->map(function($tr) {
+            $transactions->each(function($tr) {
                 $tr->type = Str::replace('App\\Models\\', '', $tr->transactable_type );
+                $tr->created_at->format('Y-m-d H:i');
             });
         }
 
