@@ -43,13 +43,15 @@ class SubscriptionController extends Controller
         $subscriptions = $subs->get();
 
         $msg = !$subscriptions ? 'You do not have an active subscription' : 'OK';
-
+        $_period = $subscriptions
+            ? ($subscriptions->first()->created_at->toDateString() . '-' . $subscriptions->last()->created_at->toDateString)
+            : "";
         return $this->buildResponse([
             'message' => $msg,
             'status' =>  !$subscriptions ? 'info' : 'success',
             'response_code' => 200,
             'subscriptions' => $subscriptions??[],
-            'period' => $subscriptions ? ($subscriptions->first()->created_at . '-' . $subscriptions->last()->created_at) : ""
+            'period' => $p ? urldecode($p) : $_period
         ]);
     }
 
