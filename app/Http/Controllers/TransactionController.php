@@ -50,7 +50,9 @@ class TransactionController extends Controller
     /**
      * Display a listing of the user's transactions.
      *
-     * @param \Illuminate\Support\Facades\Auth $auth
+     * @param  \Illuminate\Http\Request  $request
+     * @param  Integer $limit
+     * @param  String $status
      * @return \Illuminate\Http\Response
      */
     public function transactions(Request $request, $limit = 1, $status = null)

@@ -62,11 +62,8 @@ class AccountController extends Controller
         }
 
         $savings = $auth::user()->savings();
-        if ($planned !== false && is_numeric($id)) {
-            $savings->where('subscription_id', $id);
-        }
 
-        if ($id && !($saving = $savings->find($id)) && $id !== 'all') {
+        if ($id && !($saving = $savings->find($id))) {
             return $this->buildResponse([
                 'message' => 'The requested saving no longer exists.',
                 'status' => 'error',
@@ -74,13 +71,11 @@ class AccountController extends Controller
             ]);
         }
 
-        $get_all = in_array('all', [$id, $planned]);
-
         return $this->buildResponse([
             'message' => 'OK',
             'status' => 'success',
             'response_code' => 200,
-            $get_all ? 'saving' : 'savings' => $get_all ? $saving : $savings->paginate(15),
+            $id ? 'saving' : 'savings' => $id ? $saving : $savings->paginate(15),
         ]);
     }
 

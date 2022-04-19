@@ -15,7 +15,8 @@ class SubscriptionController extends Controller
      * List all the authenticated user's subscriptions.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  String $action
+     * @param  Integer $limit
+     * @param  String $status
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request, $limit = 1, $status = null)

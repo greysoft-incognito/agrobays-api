@@ -6,18 +6,62 @@ use App\Models\FoodBag;
 use App\Models\Plan;
 use App\Models\Subscription;
 use Illuminate\Http\Request;
+use Carbon\CarbonImmutable as Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class SavingsController extends Controller
 {
+
     /**
-     * Display a listing of the resource.
+     * Display a listing of the user's savings
      *
+     * @param \Illuminate\Http\Request  $request
+     * @param \Illuminate\Support\Facades\Auth $auth
+     * @param  Integer $sub_id
+     * @param  Integer $limit
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request, Auth $auth, $sub_id = null, $limit = 1)
     {
-        //
+        $save = $auth::user()->savings()->orderBy('id', 'DESC');
+
+        if (is_numeric($limit) && $limit > 0)
+        {
+            $save->limit($limit);
+        }
+
+        if (is_numeric($sub_id)) {
+            $save->where('subscription_id', $sub_id);
+        }
+
+        if ($p = $request->query('period'))
+        {
+            $period = explode('-', $p);
+            $from = new Carbon($period[0]);
+            $to = new Carbon($period[1]);
+            $save->whereBetween('created_at', [$from, $to]);
+        }
+
+        $savings = $save->get();
+
+        if ($savings->isNotEmpty()) {
+            $savings->each(function($tr) {
+                $tr->date = $tr->created_at->format('Y-m-d H:i');
+            });
+        }
+
+        $msg = $savings->isEmpty() ? 'You have not made any transactions.' : 'OK';
+        $_period = $savings->isNotEmpty()
+            ? ($savings->last()->created_at->format('Y/m/d') . '-' . $savings->first()->created_at->format('Y/m/d'))
+            : "";
+
+        return $this->buildResponse([
+            'message' => $msg,
+            'status' =>  $savings->isEmpty() ? 'info' : 'success',
+            'response_code' => 200,
+            'transactions' => $savings??[],
+            'period' => $p ? urldecode($p) : $_period
+        ]);
     }
 
     /**
