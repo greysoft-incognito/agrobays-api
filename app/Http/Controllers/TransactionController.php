@@ -77,6 +77,12 @@ class TransactionController extends Controller
 
         $transactions = $trans->get();
 
+        if ($transactions->isNotEmpty()) {
+            $transactions->map(function($tr) {
+                $tr->type = Str::replace('App\\Models\\', '', $tr->transactable_type );
+            });
+        }
+
         $msg = $transactions->isEmpty() ? 'You have not made any transactions.' : 'OK';
         $_period = $transactions->isNotEmpty()
             ? ($transactions->last()->created_at->format('Y/m/d') . '-' . $transactions->first()->created_at->format('Y/m/d'))
