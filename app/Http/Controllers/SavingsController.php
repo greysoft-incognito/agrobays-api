@@ -50,7 +50,7 @@ class SavingsController extends Controller
             });
         }
 
-        $msg = $savings->isEmpty() ? 'You have not made any transactions.' : 'OK';
+        $msg = $savings->isEmpty() ? 'You have not made any savings.' : 'OK';
         $_period = $savings->isNotEmpty()
             ? ($savings->last()->created_at->format('Y/m/d') . '-' . $savings->first()->created_at->format('Y/m/d'))
             : "";
@@ -59,7 +59,7 @@ class SavingsController extends Controller
             'message' => $msg,
             'status' =>  $savings->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'transactions' => $savings??[],
+            'savings' => $savings??[],
             'period' => $p ? urldecode($p) : $_period
         ]);
     }
