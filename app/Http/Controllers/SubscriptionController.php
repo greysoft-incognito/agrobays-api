@@ -37,7 +37,7 @@ class SubscriptionController extends Controller
             $period = explode('-', $p);
             $from = new Carbon($period[0]);
             $to = new Carbon($period[1]);
-            $subs->betweenCreatedAt($from, $to);
+            $subs->whereBetween('created_at', [$from, $to]);
         }
 
         $subscriptions = $subs->get();
