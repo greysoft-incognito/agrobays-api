@@ -44,7 +44,7 @@ class SubscriptionController extends Controller
 
         $msg = !$subscriptions ? 'You do not have an active subscription' : 'OK';
         $_period = $subscriptions
-            ? ($subscriptions->first()->created_at->format('Y/m/d') . '-' . $subscriptions->last()->created_at->format('Y/m/d'))
+            ? ($subscriptions->last()->created_at->format('Y/m/d') . '-' . $subscriptions->first()->created_at->format('Y/m/d'))
             : "";
         return $this->buildResponse([
             'message' => $msg,
