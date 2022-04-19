@@ -21,13 +21,18 @@ class SavingsController extends Controller
      * @param  Integer $limit
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request, Auth $auth, $sub_id = null, $limit = 1)
+    public function index(Request $request, Auth $auth, $sub_id = null, $limit = 1, $status = null)
     {
         $save = $auth::user()->savings()->orderBy('id', 'DESC');
 
         if (is_numeric($limit) && $limit > 0)
         {
             $save->limit($limit);
+        }
+
+        if ($status !== null && in_array($status, ['rejected', 'pending', 'complete']))
+        {
+            $save->where('status', $status);
         }
 
         if (is_numeric($sub_id)) {
