@@ -42,13 +42,13 @@ class SubscriptionController extends Controller
 
         $subscriptions = $subs->get();
 
-        $msg = !$subscriptions ? 'You do not have an active subscription' : 'OK';
+        $msg = $subscriptions->isEmpty() ? 'You do not have an active subscription' : 'OK';
         $_period = $subscriptions->isNotEmpty()
             ? ($subscriptions->last()->created_at->format('Y/m/d') . '-' . $subscriptions->first()->created_at->format('Y/m/d'))
             : "";
         return $this->buildResponse([
             'message' => $msg,
-            'status' =>  !$subscriptions->isNotEmpty() ? 'info' : 'success',
+            'status' =>  $subscriptions->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
             'subscriptions' => $subscriptions??[],
             'period' => $p ? urldecode($p) : $_period

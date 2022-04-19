@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Saving;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Carbon\CarbonImmutable as Carbon;
 use Nette\Utils\Html;
 
 class TransactionController extends Controller
@@ -53,7 +53,7 @@ class TransactionController extends Controller
      * @param \Illuminate\Support\Facades\Auth $auth
      * @return \Illuminate\Http\Response
      */
-    public function transactions($limit = 1, $status = null)
+    public function transactions(Request $request, $limit = 1, $status = null)
     {
         $trans = Auth::user()->transactions()->orderBy('id', 'DESC');
 
@@ -67,15 +67,27 @@ class TransactionController extends Controller
             $trans->where('status', $status);
         }
 
+        if ($p = $request->query('period'))
+        {
+            $period = explode('-', $p);
+            $from = new Carbon($period[0]);
+            $to = new Carbon($period[1]);
+            $trans->whereBetween('created_at', [$from, $to]);
+        }
+
         $transactions = $trans->get();
 
-        $msg = !$transactions->isNotEmpty() ? 'You have not made any transactions.' : 'OK';
+        $msg = $transactions->isEmpty() ? 'You have not made any transactions.' : 'OK';
+        $_period = $transactions->isNotEmpty()
+            ? ($transactions->last()->created_at->format('Y/m/d') . '-' . $transactions->first()->created_at->format('Y/m/d'))
+            : "";
 
         return $this->buildResponse([
             'message' => $msg,
-            'status' =>  !$transactions ? 'info' : 'success',
+            'status' =>  $transactions->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
             'transactions' => $transactions??[],
+            'period' => $p ? urldecode($p) : $_period
         ]);
     }
 
