@@ -49,6 +49,7 @@ class SubscriptionController extends Controller
             'status' =>  !$subscriptions ? 'info' : 'success',
             'response_code' => 200,
             'subscriptions' => $subscriptions??[],
+            'period' => $subscriptions ? $subscriptions->first() : ""
         ]);
     }
 
