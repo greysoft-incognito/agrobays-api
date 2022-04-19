@@ -65,8 +65,8 @@ class User extends Authenticatable
     protected function imageUrl(): Attribute
     {
         $image = $this->image
-            ? img($this->image, 'banner', 'medium-square')
-            : 'https://ui-avatars.com/api/?name='.urlencode($this->firstname.' '.$this->lastname).'&background=0D8ABC&color=fff&size=150&font-size=0.95&bold=true';
+            ? img($this->image, 'avatar', 'medium-square')
+            : asset('media/default_avatar.png');
 
         return Attribute::make(
             get: fn () => $image,
