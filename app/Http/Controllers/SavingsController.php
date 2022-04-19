@@ -52,7 +52,7 @@ class SavingsController extends Controller
         if ($savings->isNotEmpty()) {
             $savings->each(function($tr) {
                 $tr->date = $tr->created_at->format('Y-m-d H:i');
-                $tr->subscription->plan->title;
+                $tr->title = $tr->subscription->plan->title;
             });
         }
 
