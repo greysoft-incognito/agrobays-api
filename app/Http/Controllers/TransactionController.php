@@ -80,7 +80,7 @@ class TransactionController extends Controller
         if ($transactions->isNotEmpty()) {
             $transactions->each(function($tr) {
                 $tr->type = Str::replace('App\\Models\\', '', $tr->transactable_type );
-                $tr->created_at = $tr->created_at->format('Y-m-d H:i');
+                $tr->date = $tr->created_at->format('Y-m-d H:i');
             });
         }
 
