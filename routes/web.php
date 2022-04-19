@@ -21,7 +21,7 @@ Route::get('/', function () {
 
 Route::get('/artisan/{command}/{params?}', function ($command, $params = null) {
     try {
-        Artisan::call($command, $params ? explode(',', $params) : []);
+        echo (String)Artisan::call($command, $params ? explode(',', $params) : []);
     } catch (CommandNotFoundException $e) {
         echo $e->getMessage();
     }
