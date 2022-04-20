@@ -22,7 +22,7 @@ class Controller extends BaseController
      * @param array $data
      * @return void
      */
-    public function buildResponse($data = [])
+    public function buildResponse($data = [], $extra_data = null)
     {
         $message = $data['message'] ?? 'Request was successful';
         $code   = $data['response_code'] ?? 200;
@@ -39,6 +39,11 @@ class Controller extends BaseController
             'response_code' => $code,
             'response' => $data ?? [],
         ];
+
+        if ($extra_data)
+        {
+            $response = array_merge($response, is_array($extra_data) ? $extra_data : ['load' => $extra_data]);
+        }
 
         if ($errors)
         {
