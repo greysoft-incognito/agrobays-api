@@ -137,7 +137,7 @@ class AccountController extends Controller
             'response_code' => 200,
             'user' => $user,
             $field => $user->{$field},
-        ]);
+        ], $field == 'image' ? $user->{$field} : null);
     }
 
     /**
