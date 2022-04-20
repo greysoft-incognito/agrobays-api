@@ -136,6 +136,7 @@ class AccountController extends Controller
             'status' =>  'success',
             'response_code' => 200,
             'user' => $user,
+            $field => $user->{$field},
         ]);
     }
 
