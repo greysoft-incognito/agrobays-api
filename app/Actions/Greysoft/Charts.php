@@ -17,8 +17,6 @@ class Charts
             return [];
         }
 
-        $currency_symbol = config('settings.currency_symbol');
-
         return [
             "tooltip" => [
                 "trigger" => "item",
@@ -100,12 +98,12 @@ class Charts
                     "name" => "Transactions",
                     "type" => "bar",
                     "data" => $data['transactions'],
-                    "color" => "#546bfa",
+                    "color" => "#2a945b",
                 ], [
                     "name" => "Subscriptions",
                     "type" => "bar",
+                    "color" => "#f44336",
                     "data" => $data['subscriptions'],
-                    "color" => "#3a9688",
                 ], [
                     "name" => "Food Orders",
                     "type" => "bar",
@@ -214,11 +212,11 @@ class Charts
             'data' => [
                 [
                     "key" => "savings",
-                    "color" => "#546bfa",
+                    "color" => "#ffa85a",
                     "value" => floor($savings)
                 ], [
                     "key" => "fruit_orders",
-                    "color" => "#f88c2b",
+                    "color" => "#2a945b",
                     "value" => floor($orders)
                 ]
             ]
