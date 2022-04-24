@@ -108,11 +108,10 @@ class TransactionController extends Controller
      */
     public function invoice($transaction_id = null)
     {
-        $transaction = Auth::user()->transactions()->find($transaction_id);
+        $transaction = Auth::user()->transactions()->with('user')->find($transaction_id);
 
         $msg = !$transaction ? 'This transaction does not exist' : 'OK';
 
-        $transaction->user;
         return $this->buildResponse([
             'message' => $msg,
             'status' =>  !$transaction ? 'info' : 'success',
