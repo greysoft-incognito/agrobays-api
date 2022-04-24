@@ -110,10 +110,11 @@ class TransactionController extends Controller
     {
         $transaction = Auth::user()->transactions()->with('user')->find($transaction_id);
 
-        $msg = !$transaction ? 'This transaction does not exist' : 'OK';
+        $msg = $transaction ? 'Ok' : 'This transaction does not exist';
 
         return $this->buildResponse([
             'message' => $msg,
+            'vv'=>$transaction,
             'status' =>  $transaction ? 'success' : 'info',
             'response_code' => $transaction ? 200 : 404,
             'transaction' => $transaction??[],
