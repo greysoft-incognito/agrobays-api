@@ -114,8 +114,8 @@ class TransactionController extends Controller
 
         return $this->buildResponse([
             'message' => $msg,
-            'status' =>  !$transaction ? 'info' : 'success',
-            'response_code' => !$transaction ? 404 : 200,
+            'status' =>  $transaction ? 'success' : 'info',
+            'response_code' => $transaction ? 200 : 404,
             'transaction' => $transaction??[],
             'items' => $transaction->transactable->items??[($transaction->transactable??null)],
         ]);
