@@ -56,8 +56,9 @@ class PaymentController extends Controller
                 $paystack = new Paystack(env("PAYSTACK_SECRET_KEY"));
                 $reference = Str::random(12);
 
+                $real_due = ceil(($due * $request->days)*100);
                 $tranx = $paystack->transaction->initialize([
-                  'amount' => ($due * $request->days)*100,       // in kobo
+                  'amount' => $real_due,       // in kobo
                   'email' => Auth::user()->email,         // unique to customers
                   'reference' => $reference,         // unique to transactions
                   'callback_url' => config('settings.payment_verify_url', route('payment.paystack.verify'))
