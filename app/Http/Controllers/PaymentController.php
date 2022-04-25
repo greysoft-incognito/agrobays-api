@@ -36,7 +36,7 @@ class PaymentController extends Controller
 
         $code = 403;
 
-        if (!$subscription->exists())
+        if (!$subscription)
         {
             $msg = 'You do not have an active subscription';
         }
