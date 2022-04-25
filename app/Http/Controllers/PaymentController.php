@@ -32,16 +32,7 @@ class PaymentController extends Controller
             return $this->validatorFails($validator, 'subscription_id');
         }
 
-        $subscription = Auth::user()->subscription()->findOrFail($request->subscription_id);
-
-        if (($validator = Validator::make($request->all(), [
-            'days' => ['required', 'numeric', 'min:1', 'max:'.$subscription->days_left],
-        ], [
-            'days.min' => 'You have to save for at least 1 day.',
-            'days.max' => "You cannot save for more than {$subscription->days_left} days."
-        ]))->stopOnFirstFailure()->fails()) {
-            return $this->validatorFails($validator, 'email');
-        }
+        $subscription = Auth::user()->subscription()->find($request->subscription_id);
 
         $code = 403;
 
@@ -51,6 +42,15 @@ class PaymentController extends Controller
         }
         else
         {
+            if (($validator = Validator::make($request->all(), [
+                'days' => ['required', 'numeric', 'min:1', 'max:'.$subscription->days_left],
+            ], [
+                'days.min' => 'You have to save for at least 1 day.',
+                'days.max' => "You cannot save for more than {$subscription->days_left} days."
+            ]))->stopOnFirstFailure()->fails()) {
+                return $this->validatorFails($validator, 'email');
+            }
+
             $due = round($subscription->plan->amount / $subscription->plan->duration, 2);
             try {
                 $paystack = new Paystack(env("PAYSTACK_SECRET_KEY"));
