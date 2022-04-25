@@ -101,7 +101,7 @@ class PaymentController extends Controller
             'response_code' => $code ?? 200, //202
             'payload' => $tranx??[],
             'transaction' => $transaction??[],
-            'amount' => $due * $request->days,
+            'amount' => $request->days,
         ]);
     }
 
