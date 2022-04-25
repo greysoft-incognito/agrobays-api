@@ -54,7 +54,7 @@ class PaymentController extends Controller
             $due = round($subscription->plan->amount / $subscription->plan->duration, 2);
             try {
                 $paystack = new Paystack(env("PAYSTACK_SECRET_KEY"));
-                $reference = Str::random(12);
+                $reference = config('settings.trx_prefix', 'AGB-') . Str::random(12);
 
                 $real_due = ceil(($due * $request->days)*100);
                 $tranx = $paystack->transaction->initialize([
@@ -152,7 +152,7 @@ class PaymentController extends Controller
 
                 try {
                     $paystack = new Paystack(env("PAYSTACK_SECRET_KEY"));
-                    $reference = Str::random(15);
+                    $reference = config('settings.trx_prefix', 'AGB-') . Str::random(15);
 
                     $tranx = $paystack->transaction->initialize([
                     'amount' => $due*100,       // in kobo
