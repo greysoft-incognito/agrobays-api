@@ -120,72 +120,81 @@ class PaymentController extends Controller
             return $this->validatorFails($validator, 'cart');
         }
 
-        $cart = collect($request->cart)->map(function($value) {
-            $item = FruitBay::find($value['item_id']);
-            $item->total = $item->price * $value['qty'];
-            $item->qty = $value['qty'];
-            return $item;
-        });
+        $items = collect($request->cart)->map(fn($k)=>collect($k)->except('qty'))->flatten()->all();
+        if (($available = FruitBay::whereIn('id', $items)->get('id'))) {
+            $cart = collect($request->cart)->map(function($value) {
+                $item = FruitBay::find($value['item_id']);
+                if ($item) {
+                    $item->total = $item->price * $value['qty'];
+                    $item->qty = $value['qty'];
+                }
+                return $item;
+            })->filter(fn($k) => $k !== null);
 
-        if ($request->address && $request->address !== Auth::user()->address){
-            $user = User::find(Auth::id());
-            $user->address = $request->address;
-            $user->save();
-        }
-
-        $code = 403;
-
-        if ($cart->count() <= 0)
-        {
-            $msg = 'You have too few items in your basket, please add more to checkout.';
-        }
-        else
-        {
-            $due = $cart->mapWithKeys(function($value, $key) {
-                return [$key => $value->total];
-            })->sum();
-
-            try {
-                $paystack = new Paystack(env("PAYSTACK_SECRET_KEY"));
-                $reference = Str::random(15);
-
-                $tranx = $paystack->transaction->initialize([
-                  'amount' => $due*100,       // in kobo
-                  'email' => Auth::user()->email,         // unique to customers
-                  'reference' => $reference,         // unique to transactions
-                  'callback_url' => config('settings.payment_verify_url', route('payment.paystack.verify'))
-                ]);
-
-                $code = 200;
-
-                $order = Order::create([
-                    'due' => $due,
-                    'items' => $cart,
-                    'status' => 'pending',
-                    'amount' => $due,
-                    'user_id' => Auth::id(),
-                    'payment' => 'pending',
-                    'reference' => $reference,
-                ]);
-
-                $transaction = $order->transaction();
-                $transaction->create([
-                    'user_id' => Auth::id(),
-                    'reference' => $reference,
-                    'method' => 'Paystack',
-                    'status' => 'pending',
-                    'amount' => $due,
-                    'due' => $due,
-                ]);
-            } catch (ApiException | \InvalidArgumentException $e) {
-                return $this->buildResponse([
-                    'message' => $e->getMessage(),
-                    'status' => 'error',
-                    'response_code' => 422,
-                    'due' => $due,
-                    'payload' => $e instanceof ApiException ? $e->getResponseObject() : [],
-                ]);
+            if ($request->address && $request->address !== Auth::user()->address){
+                $user = User::find(Auth::id());
+                $user->address = $request->address;
+                $user->save();
             }
+
+            $code = 403;
+
+            if ($cart->count() <= 0)
+            {
+                $msg = 'You have too few items in your basket, or some items may no longer be available.';
+            }
+            else
+            {
+                $due = $cart->mapWithKeys(function($value, $key) {
+                    return [$key => $value->total];
+                })->sum();
+
+                try {
+                    $paystack = new Paystack(env("PAYSTACK_SECRET_KEY"));
+                    $reference = Str::random(15);
+
+                    $tranx = $paystack->transaction->initialize([
+                    'amount' => $due*100,       // in kobo
+                    'email' => Auth::user()->email,         // unique to customers
+                    'reference' => $reference,         // unique to transactions
+                    'callback_url' => config('settings.payment_verify_url', route('payment.paystack.verify'))
+                    ]);
+
+                    $code = 200;
+
+                    $order = Order::create([
+                        'due' => $due,
+                        'items' => $cart,
+                        'status' => 'pending',
+                        'amount' => $due,
+                        'user_id' => Auth::id(),
+                        'payment' => 'pending',
+                        'reference' => $reference,
+                    ]);
+
+                    $transaction = $order->transaction();
+                    $transaction->create([
+                        'user_id' => Auth::id(),
+                        'reference' => $reference,
+                        'method' => 'Paystack',
+                        'status' => 'pending',
+                        'amount' => $due,
+                        'due' => $due,
+                    ]);
+                } catch (ApiException | \InvalidArgumentException $e) {
+                    return $this->buildResponse([
+                        'message' => $e->getMessage(),
+                        'status' => 'error',
+                        'response_code' => 422,
+                        'due' => $due,
+                        'payload' => $e instanceof ApiException ? $e->getResponseObject() : [],
+                    ]);
+                }
+            }
+        } else {
+
+            $code = 403;
+            $msg = 'One or more items on your cart no are no longer available.';
         }
 
         return $this->buildResponse([
@@ -194,7 +203,6 @@ class PaymentController extends Controller
             'response_code' => $code ?? 200, //202
             'payload' => $tranx??[],
             'items' => $cart ?? [$subscription ?? null],
-            'amount' => $due,
         ]);
     }
 
@@ -402,6 +410,7 @@ class PaymentController extends Controller
 
             $subscription->status = $subscription->days_left >= 1 ? 'active' : 'complete';
             $subscription->save();
+            $subscription = Auth::user()->subscription;
 
             $key = 'deposit';
             $_amount = money($savings->amount*$request->days);
@@ -420,8 +429,8 @@ class PaymentController extends Controller
     }
 
     /**
-     * Delete a trasaction and related models
-     * The most appropriete place to use this is when a user cancels a transaction without
+     * Delete a transaction and related models
+     * The most appropriate place to use this is when a user cancels a transaction without
      * completing payments, although there are limitless use cases.
      *
      * @param Request $request

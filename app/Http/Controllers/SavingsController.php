@@ -8,6 +8,7 @@ use App\Models\Subscription;
 use Illuminate\Http\Request;
 use Carbon\CarbonImmutable as Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Builder;
 
 class SavingsController extends Controller
 {
@@ -166,8 +167,11 @@ class SavingsController extends Controller
      */
     public function store(Request $request, $id = null)
     {
-        dd(Subscription::where([['user_id', '=', Auth::id()], ['status', '=', 'pending']])->exists());
         $plan = Plan::find($id);
+
+        $planActiveNoSavings = Subscription::where('user_id', Auth::id())->whereDoesntHave('allSavings', function (Builder $query) {
+            $query->where('status', 'complete');
+        })->exists();
 
         if (!$plan)
         {
@@ -185,7 +189,7 @@ class SavingsController extends Controller
         //         'response_code' => 406,
         // }
         //     ]);
-        elseif (Subscription::where([['user_id', '=', Auth::id()], ['status', '=', 'pending']])->exists())
+        elseif ($planActiveNoSavings)
         {
             return $this->buildResponse([
                 'message' => 'You need to make at least one savings on all your existing subscriptions before you can subscribe to another plan.',

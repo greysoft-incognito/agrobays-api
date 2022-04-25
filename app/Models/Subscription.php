@@ -21,13 +21,23 @@ class Subscription extends Model
     ];
 
     /**
-     * Get all of the savings for the Subscription
+     * Get all of the complete savings for the Subscription
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function savings(): HasMany
     {
         return $this->hasMany(Saving::class)->where('status', 'complete');
+    }
+
+    /**
+     * Get all of the savings for the Subscription
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function allSavings(): HasMany
+    {
+        return $this->hasMany(Saving::class);
     }
 
     /**
