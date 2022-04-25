@@ -32,7 +32,7 @@ class PaymentController extends Controller
             return $this->validatorFails($validator, 'subscription_id');
         }
 
-        $subscription = Auth::user()->subscription()->find($request->subscription_id);
+        $subscription = Auth::user()->subscription()->findOrFail($request->subscription_id);
 
         if (($validator = Validator::make($request->all(), [
             'days' => ['required', 'numeric', 'min:1', 'max:'.$subscription->days_left],
@@ -419,6 +419,14 @@ class PaymentController extends Controller
         ]);
     }
 
+    /**
+     * Delete a trasaction and related models
+     * The most appropriete place to use this is when a user cancels a transaction without
+     * completing payments, although there are limitless use cases.
+     *
+     * @param Request $request
+     * @return void
+     */
     public function terminateTransaction(Request $request)
     {
         $deleted = false;
