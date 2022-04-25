@@ -211,7 +211,7 @@ class PaymentController extends Controller
         $msg = 'Invalid Transaction.';
         $status = 'error';
         $set_type = 'deposit';
-     $code = 403;
+        $code = 403;
         if(!$request->reference){
             $msg = 'No reference supplied';
         }
@@ -416,6 +416,24 @@ class PaymentController extends Controller
             'status' =>  $status ?? (!$subscription ? 'info' : 'success'),
             'response_code' => 200,
             $key => $subscription??[],
+        ]);
+    }
+
+    public function terminateTransaction(Request $request)
+    {
+        $deleted = false;
+        if ($transaction = Transaction::whereReference($request->reference)->where('user_id', Auth::id())->with(['transactable'])->first()) {
+            if ($transaction->transactable) {
+                $transaction->transactable->delete();
+            }
+            $transaction->delete();
+            $deleted = true;
+        }
+
+        return $this->buildResponse([
+            'message' => $deleted ? "Transaction with reference: {$request->reference} successfully deleted." : "Transaction not found",
+            'status' => !$deleted ? 'info' : 'success',
+            'response_code' => 200,
         ]);
     }
 }

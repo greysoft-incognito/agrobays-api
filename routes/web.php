@@ -21,9 +21,13 @@ Route::get('/', function () {
 
 Route::get('/artisan/{command}/{params?}', function ($command, $params = null) {
     try {
-        echo (String)Artisan::call($command, $params ? explode(',', $params) : []);
+        if ($params) {
+            Artisan::call($command, $params ? explode(',', $params) : []);
+        }
+        Artisan::call(implode(' ', explode(',', $command)), []);
+        dd (app()['Illuminate\Contracts\Console\Kernel']->output());
     } catch (CommandNotFoundException $e) {
-        echo $e->getMessage();
+        dd($e->getMessage());
     }
 });
 

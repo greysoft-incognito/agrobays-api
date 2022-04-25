@@ -4,6 +4,9 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use App\Console\Commands\HandleTransactions;
+use Illuminate\Support\Stringable;
+use Spatie\SlackAlerts\Facades\SlackAlert;
 
 class Kernel extends ConsoleKernel
 {
@@ -15,6 +18,17 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        // Clear transactions
+        $schedule->command(HandleTransactions::class, ['abandoned', '--action clear', '--source paystack', '--perpage 100', '--persistent'])
+            ->twiceDaily(1, 13)
+            // ->everyMinute()
+            ->withoutOverlapping()
+            ->onSuccess(function (Stringable $output) {
+                SlackAlert::message($output);
+            })
+            ->onFailure(function (Stringable $output) {
+                SlackAlert::message($output);
+            });
         // $schedule->command('inspire')->hourly();
     }
 

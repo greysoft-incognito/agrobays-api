@@ -215,6 +215,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
         Route::post('/initialize/fruit-bay', 'initializeFruitBay')->name('initialize.fruit.bay');
         Route::post('/initialize/savings', 'initializeSaving')->name('initialize.savings');
         Route::post('/paystack/webhook', 'paystackWebhook')->name('paystack.webhook');
+        Route::delete('/terminate/transaction', 'terminateTransaction')->name('terminate.transaction');
     });
 });
 

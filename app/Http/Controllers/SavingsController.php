@@ -166,6 +166,7 @@ class SavingsController extends Controller
      */
     public function store(Request $request, $id = null)
     {
+        dd(Subscription::where([['user_id', '=', Auth::id()], ['status', '=', 'pending']])->exists());
         $plan = Plan::find($id);
 
         if (!$plan)
@@ -184,7 +185,7 @@ class SavingsController extends Controller
         //         'response_code' => 406,
         // }
         //     ]);
-        elseif (Subscription::where([['user_id', '=', Auth::id()], ['status', '=', 'pending']])->exists() && 1!==1)
+        elseif (Subscription::where([['user_id', '=', Auth::id()], ['status', '=', 'pending']])->exists())
         {
             return $this->buildResponse([
                 'message' => 'You need to make at least one savings on all your existing subscriptions before you can subscribe to another plan.',
