@@ -29,21 +29,25 @@ class FoodSeeder extends Seeder
                     'name' => 'Rice',
                     'description' => $faker->text(),
                     'weight' => '50kg',
+                    'created_at' => \Carbon\Carbon::now(),
                 ], [
                     'food_bag_id' => 1,
                     'name' => 'Spagetti',
                     'description' => $faker->text(),
                     'weight' => '10kg',
+                    'created_at' => \Carbon\Carbon::now(),
                 ], [
                     'food_bag_id' => 2,
                     'name' => 'Beans',
                     'description' => $faker->text(),
                     'weight' => '50kg',
+                    'created_at' => \Carbon\Carbon::now(),
                 ], [
                     'food_bag_id' => 2,
                     'name' => 'Semolina',
                     'description' => $faker->text(),
                     'weight' => '10kg',
+                    'created_at' => \Carbon\Carbon::now(),
                 ]
             ]);
         }
