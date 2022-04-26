@@ -242,7 +242,7 @@ class PaymentController extends Controller
                 $set_type = 'order';
             }
             extract($processSaving);
-        } catch (ApiException | \InvalidArgumentException $e) {
+        } catch (ApiException | \InvalidArgumentException | \ErrorException $e) {
             $payload = $e instanceof ApiException ? $e->getResponseObject() : [];
             Log::error($e->getMessage(), ['url'=>url()->full(), 'request' => $request->all()]);
             return $this->buildResponse([
