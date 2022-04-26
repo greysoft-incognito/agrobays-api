@@ -160,6 +160,7 @@ class PaymentController extends Controller
                 $due = $cart->mapWithKeys(function($value, $key) {
                     return [$key => $value->total];
                 })->sum();
+                $real_due = $due;
 
                 try {
                     $paystack = new Paystack(env("PAYSTACK_SECRET_KEY"));
