@@ -64,6 +64,7 @@ class PaymentController extends Controller
                     $tranx = [
                         'data' => ['reference' => $reference]
                     ];
+                    $real_due = ceil($due);
                 } else {
                     $tranx = $paystack->transaction->initialize([
                       'amount' => $real_due,       // in kobo
