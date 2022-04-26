@@ -20,8 +20,9 @@ class Kernel extends ConsoleKernel
     {
         // Clear transactions
         $schedule->command(HandleTransactions::class, ['abandoned', '--action clear', '--source paystack', '--perpage 100', '--persistent'])
-            ->twiceDaily(1, 13)
+            // ->twiceDaily(1, 13)
             // ->everyMinute()
+            ->hourly()
             ->withoutOverlapping()
             ->onSuccess(function (Stringable $output) {
                 SlackAlert::message($output);

@@ -6,18 +6,13 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 use Madnest\Madzipper\Madzipper;
 use Illuminate\Support\Facades\Artisan;
+use Spatie\SlackAlerts\Facades\SlackAlert;
 
 use App\Models\Food;
-use App\Models\FrontContent;
-use App\Models\FruitBay;
 use App\Models\FruitBayCategory;
-use App\Models\FoodBag;
 use App\Models\Plan;
-use App\Models\Order;
-use App\Models\Saving;
-use App\Models\Subscription;
-use App\Models\Transaction;
 use App\Models\User;
+use Carbon\Carbon;
 
 class SystemReset extends Command
 {
@@ -56,6 +51,9 @@ class SystemReset extends Command
             return 0;
         }
 
+        SlackAlert::message("System reset started at: ". Carbon::now());
+        $this->info("System reset started.");
+
         if ($backup) {
             $filename = "backup-" . \Carbon\Carbon::now()->format('Y-m-d_H-i-s');
             $storageAt = storage_path() . "/app/backup/";
@@ -70,6 +68,8 @@ class SystemReset extends Command
             $zip = new Madzipper;
             $zip->make($storageAt . $filename . '.zip')->folder('storage/public/media')->add(Storage::allFiles('public/media'));
             $zip->folder('storage/public/uploads')->add(Storage::allFiles('public/uploads'));
+            SlackAlert::message("System backup completed at: ". Carbon::now());
+            $this->info("System backup completed successfully.");
         }
 
         // Delete User, Transaction, Subscription, Order and Saving
@@ -128,10 +128,12 @@ class SystemReset extends Command
         });
         if (Artisan::call('migrate:refresh') === 0) {
             if (Artisan::call('db:seed') === 0) {
+                SlackAlert::message("System reset completed at: ". Carbon::now());
                 $this->info("System reset completed successfully.");
                 return 0;
             }
         }
+        SlackAlert::message("An error occured at: ". Carbon::now() . ". Unable to complete system reset.");
         $this->error("An error occured.");
         return 0;
     }
