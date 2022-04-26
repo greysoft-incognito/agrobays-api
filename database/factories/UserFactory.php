@@ -21,6 +21,7 @@ class UserFactory extends Factory
             'firstname' => 'Default',
             'lastname' => 'Super Admin',
             'username' => 'superadmin',
+            'role' => 'admin',
             'email' => 'admin@greysoft.ng',
             'email_verified_at' => now(),
             'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
@@ -38,6 +39,7 @@ class UserFactory extends Factory
         return $this->state(function (array $attributes) {
             return [
                 'email_verified_at' => null,
+                'role' => 'admin',
             ];
         });
     }
