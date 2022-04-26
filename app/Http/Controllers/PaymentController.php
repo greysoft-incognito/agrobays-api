@@ -34,6 +34,7 @@ class PaymentController extends Controller
 
         $subscription = Auth::user()->subscription()->find($request->subscription_id);
 
+        $real_due = 0;
         $code = 403;
 
         if (!$subscription)
@@ -57,6 +58,7 @@ class PaymentController extends Controller
                 $reference = config('settings.trx_prefix', 'AGB-') . Str::random(12);
 
                 $real_due = ceil($due*100);
+
                 // Dont initialize paystack for inline transaction
                 if ($request->inline) {
                     $tranx = [
@@ -109,7 +111,7 @@ class PaymentController extends Controller
             'response_code' => $code ?? 200, //202
             'payload' => $tranx??[],
             'transaction' => $transaction??[],
-            'amount' => $request->days,
+            'amount' => $real_due,
         ]);
     }
 
