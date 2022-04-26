@@ -315,7 +315,8 @@ class PaymentController extends Controller
                 else
                 {
                     $subscription->status = 'active';
-                    $msg = "You have successfully made {$saving->days} day savings of {$_amount} for the {$subscription->plan->title} plan, you now have only {$_left} days left to save up.";
+                    $plantitle = $subscription->plan->title . Str::contains($subscription->plan->title, 'plan') ? '' : ' plan';
+                    $msg = "You have successfully made {$saving->days} day savings of {$_amount} for the {$plantitle}, you now have only {$_left} days left to save up.";
                 }
                 $subscription->save();
 
