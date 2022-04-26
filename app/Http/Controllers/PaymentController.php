@@ -58,7 +58,11 @@ class PaymentController extends Controller
 
                 $real_due = ceil($due*100);
                 // Dont initialize paystack for inline transaction
-                if (!$request->inline) {
+                if ($request->inline) {
+                    $tranx = [
+                        'data' => ['reference' => $reference]
+                    ];
+                } else {
                     $tranx = $paystack->transaction->initialize([
                       'amount' => $real_due,       // in kobo
                       'email' => Auth::user()->email,         // unique to customers
@@ -158,7 +162,11 @@ class PaymentController extends Controller
                     $reference = config('settings.trx_prefix', 'AGB-') . Str::random(15);
 
                     // Dont initialize paystack for inline transaction
-                    if (!$request->inline) {
+                    if ($request->inline) {
+                        $tranx = [
+                            'data' => ['reference' => $reference]
+                        ];
+                    } else {
                         $tranx = $paystack->transaction->initialize([
                             'amount' => $due*100,       // in kobo
                             'email' => Auth::user()->email,         // unique to customers
