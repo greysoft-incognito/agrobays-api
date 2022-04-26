@@ -52,19 +52,19 @@ class PaymentController extends Controller
                 return $this->validatorFails($validator, 'email');
             }
 
-            $due = round($subscription->plan->amount / $subscription->plan->duration, 2) * $request->days;
+            $due = round(($subscription->plan->amount / $subscription->plan->duration) * $request->days, 2);
             try {
                 $paystack = new Paystack(env("PAYSTACK_SECRET_KEY"));
                 $reference = config('settings.trx_prefix', 'AGB-') . Str::random(12);
 
-                $real_due = ceil($due*100);
+                $real_due = $due*100;
 
                 // Dont initialize paystack for inline transaction
                 if ($request->inline) {
                     $tranx = [
                         'data' => ['reference' => $reference]
                     ];
-                    $real_due = ceil($due);
+                    $real_due = $due;
                 } else {
                     $tranx = $paystack->transaction->initialize([
                       'amount' => $real_due,       // in kobo
@@ -72,6 +72,7 @@ class PaymentController extends Controller
                       'reference' => $reference,         // unique to transactions
                       'callback_url' => config('settings.payment_verify_url', route('payment.paystack.verify'))
                     ]);
+                    $real_due = $due;
                 }
 
                 $code = 200;
@@ -95,7 +96,7 @@ class PaymentController extends Controller
                     'amount' => $due,
                     'due' => $due,
                 ]);
-            } catch (ApiException | \InvalidArgumentException $e) {
+            } catch (ApiException | \InvalidArgumentException | \ErrorException $e) {
                 return $this->buildResponse([
                     'message' => $e->getMessage(),
                     'status' => 'error',
@@ -201,7 +202,7 @@ class PaymentController extends Controller
                         'amount' => $due,
                         'due' => $due,
                     ]);
-                } catch (ApiException | \InvalidArgumentException $e) {
+                } catch (ApiException | \InvalidArgumentException | \ErrorException $e) {
                     return $this->buildResponse([
                         'message' => $e->getMessage(),
                         'status' => 'error',
@@ -235,7 +236,7 @@ class PaymentController extends Controller
      * @param  String $action
      * @return \Illuminate\Http\Response
      */
-    public function paystackVerify(Request $request, $type = 'savings')
+    public function paystackVerify(Request $request)
     {
         $msg = 'Invalid Transaction.';
         $status = 'error';
@@ -300,7 +301,7 @@ class PaymentController extends Controller
         if ($saving && $saving->status === 'pending') {
             $subscription = User::find($saving->user_id)->subscription()->where('id', $saving->subscription_id)->first();
             $_amount = money($tranx->data->amount/100);
-            $_left = $subscription->days_left - $request->duration;
+            $_left = $subscription->days_left - $subscription->plan->duration;
 
             if ('success' === $tranx->data->status) {
                 $saving->status = 'complete';
@@ -315,8 +316,8 @@ class PaymentController extends Controller
                 else
                 {
                     $subscription->status = 'active';
-                    $plantitle = $subscription->plan->title . Str::contains($subscription->plan->title, 'plan') ? '' : ' plan';
-                    $msg = "You have successfully made {$saving->days} day savings of {$_amount} for the {$plantitle}, you now have only {$_left} days left to save up.";
+                    $plantitle = $subscription->plan->title . (Str::contains($subscription->plan->title, 'plan') ? '' : ' plan');
+                    $msg = "You have successfully made {$saving->days} day(s) savings of {$_amount} for the {$plantitle}, you now have only {$_left} days left to save up.";
                 }
                 $subscription->save();
 
