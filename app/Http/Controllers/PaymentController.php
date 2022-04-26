@@ -51,18 +51,21 @@ class PaymentController extends Controller
                 return $this->validatorFails($validator, 'email');
             }
 
-            $due = round($subscription->plan->amount / $subscription->plan->duration, 2);
+            $due = round($subscription->plan->amount / $subscription->plan->duration, 2) * $request->days;
             try {
                 $paystack = new Paystack(env("PAYSTACK_SECRET_KEY"));
                 $reference = config('settings.trx_prefix', 'AGB-') . Str::random(12);
 
-                $real_due = ceil(($due * $request->days)*100);
-                $tranx = $paystack->transaction->initialize([
-                  'amount' => $real_due,       // in kobo
-                  'email' => Auth::user()->email,         // unique to customers
-                  'reference' => $reference,         // unique to transactions
-                  'callback_url' => config('settings.payment_verify_url', route('payment.paystack.verify'))
-                ]);
+                $real_due = ceil($due*100);
+                // Dont initialize paystack for inline transaction
+                if (!$request->inline) {
+                    $tranx = $paystack->transaction->initialize([
+                      'amount' => $real_due,       // in kobo
+                      'email' => Auth::user()->email,         // unique to customers
+                      'reference' => $reference,         // unique to transactions
+                      'callback_url' => config('settings.payment_verify_url', route('payment.paystack.verify'))
+                    ]);
+                }
 
                 $code = 200;
 
@@ -82,8 +85,8 @@ class PaymentController extends Controller
                     'reference' => $reference,
                     'method' => 'Paystack',
                     'status' => 'pending',
-                    'amount' => $due * $request->days,
-                    'due' => $due * $request->days,
+                    'amount' => $due,
+                    'due' => $due,
                 ]);
             } catch (ApiException | \InvalidArgumentException $e) {
                 return $this->buildResponse([
@@ -154,12 +157,15 @@ class PaymentController extends Controller
                     $paystack = new Paystack(env("PAYSTACK_SECRET_KEY"));
                     $reference = config('settings.trx_prefix', 'AGB-') . Str::random(15);
 
-                    $tranx = $paystack->transaction->initialize([
-                    'amount' => $due*100,       // in kobo
-                    'email' => Auth::user()->email,         // unique to customers
-                    'reference' => $reference,         // unique to transactions
-                    'callback_url' => config('settings.payment_verify_url', route('payment.paystack.verify'))
-                    ]);
+                    // Dont initialize paystack for inline transaction
+                    if (!$request->inline) {
+                        $tranx = $paystack->transaction->initialize([
+                            'amount' => $due*100,       // in kobo
+                            'email' => Auth::user()->email,         // unique to customers
+                            'reference' => $reference,         // unique to transactions
+                            'callback_url' => config('settings.payment_verify_url', route('payment.paystack.verify'))
+                        ]);
+                    }
 
                     $code = 200;
 
