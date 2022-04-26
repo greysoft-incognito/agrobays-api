@@ -61,7 +61,7 @@ class Saving extends Model
     public function total(): Attribute
     {
         return Attribute::make(
-            get: fn()=> $this->amount * $this->days
+            get: fn()=> $this->amount
         );
     }
 
