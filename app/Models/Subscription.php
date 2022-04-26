@@ -97,9 +97,8 @@ class Subscription extends Model
 
     public function totalLeft(): Attribute
     {
-        return 1202;
         $total = $this->savings()->get()->map(function($value, $key) {
-            return $value->total;
+            return 123;
         })->sum();
 
         return Attribute::make(
