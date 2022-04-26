@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 use Madnest\Madzipper\Madzipper;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Str;
 use Spatie\SlackAlerts\Facades\SlackAlert;
 
 use App\Models\Food;
@@ -41,6 +42,8 @@ class SystemReset extends Command
     {
         $backup = $this->option('backup');
         $restore = $this->option('restore');
+        $this->info(Str::of(env('APP_URL'))->trim('/http://https://') . " Is being reset.");
+        SlackAlert::message(Str::of(env('APP_URL'))->trim('/http://https://') . " Is being reset.");
 
         if ($restore) {
             $last = collect(Storage::allFiles('backup'))->filter(fn($f)=>\Str::contains($f, '.sql'))->last();
