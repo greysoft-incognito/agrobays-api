@@ -86,7 +86,7 @@ class Subscription extends Model
 
     public function totalSaved(): Attribute
     {
-        $total = $this->savings()->get()->map(function($value, $key) {
+        $total = $this->savings()->get()->map(function($value) {
             return $value->total ?? 0;
         })->sum();
 
@@ -97,12 +97,12 @@ class Subscription extends Model
 
     public function totalLeft(): Attribute
     {
-        $total = $this->savings()->get()->map(function($value, $key) {
-            return 123;
+        $total = $this->savings()->get()->map(function($value) {
+            return $value->total;
         })->sum();
 
         return Attribute::make(
-            get: fn() => number_format($this->plan->amount - $total, 2)
+            get: fn() => number_format($total)//$this->plan->amount - $total, 2)
         );
     }
 }
