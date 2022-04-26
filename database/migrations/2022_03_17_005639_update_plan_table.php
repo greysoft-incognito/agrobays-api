@@ -27,9 +27,11 @@ return new class extends Migration
     public function down()
     {
         Schema::disableForeignKeyConstraints();
-        Schema::table('plans', function (Blueprint $table) {
-            $table->drop('image');
-            $table->drop('status');
-        });
+        if (Schema::hasTable('plans')) {
+            Schema::table('plans', function (Blueprint $table) {
+                $table->dropColumn('image');
+                $table->dropColumn('status');
+            });
+        }
     }
 };

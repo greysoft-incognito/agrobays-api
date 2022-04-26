@@ -148,6 +148,7 @@ class PaymentController extends Controller
                 $user->save();
             }
 
+            $real_due = 0;
             $code = 403;
 
             if ($cart->count() <= 0)
@@ -221,6 +222,7 @@ class PaymentController extends Controller
             'response_code' => $code ?? 200, //202
             'payload' => $tranx??[],
             'items' => $cart ?? [$subscription ?? null],
+            'amount' => $real_due,
         ]);
     }
 
@@ -312,7 +314,7 @@ class PaymentController extends Controller
                 else
                 {
                     $subscription->status = 'active';
-                    $msg = "You have successfully made a {$saving->days} day savings of {$_amount} for the {$subscription->plan->title} plan, you now have only {$_left} days left to save up.";
+                    $msg = "You have successfully made {$saving->days} day savings of {$_amount} for the {$subscription->plan->title} plan, you now have only {$_left} days left to save up.";
                 }
                 $subscription->save();
 

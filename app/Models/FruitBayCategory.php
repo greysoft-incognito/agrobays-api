@@ -53,6 +53,6 @@ class FruitBayCategory extends Model
      */
     public function items(): HasMany
     {
-        return $this->hasMany(FruitBay::class, 'foreign_key', 'local_key');
+        return $this->hasMany(FruitBay::class);
     }
 }

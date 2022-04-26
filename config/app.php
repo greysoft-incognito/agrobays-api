@@ -171,6 +171,7 @@ return [
          */
         Yajra\DataTables\DataTablesServiceProvider::class,
         Spatie\SlashCommand\SlashCommandServiceProvider::class,
+        Madnest\Madzipper\MadzipperServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -196,6 +197,7 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         "Settings" => App\Actions\Greysoft\SettingsFacade::class,
+        'Zipper' => Madnest\Madzipper\Madzipper::class,
     ])->toArray(),
 
 ];

@@ -21,13 +21,41 @@ class FoodBagSeeder extends Seeder
         FoodBag::where('id', '!=', NULL)->delete();
         FoodBag::insert([
             [
-                'plan_id' => Plan::first()->id??1,
-                'title' => 'Bag 1',
-                'description' => $faker->text(),
+                'plan_id' => 1,
+                'title' => 'Food Bag A',
+                'description' => 'Foodbag packed and designed to make sure you maintain a healthy feeding routine.',
             ], [
-                'plan_id' => Plan::get()->reverse()->first()->id??3,
-                'title' => 'Bag 4',
-                'description' => $faker->text(),
+                'plan_id' => 1,
+                'title' => 'Food Bag B',
+                'description' => 'Foodbag packed to ensure you maintain a healthy feeding routine.',
+            ], [
+                'plan_id' => 1,
+                'title' => 'Food Bag C',
+                'description' => 'Foodbag packed to ensure you have a healthy feeding routine.',
+            ], [
+                'plan_id' => 2,
+                'title' => 'Food Bag A',
+                'description' => 'Specially Packed for your Nourishment.',
+            ], [
+                'plan_id' => 2,
+                'title' => 'Food Bag B',
+                'description' => 'Specially Packed for your Nourishment.',
+            ], [
+                'plan_id' => 2,
+                'title' => 'Food Bag C',
+                'description' => 'Specially Packed for your Nourishment.',
+            ],[
+                'plan_id' => 3,
+                'title' => 'Food Bag A',
+                'description' => 'Specially Packed for your daily routine Nourishment.',
+            ], [
+                'plan_id' => 3,
+                'title' => 'Food Bag B',
+                'description' => 'Specially Packed for your daily routine Nourishment.',
+            ], [
+                'plan_id' => 3,
+                'title' => 'Food Bag C',
+                'description' => 'Specially Packed for your daily routine Nourishment.',
             ],
         ]);
     }

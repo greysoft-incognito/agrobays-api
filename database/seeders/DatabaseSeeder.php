@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
             PlanSeeder::class,
             FoodBagSeeder::class,
             FoodSeeder::class,
+            FruitBayCategorySeeder::class,
+            FruitBaySeeder::class,
         ]);
     }
 }
