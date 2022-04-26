@@ -102,7 +102,7 @@ class Subscription extends Model
         })->sum();
 
         return Attribute::make(
-            get: fn() => number_format($total)//$this->plan->amount - $total, 2)
+            get: fn() => number_format($this->plan->amount)//$this->plan->amount - $total, 2)
         );
     }
 }
