@@ -301,7 +301,7 @@ class PaymentController extends Controller
         if ($saving && $saving->status === 'pending') {
             $subscription = User::find($saving->user_id)->subscription()->where('id', $saving->subscription_id)->first();
             $_amount = money($tranx->data->amount/100);
-            $_left = $subscription->days_left - $subscription->plan->duration;
+            $_left = $subscription->days_left - $saving->days;
 
             if ('success' === $tranx->data->status) {
                 $saving->status = 'complete';
@@ -315,6 +315,7 @@ class PaymentController extends Controller
                 }
                 else
                 {
+                    $_left = $_left-1;
                     $subscription->status = 'active';
                     $plantitle = $subscription->plan->title . (Str::contains($subscription->plan->title, 'plan') ? '' : ' plan');
                     $msg = "You have successfully made {$saving->days} day(s) savings of {$_amount} for the {$plantitle}, you now have only {$_left} days left to save up.";
