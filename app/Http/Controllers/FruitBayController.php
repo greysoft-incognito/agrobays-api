@@ -71,6 +71,7 @@ class FruitBayController extends Controller
             'message' => $search->isEmpty() ? "\"{$request->q}\" not found." : 'OK',
             'status' => $search->isEmpty() ? 'info' : 'success',
             'response_code' => $search->count() ? 200 : 404,
+            'ignore' => [404],
             'found' => $search->count(),
             'items' => $search->count() ? $search : [],
         ]);
