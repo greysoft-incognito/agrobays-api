@@ -21,6 +21,7 @@ return new class extends Migration
             $table->decimal('due')->default(0.00);
             $table->decimal('tax')->default(0.00);
             $table->json('items');
+            $table->enum('delivery_method', ['delivery', 'pickup'])->default('delivery');
             $table->enum('payment', ['pending', 'rejected', 'complete'])->default('pending');
             $table->enum('status', ['pending', 'rejected', 'shipped', 'delivered'])->default('pending');
             $table->timestamps();

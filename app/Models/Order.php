@@ -22,6 +22,7 @@ class Order extends Model
         'user_id',
         'payment',
         'reference',
+        'delivery_method',
     ];
 
     /**

@@ -144,9 +144,12 @@ class PaymentController extends Controller
             })->filter(fn($k) => $k !== null);
 
             if ($request->address && $request->address !== Auth::user()->address){
+                $delivery_method = 'delivery';
                 $user = User::find(Auth::id());
                 $user->address = $request->address;
                 $user->save();
+            } else {
+                $delivery_method = 'pickup';
             }
 
             $real_due = 0;
@@ -190,6 +193,7 @@ class PaymentController extends Controller
                         'amount' => $due,
                         'user_id' => Auth::id(),
                         'payment' => 'pending',
+                        'delivery_method' => $delivery_method,
                         'reference' => $reference,
                     ]);
 
