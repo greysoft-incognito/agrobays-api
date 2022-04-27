@@ -155,6 +155,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
     ->prefix('fruitbay')->name('fruitbay.')
     ->group(function() {
         Route::get('/', 'index');
+        Route::get('/search', 'search');
         Route::get('/category/{category?}', 'index');
         Route::get('/categories/{item?}', 'categories');
         Route::get('/{item}', 'getItem');

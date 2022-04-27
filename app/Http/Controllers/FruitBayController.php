@@ -42,10 +42,37 @@ class FruitBayController extends Controller
         }
 
         return $this->buildResponse([
-            'message' => $items->isEmpty() ? 'The fruit bay is empty for now' : '',
+            'message' => $items->isEmpty() ? 'The fruit bay is empty for now' : 'OK',
             'status' => $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
             'items' => $items,
+        ]);
+    }
+
+    /**
+     * Search for fruitbay items
+     *
+     * @param Request $request
+     * @param string|integer|null $category
+     * @return \Illuminate\Http\Response|\Illuminate\Contracts\Routing\ResponseFactory
+     */
+    public function search(Request $request)
+    {
+        $query = FruitBay::where('name', 'like', "%{$request->q}%");
+        if (in_array($request->paginate, [true, 'true'], true)) {
+            $search = $query->paginate($request->limit??15);
+        } else {
+            if ($request->limit && $request->limit > 0) {
+                $query->limit($request->limit);
+            }
+            $search = $query->get();
+        }
+        return $this->buildResponse([
+            'message' => $search->isEmpty() ? "\"{$request->q}\" not found." : 'OK',
+            'status' => $search->isEmpty() ? 'info' : 'success',
+            'response_code' => $search->count() ? 200 : 404,
+            'found' => $search->count(),
+            'items' => $search->count() ? $search : [],
         ]);
     }
 
@@ -61,7 +88,7 @@ class FruitBayController extends Controller
         $item = FruitBay::whereId($item)->orWhere(['slug' => $item])->first();
 
         return $this->buildResponse([
-            'message' => !$item ? 'The requested item no longer exists' : '',
+            'message' => !$item ? 'The requested item no longer exists' : 'OK',
             'status' =>  !$item ? 'error' : 'success',
             'response_code' => !$item ? 404 : 200,
             'item' => $item,
@@ -120,7 +147,7 @@ class FruitBayController extends Controller
             $item = FruitBayCategory::whereId($category)->orWhere(['slug' => $category])->first();
 
             return $this->buildResponse([
-                'message' => !$item ? 'The requested category no longer exists.' : '',
+                'message' => !$item ? 'The requested category no longer exists.' : 'OK',
                 'status' =>  !$item ? 'info' : 'success',
                 'response_code' => !$item ? 404 : 200,
                 'item' => $item,
@@ -130,7 +157,7 @@ class FruitBayController extends Controller
         $items = FruitBayCategory::get();
 
         return $this->buildResponse([
-            'message' => $items->isEmpty() ? 'There are no categories for now.' : '',
+            'message' => $items->isEmpty() ? 'There are no categories for now.' : 'OK',
             'status' => $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
             'items' => $items,
