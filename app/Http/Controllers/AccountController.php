@@ -120,7 +120,7 @@ class AccountController extends Controller
                 $vals .= '|min:8|confirmed';
             }
             if (!is_array($field)) {
-                return [$field.'*' => "required|$vals"];
+                return [$field.'*' => "required|string"];
             }
             return [$field => "required|$vals"];
         })->all();
