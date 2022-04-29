@@ -115,9 +115,12 @@ class AccountController extends Controller
             if (Str::contains($field, ':image')) {
                 $field = current(explode(':image', $field));
             }
-            $vals = $field == 'image' ? 'mimes:png,jpg' : 'string';
+            $vals = $field == 'image' ? 'mimes:png,jpg' : (is_array($field) ? 'array' : 'string');
             if ($field === 'password') {
                 $vals .= '|min:8|confirmed';
+            }
+            if (!is_array($field)) {
+                return [$field.'*' => "required|$vals"];
             }
             return [$field => "required|$vals"];
         })->all();
