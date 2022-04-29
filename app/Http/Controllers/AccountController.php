@@ -205,10 +205,13 @@ class AccountController extends Controller
             'nextofkin' => ['required', 'string', 'max:255'],
             'nextofkin_relationship' => ['required', 'string', 'max:255'],
             'nextofkin_phone' => ['required', 'string', 'max:255'],
-            'address' => ['required', 'string', 'max:255'],
+            'address.*' => ['required', 'string', 'max:255'],
             'country' => ['required', 'string', 'max:255'],
             'state' => ['required', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:255'],
+        ], [], [
+            'address.home' => "Home Address",
+            'address.shipping' => "Shipping Address"
         ]);
 
         if ($validator->fails()) {
