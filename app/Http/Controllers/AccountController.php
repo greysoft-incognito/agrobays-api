@@ -6,6 +6,7 @@ use App\Models\Saving;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -19,6 +20,8 @@ class AccountController extends Controller
      * @var array<int, string>
      */
     protected $fillable = [
+        'password_confirmation',
+        'password',
         'firstname',
         'lastname',
         'address',
@@ -89,10 +92,16 @@ class AccountController extends Controller
         ]);
     }
 
-    public function updateField(Request $request, $field = 'image')
+    public function updateField(Request $request, $identifier = 'password')
     {
-        $allow = in_array($field, $this->fillable);
+        $fields = collect($request->all())->keys();
 
+        foreach ($fields as $key => $_field) {
+            $allow = in_array($_field, $this->fillable);
+            if (!$allow) break;
+        }
+
+        $updated = [];
         $user = User::find(Auth::id());
         if (!$user) {
             return $this->buildResponse([
@@ -102,18 +111,27 @@ class AccountController extends Controller
             ]);
         }
 
-        $validator = Validator::make($request->all(), [
-            $field == 'image' ? 'image' : $field => ['required', $field == 'image' ? 'mimes:png,jpg' : 'string'],
-        ]);
+        $valid = $fields->mapWithKeys(function($field) {
+            $vals = $field == 'image' ? 'mimes:png,jpg' : 'string';
+            if ($field === 'password') {
+                $vals .= '|min:8|confirmed';
+            }
+            return [$field => "required|$vals"];
+        })->all();
+        $validator = Validator::make($request->all(), $valid);
 
         if ($validator->fails() || !$allow) {
             return $this->buildResponse([
-                'message' => !$allow ? 'An error occured!' : $validator->errors()->first($field),
+                'message' => !$allow ? 'An error occured!' : $validator->errors()->first(),
                 'status' => 'error',
                 'response_code' => 422,
-                'errors' => !$allow ? ["You are not allowed to update $field"] : $validator->errors(),
+                'errors' => !$allow ? ["You are not allowed to update $_field"] : $validator->errors(),
             ]);
         }
+
+        $fields = $fields->filter(function($k) {
+            return !Str::contains($k, '_confirmation');
+        });
 
         if ($request->hasFile('image'))
         {
@@ -124,18 +142,25 @@ class AccountController extends Controller
         }
         else
         {
-            $user->{$field} = $request->{$field};
+            foreach ($fields as $_field) {
+                $allow = in_array($_field, $this->fillable);
+                if (!$allow) break;
+
+                if ($_field !== 'password') {
+                    $updated[$_field] = $request->{$_field};
+                }
+                $user->{$_field} = $request->{$_field};
+            }
         }
 
         $user->save();
 
-        return $this->buildResponse([
-            'message' => "Your profile $field has been successfully updated.",
+        return $this->buildResponse(collect($updated)->merge([
+            'message' => "Your profile $identifier has been successfully updated.",
             'status' =>  'success',
             'response_code' => 200,
             'user' => $user,
-            $field => $user->{$field},
-        ], $field == 'image' ? ['image' => $user->image_url] : null);
+        ])->all(), $identifier == 'image' ? ['image' => $user->image_url] : null);
     }
 
     /**
