@@ -112,6 +112,9 @@ class AccountController extends Controller
         }
 
         $valid = $fields->mapWithKeys(function($field) {
+            if (Str::contains($field, ':image')) {
+                $field = current(explode(':image', $field));
+            }
             $vals = $field == 'image' ? 'mimes:png,jpg' : 'string';
             if ($field === 'password') {
                 $vals .= '|min:8|confirmed';
@@ -143,6 +146,9 @@ class AccountController extends Controller
         else
         {
             foreach ($fields as $_field) {
+                if (Str::contains($_field, ':image')) {
+                    $_field = current(explode(':image', $_field));
+                }
                 $allow = in_array($_field, $this->fillable);
                 if (!$allow) break;
 
