@@ -45,6 +45,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'address' => 'array',
     ];
 
     /**
@@ -55,7 +56,40 @@ class User extends Authenticatable
     protected $appends = [
         'image_url',
         'fullname',
+        'address',
     ];
+
+    /**
+     * The model's default values for attributes.
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'address' => [
+            "shipping" => "",
+            "home" => "",
+        ],
+    ];
+
+    /**
+     * Interact with the user's address.
+     *
+     * @return  \Illuminate\Database\Eloquent\Casts\Attribute
+     */
+    public function address(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value, $attributes) {
+                if (is_null($val = json_decode($value))) {
+                    return [
+                        "shipping" => "",
+                        "home" => "",
+                    ];
+                }
+                return $val;
+            }
+        );
+    }
 
     /**
      * Get the URL to the fruit bay category's photo.
