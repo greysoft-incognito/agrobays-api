@@ -147,7 +147,7 @@ class AccountController extends Controller
         {
             foreach ($fields as $_field) {
                 if (Str::contains($_field, ':image')) {
-                    $_field = current(explode(':image', $_field));
+                    $_field = current(explode(':image', (string)$_field));
                 }
                 $allow = in_array($_field, $this->fillable);
                 if (!$allow) break;
