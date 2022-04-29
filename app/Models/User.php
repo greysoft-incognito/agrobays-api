@@ -87,7 +87,11 @@ class User extends Authenticatable
                     ];
                 }
                 return $val;
-            }
+            },
+            set: fn($value) => ["address" => json_encode([
+                "shipping" => $value->shipping??$value['shipping']??'',
+                "home" => $value->home??$value['home']??'',
+            ])]
         );
     }
 
