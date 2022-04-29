@@ -94,6 +94,7 @@ class AccountController extends Controller
 
     public function updateField(Request $request, $identifier = 'password')
     {
+        $filled = collect($request->all());
         $fields = collect($request->all())->keys();
 
         foreach ($fields as $key => $_field) {
@@ -111,20 +112,25 @@ class AccountController extends Controller
             ]);
         }
 
-        $valid = $fields->mapWithKeys(function($field) {
+        $valid = $fields->mapWithKeys(function($field) use ($filled) {
             if (Str::contains($field, ':image')) {
                 $field = current(explode(':image', $field));
             }
-            $vals = $field == 'image' ? 'mimes:png,jpg' : (is_array($field) ? 'array' : 'string');
+            $vals = $field == 'image' ? 'mimes:png,jpg' : (is_array($filled[$field]) ? 'array' : 'string');
             if ($field === 'password') {
                 $vals .= '|min:8|confirmed';
             }
-            if (!is_array($field)) {
+            if (is_array($filled[$field])) {
                 return [$field.'.*' => "required|string"];
             }
             return [$field => "required|$vals"];
         })->all();
-        $validator = Validator::make($request->all(), $valid);
+
+        $validator = Validator::make($request->all(), $valid, [], $fields->filter(function($k) use ($filled) {
+            return is_array($filled[$k]);
+        })->mapWithKeys(function($field, $value) use ($filled) {
+            return collect(array_keys($filled[$field]))->mapWithKeys(fn($k)=>["$field.$k" => "$k $field"]);
+        })->all());
 
         if ($validator->fails() || !$allow) {
             return $this->buildResponse([
