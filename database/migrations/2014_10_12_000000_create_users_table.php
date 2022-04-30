@@ -26,10 +26,10 @@ return new class extends Migration
             $table->string('username')->unique();
             $table->string('password');
             $table->string('phone')->nullable();
-            $table->json('address');
-            $table->json('city');
-            $table->json('state');
-            $table->json('country');
+            $table->json('address')->nullable();
+            $table->json('city')->nullable();
+            $table->json('state')->nullable();
+            $table->json('country')->nullable();
             $table->enum('role', ['user', 'admin', 'staff'])->default('user');
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
