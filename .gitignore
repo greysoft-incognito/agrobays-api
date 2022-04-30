@@ -2,6 +2,7 @@
 /public/hot
 /public/storage
 /public/media
+/public/adminer/error*
 /public/uploads
 /storage/*.key
 /vendor
@@ -17,3 +18,4 @@ npm-debug.log
 yarn-error.log
 /.idea
 /.vscode
+.DS_Store

@@ -652,11 +652,11 @@ label {
 	.logout {
 		display: none;
 	}
-	
+
 	#breadcrumb {
 		position: static;
 	}
-	
+
 	#content {
 		margin: 0;
 	}
