@@ -46,6 +46,9 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'address' => 'array',
+        'country' => 'array',
+        'state' => 'array',
+        'city' => 'array',
     ];
 
     /**
@@ -69,6 +72,18 @@ class User extends Authenticatable
             "shipping" => "",
             "home" => "",
         ],
+        'country' => [
+            "name" => "",
+            "iso2" => "",
+            "emoji" => "",
+        ],
+        'state' => [
+            "name" => "",
+            "iso2" => "",
+        ],
+        'city' => [
+            "name" => "",
+        ],
     ];
 
     /**
@@ -91,6 +106,78 @@ class User extends Authenticatable
             set: fn($value) => ["address" => json_encode([
                 "shipping" => $value->shipping??$value['shipping']??'',
                 "home" => $value->home??$value['home']??'',
+            ])]
+        );
+    }
+
+    /**
+     * Interact with the user's country.
+     *
+     * @return  \Illuminate\Database\Eloquent\Casts\Attribute
+     */
+    public function country(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value, $attributes) {
+                if (!$value || !is_string($value) || is_null($val = json_decode($value))) {
+                    return [
+                        "name" => "",
+                        "iso2" => "",
+                        "emoji" => "",
+                    ];
+                }
+                return $val;
+            },
+            set: fn($value) => ["country" => json_encode([
+                "name" => $value->name??$value['name']??'',
+                "iso2" => $value->iso2??$value['iso2']??'',
+                "emoji" => $value->emoji??$value['emoji']??'',
+            ])]
+        );
+    }
+
+    /**
+     * Interact with the user's state.
+     *
+     * @return  \Illuminate\Database\Eloquent\Casts\Attribute
+     */
+    public function state(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value, $attributes) {
+                if (!$value || !is_string($value) || is_null($val = json_decode($value))) {
+                    return [
+                        "name" => "",
+                        "iso2" => "",
+                    ];
+                }
+                return $val;
+            },
+            set: fn($value) => ["state" => json_encode([
+                "name" => $value->name??$value['name']??'',
+                "iso2" => $value->iso2??$value['iso2']??'',
+            ])]
+        );
+    }
+
+    /**
+     * Interact with the user's city.
+     *
+     * @return  \Illuminate\Database\Eloquent\Casts\Attribute
+     */
+    public function city(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value, $attributes) {
+                if (!$value || !is_string($value) || is_null($val = json_decode($value))) {
+                    return [
+                        "name" => "",
+                    ];
+                }
+                return $val;
+            },
+            set: fn($value) => ["city" => json_encode([
+                "name" => $value->name??$value['name']??'',
             ])]
         );
     }
