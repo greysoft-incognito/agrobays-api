@@ -4,11 +4,13 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Request;
 use Madnest\Madzipper\Madzipper;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
 use Spatie\SlackAlerts\Facades\SlackAlert;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 use App\Models\Food;
 use App\Models\FruitBayCategory;
@@ -52,6 +54,10 @@ class SystemReset extends Command
 
         if ($wizard)
         {
+            if (!app()->runningInConsole()) {
+                $this->error("This action can only be run in a CLI.");
+                return 0;
+            }
             $action = $this->choice('What do you want to do?', ['backup', 'restore', 'reset'], 2, 3);
 
             if ($action === 'backup') {
@@ -91,8 +97,15 @@ class SystemReset extends Command
      */
     protected function backup(): int
     {
+        $this->info(Str::of(env('APP_URL'))->trim('/http://https://') . " Is being backed up.");
+        SlackAlert::message(Str::of(env('APP_URL'))->trim('/http://https://') . " Is being backed up.");
+
+        SlackAlert::message("System backup started at: ". Carbon::now());
+        $this->info("System backup started.");
+
         $backupPath = storage_path("app/backup/");
 
+        // Backup the database
         $filename = "backup-" . \Carbon\Carbon::now()->format('Y-m-d_H-i-s');
         $command = "mysqldump --skip-comments"
         ." --user=" . env('DB_USERNAME')
@@ -102,9 +115,49 @@ class SystemReset extends Command
         $returnVar = NULL; $output = NULL;
         exec($command, $output, $returnVar);
 
+        // Backup the files.
         $zip = new Madzipper;
-        $zip->make($backupPath . $filename . '.zip')->folder('public')->add('storage');
+        $zip->make($backupPath . $filename . '.zip')->folder('public')->add([storage_path("app/public")]);
         $signature = Str::of($filename)->substr(0, -4)->replace(['backup-','/'], '');
+
+        // Generate Link
+        if (app()->runningInConsole()) {
+            $link = app()->runningInConsole() ? $this->choice('Should we generate a link to download your backup files?', ['No', 'Yes'], 1, 2) : 'Yes';
+            if ($link === 'Yes' && file_exists($backupPath . $filename . ".sql")) {
+
+                $zip = new Madzipper;
+                $zip->make(storage_path("app/secure/$filename.zip"))->folder('backup')
+                    ->add([$backupPath . $filename . ".sql", $backupPath . $filename . ".zip"]);
+
+                $link_url = route('secure.download', $filename . ".zip");
+                $mail = app()->runningInConsole() ? $this->choice('Should we mail you the link?', ['No, I\'ll copy from here.', 'Yes, mail me'], 1, 2) : 'No';
+
+                if ($mail === 'Yes, mail me' && $zip->getFilePath()) {
+                    $address = $this->ask('Email Address:');
+                    Mail::send('email', [
+                        'name'=> ($name = collect(explode('@', $address)))->last(),
+                        'message_line1' => 'You requested that we mail you a link to download your system backup.',
+                        'cta' => ['link' => $link_url, 'title' => 'Download']
+                    ], function($message) use($address, $name, $filename) {
+                       $message->to($address, $name)->subject('Backup');
+                    //    $message->attach(storage_path("app/secure/$filename.zip"));
+                       $message->from(env('MAIL_FROM_ADDRESS'), config('settings.site_name'));
+                    });
+
+                    SlackAlert::message("We have sent the download link to your backup file to $address.");
+                    $this->info("We have sent the download link to your backup file to $address.");
+                } elseif (!$zip->getFilePath()) {
+                    SlackAlert::message("You have requested that we we mail you the link to your backup file but we failed to fetch the link.");
+                    $this->error("Failed to fetch link.");
+                } else {
+                    SlackAlert::message("Download your backup file through this link: $link_url.");
+                    $this->info("Download your backup file through this link: $link_url.");
+                }
+            } elseif (!file_exists($backupPath . $filename . ".sql")) {
+                $this->error("Failed to send link.");
+            }
+        }
+
         SlackAlert::message("System backup completed at: ". Carbon::now());
         $this->info("System backup completed successfully (Signature: $signature).");
         return 0;
@@ -119,6 +172,21 @@ class SystemReset extends Command
      */
     protected function restore(string $signature, $delete = false): int
     {
+        $this->info(Str::of(env('APP_URL'))->trim('/http://https://') . " Is being restored.");
+        SlackAlert::message(Str::of(env('APP_URL'))->trim('/http://https://') . " Is being restored.");
+
+        // Delete public Symbolic links
+        file_exists(public_path('media')) && unlink(public_path('media'));
+        file_exists(public_path('storage')) && unlink(public_path('storage'));
+        file_exists(public_path('uploads')) && unlink(public_path('uploads'));
+
+        SlackAlert::message("System restore started at: ". Carbon::now());
+        $this->info("System restore started.");
+
+        // Create public Symbolic links
+        Artisan::call('storage:link');
+        $this->info("Public Symbolic links deleted.");
+
         $backupPath = storage_path("app/backup/");
         if ($signature) {
             $database = "backup-" . $signature . ".sql";
@@ -176,14 +244,16 @@ class SystemReset extends Command
             $this->backup();
         }
 
-        // Refresh public Symbolic links
+        SlackAlert::message("System reset started at: ". Carbon::now());
+        $this->info("System reset started.");
+
+        // Delete public Symbolic links
         file_exists(public_path('media')) && unlink(public_path('media'));
         file_exists(public_path('storage')) && unlink(public_path('storage'));
         file_exists(public_path('uploads')) && unlink(public_path('uploads'));
+        // Create public Symbolic links
         Artisan::call('storage:link');
-
-        SlackAlert::message("System reset started at: ". Carbon::now());
-        $this->info("System reset started.");
+        $this->info("Public Symbolic links deleted.");
 
         // Delete User, Transaction, Subscription, Order and Saving
         User::with(['transactions', 'subscription'])->get()->map(function($user) {

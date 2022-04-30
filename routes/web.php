@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
 
 /*
@@ -18,6 +20,19 @@ use Symfony\Component\Console\Exception\CommandNotFoundException;
 Route::get('/', function () {
     return ['Laravel' => app()->version()];
 });
+
+Route::middleware(['auth:sanctum', 'admin'])->group(function() {
+    Route::get('downloads/secure/{filename?}', function($filename='') {
+        if (file_exists(storage_path('app/backup/'.$filename))) {
+            return response()->download(storage_path('app/secure/'.$filename));
+        }
+        return abort(404, 'File not found');
+    })->name('secure.download');
+});
+
+Route::get('/web/user', [AuthenticatedSessionController::class, 'index'])
+        ->middleware(['web', 'auth', 'admin'])
+        ->name('web.user');
 
 Route::get('/artisan/{command}/{params?}', function ($command, $params = null) {
     try {

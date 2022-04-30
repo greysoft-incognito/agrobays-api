@@ -60,6 +60,9 @@ class User extends Authenticatable
         'image_url',
         'fullname',
         'address',
+        'country',
+        'city',
+        'state',
     ];
 
     /**
@@ -68,22 +71,10 @@ class User extends Authenticatable
      * @var array
      */
     protected $attributes = [
-        'address' => [
-            "shipping" => "",
-            "home" => "",
-        ],
-        'country' => [
-            "name" => "",
-            "iso2" => "",
-            "emoji" => "",
-        ],
-        'state' => [
-            "name" => "",
-            "iso2" => "",
-        ],
-        'city' => [
-            "name" => "",
-        ],
+        'address' => '{"shipping": "", "home": ""}',
+        'country' => '{"name": "", "iso2": "", "emoji": ""}',
+        'state' => '{"name": "", "iso2": ""}',
+        'city' => '{"name": ""}',
     ];
 
     /**
