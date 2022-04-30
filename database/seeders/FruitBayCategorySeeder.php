@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\FruitBayCategory;
+use Illuminate\Support\Facades\DB;
 
 class FruitBayCategorySeeder extends Seeder
 {
