@@ -69,8 +69,8 @@ class SystemReset extends Command
             exec($command, $output, $returnVar);
 
             $zip = new Madzipper;
-            $zip->make($storageAt . $filename . '.zip')->folder('storage/public/media')->add(Storage::allFiles('public/media'));
-            $zip->folder('storage/public/uploads')->add(Storage::allFiles('public/uploads'));
+            $zip->make($storageAt . $filename . '.zip')->folder('storage/app/public/media')->add(Storage::allFiles('storage/app/public/media'));
+            $zip->folder('storage/app/public/uploads')->add(Storage::allFiles('storage/app/public/uploads'));
             SlackAlert::message("System backup completed at: ". Carbon::now());
             $this->info("System backup completed successfully.");
         }
