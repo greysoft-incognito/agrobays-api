@@ -31,7 +31,7 @@ class AuthenticatedSessionController extends Controller
         $user = $request->user();
         $user->subscription;
 
-        if (!$request->isXmlHttpRequest()) {
+        if (!$request->ajax()) {
             return response()->redirectToRoute('web.user');
         }
         return $this->buildResponse([

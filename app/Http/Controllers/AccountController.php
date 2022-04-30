@@ -24,6 +24,7 @@ class AccountController extends Controller
         'password',
         'firstname',
         'lastname',
+        'name',
         'address',
         'image',
     ];
