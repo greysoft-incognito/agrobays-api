@@ -2,9 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Food;
 use App\Models\FoodBag;
-use App\Models\Plan;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Faker\Generator;
