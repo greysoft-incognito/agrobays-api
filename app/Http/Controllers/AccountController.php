@@ -27,6 +27,7 @@ class AccountController extends Controller
         'name',
         'address',
         'image',
+        'type',
     ];
 
     /**
