@@ -80,7 +80,7 @@ class User extends Authenticatable
     {
         return Attribute::make(
             get: function ($value, $attributes) {
-                if (is_null($val = json_decode($value)) && is_string($value)) {
+                if (is_string($value) && is_null($val = json_decode($value))) {
                     return [
                         "shipping" => "",
                         "home" => "",
