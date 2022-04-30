@@ -166,11 +166,11 @@ class SystemReset extends Command
     /**
      * Perform a system restoration from the last or one of the available backups
      *
-     * @param string $signature
+     * @param string|null $signature
      * @param boolean $delete
      * @return integer
      */
-    protected function restore(string $signature, $delete = false): int
+    protected function restore($signature, $delete = false): int
     {
         $this->info(Str::of(env('APP_URL'))->trim('/http://https://') . " Is being restored.");
         SlackAlert::message(Str::of(env('APP_URL'))->trim('/http://https://') . " Is being restored.");
