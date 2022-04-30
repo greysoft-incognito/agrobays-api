@@ -27,9 +27,9 @@ return new class extends Migration
             $table->string('password');
             $table->string('phone')->nullable();
             $table->json('address');
-            $table->string('city')->nullable();
-            $table->string('state')->nullable();
-            $table->string('country')->nullable();
+            $table->json('city');
+            $table->json('state');
+            $table->json('country');
             $table->enum('role', ['user', 'admin', 'staff'])->default('user');
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();

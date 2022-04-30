@@ -21,6 +21,7 @@ class UserFactory extends Factory
             'firstname' => 'Default',
             'lastname' => 'Super Admin',
             'username' => 'superadmin',
+            'address' => '{"home":"","shipping":""}',
             'role' => 'admin',
             'email' => 'admin@greysoft.ng',
             'email_verified_at' => now(),
