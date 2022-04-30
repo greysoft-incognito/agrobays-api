@@ -17,7 +17,7 @@ return [
     'slack_debug' => false,
     'slack_logger' => true,
     'payment_verify_url' => env('PAYMENT_VERIFY_URL', 'http://localhost:8080/payment/verify'),
-    'default_banner' => asset('media/default_banner.png'),
+    'default_banner' => env('FRONTEND_LINK', 'http://localhost:8080') . '/media/default_banner.png',
     'paystack_public_key' => env('PAYSTACK_PUBLIC_KEY', 'pk_'),
 
     'permissions' => [
