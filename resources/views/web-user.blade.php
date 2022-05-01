@@ -24,7 +24,7 @@ endif;
 <html lang="en">
 
 <head>
-    <title>{{ $action ?? 'Management' }}</title>
+    <title>{{ $action ?? 'Management Console' }}</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
