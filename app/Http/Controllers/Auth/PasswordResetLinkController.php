@@ -7,7 +7,7 @@ use App\Models\PasswordCodeResets;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
-use App\Notifications\PasswordRecovery;
+use App\Notifications\SendCode;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
