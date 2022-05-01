@@ -31,7 +31,7 @@ class AccountController extends Controller
     ];
 
     /**
-     * Display a listing of the resource.
+     * Get the currently logged user.
      *
      * @param \Illuminate\Support\Facades\Auth $auth
      * @return \Illuminate\Http\Response

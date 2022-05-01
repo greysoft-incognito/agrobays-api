@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\PasswordCodeResets;
+use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -25,14 +27,44 @@ class NewPasswordController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'token' => ['required'],
-            'email' => ['required', 'email'],
+            'code' => ['required'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
         if ($validator->fails()) {
             return $this->validatorFails($validator);
         }
+
+        // find the code
+        $code = PasswordCodeResets::firstWhere('code', $request->code);
+
+        // check if it has not expired: the time is 30 minutes
+        if (!$code || $code->created_at->diffInMinutes(now()) >= 30) {
+            $code && $code->delete();
+            return $this->buildResponse([
+                'message' => 'An error occured.',
+                'status' => 'error',
+                'response_code' => 422,
+                'errors' => [
+                    'code' => __('The code you provided has expired or does not exist.')
+                ]
+            ]);
+        }
+
+        // find user's email
+        $user = User::firstWhere('email', $code->email);
+
+        // update user password Hash::make($request->password)
+        $user->update(['password' => Hash::make($request->password)]);
+
+        // delete current code
+        $code->delete();
+
+        return $this->buildResponse([
+            'message' => __('Your password has successfully been chaged.'),
+            'status' => 'success',
+            'response_code' => 200,
+        ]);
 
         // Here we will attempt to reset the user's password. If it is successful we
         // will update the password on an actual user model and persist it to the
@@ -62,6 +94,46 @@ class NewPasswordController extends Controller
 
         return $this->buildResponse([
             'message' => __($status),
+            'status' => 'success',
+            'response_code' => 200,
+        ]);
+    }
+    /**
+     * Handle an incoming check password request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function check(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'code' => ['required'],
+        ]);
+
+        if ($validator->fails()) {
+            return $this->validatorFails($validator);
+        }
+
+        // find the code
+        $code = PasswordCodeResets::firstWhere('code', $request->code);
+
+        // check if it has not expired: the time is 30 minutes
+        if (!$code || $code->created_at->diffInMinutes(now()) >= 30) {
+            $code && $code->delete();
+            return $this->buildResponse([
+                'message' => 'An error occured.',
+                'status' => 'error',
+                'response_code' => 422,
+                'errors' => [
+                    'code' => __('The code you provided has expired or does not exist.')
+                ]
+            ]);
+        }
+
+        return $this->buildResponse([
+            'message' => __('Your reset code is valid, you can change your password now.'),
             'status' => 'success',
             'response_code' => 200,
         ]);

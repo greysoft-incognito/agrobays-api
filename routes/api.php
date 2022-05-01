@@ -28,12 +28,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::prefix('users')->name('users.')
-->middleware(['auth:sanctum'])
-->group(function() {
-
-});
-
 Route::get('/get/settings', function() {
     return response([
         'message' => "OK",
@@ -58,6 +52,14 @@ Route::middleware(['auth:sanctum'])->group(function() {
     ->group(function() {
 
         Route::get('/charts/{type?}', [AdminController::class, 'charts'])->name('charts');
+
+        Route::controller(AdminController::class)
+        ->prefix('users')
+        ->name('users.')
+        ->group(function() {
+            Route::get('/', 'index');
+            Route::get('/user/{id}', 'getItem');
+        });
 
         // Load admin fruitbay
         Route::controller(AdminFruitBayController::class)

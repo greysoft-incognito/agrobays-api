@@ -147,7 +147,7 @@
                                             @endisset
                                             @isset($cta)
                                                 <table role="presentation" border="0" cellpadding="0" cellspacing="0"
-                                                    class="btn btn-primary"
+                                                    class="btn {{ empty($cta['code']) ? 'btn-primary' : '' }}"
                                                     style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; box-sizing: border-box; width: 100%;"
                                                     width="100%">
                                                     <tbody>
@@ -157,18 +157,30 @@
                                                                 valign="top">
                                                                 <table role="presentation" border="0" cellpadding="0"
                                                                     cellspacing="0"
-                                                                    style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: auto;">
+                                                                    style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: auto; display: flex; justify-content: center;">
                                                                     <tbody>
                                                                         <tr>
-                                                                            <td style="font-family: sans-serif; font-size: 14px; vertical-align: top; border-radius: 5px; text-align: center; background-color: #3498db;"
-                                                                                valign="top" align="center"
-                                                                                bgcolor="#3498db">
-                                                                                <a href="{{ $cta['link'] }}"
-                                                                                    target="_blank"
-                                                                                    style="border: solid 1px #3498db; border-radius: 5px; box-sizing: border-box; cursor: pointer; display: inline-block; font-size: 14px; font-weight: bold; margin: 0; padding: 12px 25px; text-decoration: none; text-transform: capitalize; background-color: #3498db; border-color: #3498db; color: #ffffff;">
-                                                                                    {{ $cta['title'] }}
-                                                                                </a>
-                                                                            </td>
+                                                                            @isset($cta['code'])
+                                                                                <td style="font-family: sans-serif; font-size: 1.3em; vertical-align: top; border-radius: 5px; text-align: center; background-color: #fff;display: flex;"
+                                                                                    valign="top" align="center"
+                                                                                    bgcolor="#3498db">
+                                                                                    <h1
+                                                                                        style="margin-top: 3px;margin-bottom: 3px;">
+                                                                                        {{ $cta['code'] }}
+                                                                                    </h1>
+                                                                                </td>
+                                                                            @endisset
+                                                                            @isset($cta['link'])
+                                                                                <td style="font-family: sans-serif; font-size: 14px; vertical-align: top; border-radius: 5px; text-align: center; background-color: #3498db;"
+                                                                                    valign="top" align="center"
+                                                                                    bgcolor="#3498db">
+                                                                                    <a href="{{ $cta['link'] }}"
+                                                                                        target="_blank"
+                                                                                        style="border: solid 1px #3498db; border-radius: 5px; box-sizing: border-box; cursor: pointer; display: inline-block; font-size: 14px; font-weight: bold; margin: 0; padding: 12px 25px; text-decoration: none; text-transform: capitalize; background-color: #3498db; border-color: #3498db; color: #ffffff;">
+                                                                                        {{ $cta['title'] ?? 'Click Here' }}
+                                                                                    </a>
+                                                                                </td>
+                                                                            @endisset
                                                                         </tr>
                                                                     </tbody>
                                                                 </table>
@@ -183,10 +195,22 @@
                                                     {{ $message_line2 }}
                                                 </p>
                                             @endisset
+                                            @isset($message_line3)
+                                                <p
+                                                    style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">
+                                                    {{ $message_line3 }}
+                                                </p>
+                                            @endisset
                                             <p
                                                 style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">
-                                                {{ $close_greeting ?? 'Good luck! Hope it works.' }}
+                                                {!! $close_greeting ?? 'Good luck! Hope it works.' !!}
                                             </p>
+                                            @isset($message_help)
+                                                <div
+                                                    style="color: #073e7a;font-size: 0.96em;border-top: #f0f2f4 solid;padding-top: 7px;margin-top: 2em;">
+                                                    {{ $message_help }}
+                                                </div>
+                                            @endisset
                                         </td>
                                     </tr>
                                 </table>
