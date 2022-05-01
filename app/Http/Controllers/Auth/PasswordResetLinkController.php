@@ -43,7 +43,7 @@ class PasswordResetLinkController extends Controller
         $reset->save();
 
         // Notify the user
-        User::whereEmail($reset->email)->first()->SendCode(new PasswordRecovery($reset->code));
+        User::whereEmail($reset->email)->first()->notify(new SendCode($reset->code));
 
         // And finally return a response
         return $this->buildResponse([
