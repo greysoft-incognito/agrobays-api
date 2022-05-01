@@ -17,6 +17,7 @@ if (isset($user)):
         ->values()
         ->all();
     $signatures = $action !== 'download' ? $signatures : $secure_files;
+    $action = $action ?? null;
 endif;
 @endphp
 <!DOCTYPE html>
@@ -241,8 +242,8 @@ endif;
         @endisset
         <div class="flex">
             <select x-ref="artisan" @input="$refs.artisan_run.setAttribute('href', $el.value)" id="artisan">
-                <option value="" readonly>Choose {{ $action ? 'Signature' : 'Action' }}</option>
                 @if ($action === 'choose' || $action === 'download')
+                    <option value="" readonly>Choose {{ $action ? 'Signature' : 'Action' }}</option>
                     @foreach ($signatures as $signature)
                         <option
                             value="{{ url(($action === 'choose' ? 'artisan/system:reset -r -s ' : 'downloads/') . $signature) }}">

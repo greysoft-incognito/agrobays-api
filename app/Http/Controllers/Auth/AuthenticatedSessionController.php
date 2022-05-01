@@ -11,8 +11,9 @@ class AuthenticatedSessionController extends Controller
 {
     public function index()
     {
-        if (Auth::user()) {
-            return view('web-user', Auth::user());
+        if ($user = Auth::user()) {
+            $errors = $code = $messages = $action = null;
+            return view('web-user', compact('user', 'errors', 'code', 'action'));
         }
         return view('login');
     }
