@@ -26,6 +26,7 @@ class SystemReset extends Command
      * @var string
      */
     protected $signature = 'system:reset
+                            {action? : Action to perform [reset, backup, restore]}
                             {--w|wizard : Let the wizard help you manage system reset and restore.}
                             {--r|restore : Restore the system to the last backup or provide the --signature option to restore a known backup signature.}
                             {--s|signature= : Set the backup signature value to restore a particular known backup. E.g. 2022-04-26_16-05-34.}
@@ -46,11 +47,23 @@ class SystemReset extends Command
      */
     public function handle()
     {
+        $action = $this->argument('action');
         $backup = $this->option('backup');
         $restore = $this->option('restore');
         $signature = $this->option('signature');
         $delete = $this->option('delete');
         $wizard = $this->option('wizard');
+
+        if ($action === 'backup') {
+            return $this->backup();
+        } elseif ($action === 'restore') {
+            $signatures = collect(Storage::allFiles('backup'))
+                ->filter(fn($f)=>Str::contains($f, '.sql'))
+                ->map(fn($f)=>Str::of($f)->substr(0, -4)->replace(['backup','/-'], ''))->sortDesc()->values()->all();
+            $signature = $this->choice('Backup Signature (Latest shown first):', $signatures, 0, 3);
+            $delete = $this->choice('Delete Signature after restoration?', ['No', 'Yes'], 1, 2);
+            return $this->restore($signature, $delete==='Yes');
+        }
 
         if ($wizard)
         {
@@ -125,11 +138,13 @@ class SystemReset extends Command
             $link = app()->runningInConsole() ? $this->choice('Should we generate a link to download your backup files?', ['No', 'Yes'], 1, 2) : 'Yes';
             if ($link === 'Yes' && file_exists($backupPath . $filename . ".sql")) {
 
+                // Generate a downloadable link for this backup
                 $zip = new Madzipper;
                 $zip->make(storage_path("app/secure/$filename.zip"))->folder('backup')
                     ->add([$backupPath . $filename . ".sql", $backupPath . $filename . ".zip"]);
 
                 $link_url = route('secure.download', $filename . ".zip");
+
                 $mail = app()->runningInConsole() ? $this->choice('Should we mail you the link?', ['No, I\'ll copy from here.', 'Yes, mail me'], 1, 2) : 'No';
 
                 if ($mail === 'Yes, mail me' && $zip->getFilePath()) {
@@ -156,6 +171,14 @@ class SystemReset extends Command
             } elseif (!file_exists($backupPath . $filename . ".sql")) {
                 $this->error("Failed to send link.");
             }
+        } else {
+            // Generate a downloadable link for this backup
+            $zip = new Madzipper;
+            $zip->make(storage_path("app/secure/$filename.zip"))->folder('backup')
+                ->add([$backupPath . $filename . ".sql", $backupPath . $filename . ".zip"]);
+
+            $link_url = route('secure.download', $filename . ".zip");
+            $this->info("Download your backup file through this link: $link_url.");
         }
 
         SlackAlert::message("System backup completed at: ". Carbon::now());

@@ -1,10 +1,11 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
+use Symfony\Component\Console\Exception\InvalidArgumentException;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,16 +30,28 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function() {
         return abort(404, 'File not found');
     })->name('secure.download');
 
-    Route::get('/artisan/{command}/{params?}', function ($command, $params = null) {
+    Route::get('/artisan/backup/action/{action?}', function ($action = 'choose')
+    {
+        $errors = $code = $messages = null;
+        $user = Auth::user();
+        return view('web-user', compact('user', 'errors', 'code', 'action'));
+    });
+
+    Route::get('/artisan/{command}/{params?}', function (Response $response, $command, $params = null)
+    {
+        $errors = $code = $messages = $action = null;
+        $user = Auth::user();
         try {
             if ($params) {
                 Artisan::call($command, $params ? explode(',', $params) : []);
             }
             Artisan::call(implode(' ', explode(',', $command)), []);
-            dd (app()['Illuminate\Contracts\Console\Kernel']->output());
-        } catch (CommandNotFoundException $e) {
-            dd($e->getMessage());
+            $code = collect(nl2br(app()['Illuminate\Contracts\Console\Kernel']->output()));
+        } catch (CommandNotFoundException | InvalidArgumentException $e) {
+            $errors = collect([$e->getMessage()]);
         }
+
+        return view('web-user', compact('user', 'errors', 'code', 'action'));
     });
 });
 
