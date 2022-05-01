@@ -18,7 +18,7 @@ use Symfony\Component\Console\Exception\CommandNotFoundException;
 */
 
 Route::get('/', function () {
-    return ['Laravel' => app()->version()];
+    return ['Agrobays' => '1.0.5-beta'];
 });
 
 Route::middleware(['auth:sanctum', 'admin'])->group(function() {
@@ -28,23 +28,23 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function() {
         }
         return abort(404, 'File not found');
     })->name('secure.download');
+
+    Route::get('/artisan/{command}/{params?}', function ($command, $params = null) {
+        try {
+            if ($params) {
+                Artisan::call($command, $params ? explode(',', $params) : []);
+            }
+            Artisan::call(implode(' ', explode(',', $command)), []);
+            dd (app()['Illuminate\Contracts\Console\Kernel']->output());
+        } catch (CommandNotFoundException $e) {
+            dd($e->getMessage());
+        }
+    });
 });
 
 Route::get('/web/user', [AuthenticatedSessionController::class, 'index'])
         ->middleware(['web', 'auth', 'admin'])
         ->name('web.user');
-
-Route::get('/artisan/{command}/{params?}', function ($command, $params = null) {
-    try {
-        if ($params) {
-            Artisan::call($command, $params ? explode(',', $params) : []);
-        }
-        Artisan::call(implode(' ', explode(',', $command)), []);
-        dd (app()['Illuminate\Contracts\Console\Kernel']->output());
-    } catch (CommandNotFoundException $e) {
-        dd($e->getMessage());
-    }
-});
 
 // Route::post('slacker/{action?}', [Slack::class, 'index']);
 
