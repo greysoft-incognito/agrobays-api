@@ -45,7 +45,7 @@ Route::post('/verify-email/with-code', [VerifyEmailController::class, 'store'])
     ->middleware(['auth:sanctum', 'throttle:6,1'])
     ->name('verification.verify.code');
 
-Route::post('/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
+Route::get('/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
     ->middleware(['auth:sanctum', 'throttle:code-requests'])
     ->name('verification.send');
 
