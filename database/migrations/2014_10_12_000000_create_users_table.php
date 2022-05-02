@@ -31,6 +31,8 @@ return new class extends Migration
             $table->json('state')->nullable();
             $table->json('country')->nullable();
             $table->enum('role', ['user', 'admin', 'staff'])->default('user');
+            $table->string('email_verify_code')->nullable();
+            $table->timestamp('last_attempt')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();

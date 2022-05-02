@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use App\Notifications\SendCode;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -45,6 +46,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'last_attempt' => 'datetime',
         'address' => 'array',
         'country' => 'array',
         'state' => 'array',
@@ -217,6 +219,28 @@ class User extends Authenticatable
     public function savings(): HasMany
     {
         return $this->hasMany(Saving::class);
+    }
+
+    public function sendEmailVerificationNotification()
+    {
+        $this->last_attempt = now();
+        $this->email_verify_code = mt_rand(100000, 999999);
+        $this->save();
+
+        $this->notify(new SendCode($this->email_verify_code, 'verify'));
+    }
+
+    public function markEmailAsVerified()
+    {
+        $this->last_attempt = null;
+        $this->email_verify_code = null;
+        $this->email_verified_at = now();
+        $this->save();
+
+        if ($this->wasChanged('email_verified_at')) {
+            return true;
+        }
+        return false;
     }
 
     /**

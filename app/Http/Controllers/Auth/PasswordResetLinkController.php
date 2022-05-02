@@ -26,7 +26,7 @@ class PasswordResetLinkController extends Controller
         $validator = Validator::make($request->all(), [
             'email' => ['required', 'email', 'exists:users'],
         ], [
-            'email.exists' => 'We cound not find a user with this email address.'
+            'email.exists' => 'We could not find a user with this email address.'
         ]);
 
         if ($validator->fails()) {
@@ -47,7 +47,7 @@ class PasswordResetLinkController extends Controller
 
         // And finally return a response
         return $this->buildResponse([
-            'message' => __('We have sent a meassage to your email to help with recovering your password.'),
+            'message' => __('We have sent a message to your email address to help with recovering your password.'),
             'status' => 'success',
             'response_code' => 200,
         ]);

@@ -26,7 +26,7 @@ Route::get('/web/login', [AuthenticatedSessionController::class, 'index'])
     ->name('web.login');
 
 Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
-    ->middleware(['guest', 'throttle:password-requests'])
+    ->middleware(['guest', 'throttle:code-requests'])
     ->name('password.email');
 
 Route::post('/reset-password/check-code', [NewPasswordController::class, 'check'])
@@ -41,8 +41,12 @@ Route::get('/verify-email/{id}/{hash}', [VerifyEmailController::class, '__invoke
     ->middleware(['auth:sanctum', 'signed', 'throttle:6,1'])
     ->name('verification.verify');
 
-Route::post('/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
+Route::post('/verify-email/with-code', [VerifyEmailController::class, 'store'])
     ->middleware(['auth:sanctum', 'throttle:6,1'])
+    ->name('verification.verify.code');
+
+Route::post('/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
+    ->middleware(['auth:sanctum', 'throttle:code-requests'])
     ->name('verification.send');
 
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])

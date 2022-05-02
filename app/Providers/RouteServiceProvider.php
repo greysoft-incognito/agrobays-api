@@ -51,12 +51,20 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
 
-        RateLimiter::for('password-requests', function (Request $request) {
-            $check = PasswordCodeResets::whereEmail($request?->email)->first();
-            return (!$check || $check->created_at->diffInMinutes(now()) >= 30)
+        RateLimiter::for('code-requests', function (Request $request) {
+            if ($request->route()->named('verification.send')) {
+                $check = $request->user();
+                $datetime = $check->last_attempt;
+                $action = 'activate your account';
+            } else {
+                $check = PasswordCodeResets::whereEmail($request?->email)->first();
+                $datetime = $check->created_at??null;
+                $action = 'reset your password';
+            }
+            return (!$datetime || $datetime->diffInMinutes(now()) >= 30)
                 ? Limit::none()
                 : (new Controller)->buildResponse([
-                    'message' => __('We already sent a mail to help you reset your password, you can try again :0 minutes.', [30 - $check->created_at->diffInMinutes(now())]),
+                    'message' => __("We already sent a mail to help you {$action}, you can try again :0 minutes.", [30 - $datetime->diffInMinutes(now())]),
                     'status' => 'success',
                     'response_code' => 429,
                 ]);

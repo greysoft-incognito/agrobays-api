@@ -137,12 +137,12 @@
                                             valign="top">
                                             <p
                                                 style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">
-                                                Hi {{ $name ?? 'there' }},
+                                                Hi <b>{{ $name ?? 'there' }}</b>,
                                             </p>
                                             @isset($message_line1)
                                                 <p
                                                     style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">
-                                                    {{ $message_line1 }}
+                                                    {!! $message_line1 !!}
                                                 </p>
                                             @endisset
                                             @isset($cta)
@@ -192,13 +192,13 @@
                                             @isset($message_line2)
                                                 <p
                                                     style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">
-                                                    {{ $message_line2 }}
+                                                    {!! $message_line2 !!}
                                                 </p>
                                             @endisset
                                             @isset($message_line3)
                                                 <p
                                                     style="font-family: sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px;">
-                                                    {{ $message_line3 }}
+                                                    {!! $message_line3 !!}
                                                 </p>
                                             @endisset
                                             <p
@@ -208,7 +208,7 @@
                                             @isset($message_help)
                                                 <div
                                                     style="color: #073e7a;font-size: 0.96em;border-top: #f0f2f4 solid;padding-top: 7px;margin-top: 2em;">
-                                                    {{ $message_help }}
+                                                    {!! $message_help !!}
                                                 </div>
                                             @endisset
                                         </td>
