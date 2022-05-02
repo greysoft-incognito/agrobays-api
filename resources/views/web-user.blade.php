@@ -254,6 +254,7 @@ endif;
                 @else
                     <option value="{{ url('artisan/list') }}">Help and Info</option>
                     <option value="{{ url('artisan/storage:link') }}">Sym Link Storage</option>
+                    <option value="{{ url('artisan/migrate') }}">Migrate Database</option>
                     <option value="{{ url('artisan/optimize:clear') }}">Clear Cache</option>
                     <option value="{{ url('artisan/transactions -h') }}">Transactions Help</option>
                     <option value="{{ url('artisan/transactions abandoned -a clear,-s paystack,-p 50,-r') }}">Clear
