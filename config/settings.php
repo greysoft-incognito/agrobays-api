@@ -9,6 +9,8 @@ return [
     |
     */
     'site_name' => 'Agrobays AgroFoods',
+    'currency_symbol' => '₦',
+    'currency' => 'NGN',
     'use_queue' => true,
     'keep_successful_queue_logs' => true,
     'slack_debug' => false,
@@ -16,7 +18,7 @@ return [
     'payment_verify_url' => env('PAYMENT_VERIFY_URL', 'http://localhost:8080/payment/verify'),
     'default_banner' => env('ASSETS_URL', 'http://localhost:8080') . '/media/default_banner.png',
     'paystack_public_key' => env('PAYSTACK_PUBLIC_KEY', 'pk_'),
-
+    'trx_prefix' => 'AGB-',
     'permissions' => [
         'manage_guests' => 'View, manage and get notifications for guest and bootcamp registrations',
         'manage_users' => 'Create, view, manage and get notifications for user access',
