@@ -98,18 +98,21 @@ class AdminSavingController extends Controller
      */
     public function destroy(Request $request, $item = null)
     {
-        if ($request->items) 
+        if ($request->items)
         {
-            $count = collect($request->items)->each(function($item) {
+            $count = collect($request->items)->map(function($item) {
                 $saving = Saving::whereId($item)->first();
-                $saving->delete();
+                if ($saving) {
+                    return $saving->delete();
+                }
+                return false;
+            })->filter(fn($i)=>$i!==false)->count();
 
-                return $this->buildResponse([
-                    'message' => "{$count} savings have been deleted.",
-                    'status' =>  'success',
-                    'response_code' => 200,
-                ]);
-            })->count();
+            return $this->buildResponse([
+                'message' => "{$count} savings bags have been deleted.",
+                'status' =>  'success',
+                'response_code' => 200,
+            ]);
         }
         else
         {

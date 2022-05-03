@@ -107,19 +107,22 @@ class AdminFoodsController extends Controller
      */
     public function destroy(Request $request, $item = null)
     {
-        if ($request->items) 
+        if ($request->items)
         {
             $count = collect($request->items)->each(function($item) {
                 $food = Food::whereId($item)->first();
-                $food->image && Storage::delete($food->image);
-                $food->delete();
+                if ($food) {
+                    $food->image && Storage::delete($food->image);
+                    return $food->delete();
+                }
+                return false;
+            })->filter(fn($i)=>$i!==false)->count();
 
-                return $this->buildResponse([
-                    'message' => "{$count} foods have been deleted.",
-                    'status' =>  'success',
-                    'response_code' => 200,
-                ]);
-            })->count();
+            return $this->buildResponse([
+                'message' => "{$count} foods have been deleted.",
+                'status' =>  'success',
+                'response_code' => 200,
+            ]);
         }
         else
         {

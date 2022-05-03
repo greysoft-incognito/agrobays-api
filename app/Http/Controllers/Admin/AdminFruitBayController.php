@@ -102,19 +102,22 @@ class AdminFruitBayController extends Controller
      */
     public function destroy(Request $request, $item = null)
     {
-        if ($request->items) 
+        if ($request->items)
         {
-            $count = collect($request->items)->each(function($item) {
+            $count = collect($request->items)->map(function($item) {
                 $item = FruitBay::whereId($item)->first();
-                $item->image && Storage::delete($item->image);
-                $item->delete();
+                if ($item) {
+                    $item->image && Storage::delete($item->image);
+                    return $item->delete();
+                }
+                return false;
+            })->filter(fn($i)=>$i!==false)->count();
 
-                return $this->buildResponse([
-                    'message' => "{$count} items have been deleted.",
-                    'status' =>  'success',
-                    'response_code' => 200,
-                ]);
-            })->count();
+            return $this->buildResponse([
+                'message' => "{$count} items bags have been deleted.",
+                'status' =>  'success',
+                'response_code' => 200,
+            ]);
         }
         else
         {

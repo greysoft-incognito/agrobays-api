@@ -4,12 +4,15 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AdminFoodbagsController;
 use App\Http\Controllers\Admin\AdminFoodsController;
+use App\Http\Controllers\Admin\AdminFrontContentController;
 use App\Http\Controllers\Admin\AdminFruitBayCategoryController;
 use App\Http\Controllers\Admin\AdminFruitBayController;
 use App\Http\Controllers\Admin\AdminPlansController;
 use App\Http\Controllers\Admin\AdminSavingController;
 use App\Http\Controllers\Admin\AdminSubscriptionController;
 use App\Http\Controllers\Admin\AdminTransactionController;
+use App\Http\Controllers\Admin\FrontContentController;
+use App\Http\Controllers\Admin\UsersController;
 use App\Http\Controllers\FruitBayController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SavingsController;
@@ -59,6 +62,30 @@ Route::middleware(['auth:sanctum'])->group(function() {
         ->group(function() {
             Route::get('/', 'index');
             Route::get('/user/{id}', 'getItem');
+        });
+
+        // Admin Front Content
+        Route::controller(AdminFrontContentController::class)
+        ->prefix('front/content')
+        ->name('front.content.')
+        ->group(function() {
+            Route::get('/', 'index');
+            Route::get('/type/{type?}/{limit?}', 'index');
+            Route::get('/{item}', 'getContent');
+            Route::post('/{item?}', 'store');
+            Route::delete('/{item?}', 'destroy');
+        });
+
+        // Admin Users
+        Route::controller(UsersController::class)
+        ->prefix('users')
+        ->name('users.')
+        ->group(function() {
+            Route::get('/', 'index');
+            Route::get('/role/{role?}/{limit?}', 'index');
+            Route::get('/{id}', 'getUser');
+            Route::post('/{id?}', 'store');
+            Route::delete('/{id?}', 'destroy');
         });
 
         // Load admin fruitbay

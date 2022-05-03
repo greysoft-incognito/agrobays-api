@@ -48,7 +48,7 @@ class AdminFoodbagsController extends Controller
             'message' => !$bag ? 'The requested foodbag no longer exists' : 'OK',
             'status' =>  !$bag ? 'info' : 'success',
             'response_code' => !$bag ? 404 : 200,
-            'bag' => $bag,
+            'bag' => $bag ?? (object)[],
         ]);
     }
 
@@ -93,19 +93,22 @@ class AdminFoodbagsController extends Controller
      */
     public function destroy(Request $request, $item = null)
     {
-        if ($request->items) 
+        if ($request->items)
         {
-            $count = collect($request->items)->each(function($item) {
+            $count = collect($request->items)->map(function($item) {
                 $bag = FoodBag::whereId($item)->first();
-                $bag->image && Storage::delete($bag->image);
-                $bag->delete();
+                if ($bag) {
+                    $bag->image && Storage::delete($bag->image);
+                    return $bag->delete();
+                }
+                return false;
+            })->filter(fn($i)=>$i!==false)->count();
 
-                return $this->buildResponse([
-                    'message' => "{$count} foods bags have been deleted.",
-                    'status' =>  'success',
-                    'response_code' => 200,
-                ]);
-            })->count();
+            return $this->buildResponse([
+                'message' => "{$count} foods bags have been deleted.",
+                'status' =>  'success',
+                'response_code' => 200,
+            ]);
         }
         else
         {

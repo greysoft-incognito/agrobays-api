@@ -98,7 +98,7 @@ class User extends Authenticatable implements MustVerifyEmail
             },
             set: fn($value) => ["address" => json_encode([
                 "shipping" => $value->shipping??$value['shipping']??'',
-                "home" => $value->home??$value['home']??'',
+                "home" => $value->home??$value['home']??$value??'',
             ])]
         );
     }
@@ -122,7 +122,7 @@ class User extends Authenticatable implements MustVerifyEmail
                 return $val;
             },
             set: fn($value) => ["country" => json_encode([
-                "name" => $value->name??$value['name']??'',
+                "name" => $value->name??$value['name']??$value??'',
                 "iso2" => $value->iso2??$value['iso2']??'',
                 "emoji" => $value->emoji??$value['emoji']??'',
             ])]
@@ -147,7 +147,7 @@ class User extends Authenticatable implements MustVerifyEmail
                 return $val;
             },
             set: fn($value) => ["state" => json_encode([
-                "name" => $value->name??$value['name']??'',
+                "name" => $value->name??$value['name']??$value??'',
                 "iso2" => $value->iso2??$value['iso2']??'',
             ])]
         );
@@ -170,7 +170,7 @@ class User extends Authenticatable implements MustVerifyEmail
                 return $val;
             },
             set: fn($value) => ["city" => json_encode([
-                "name" => $value->name??$value['name']??'',
+                "name" => $value->name??$value['name']??$value??'',
             ])]
         );
     }
@@ -273,3 +273,4 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Order::class);
     }
 }
+

@@ -106,19 +106,22 @@ class AdminPlansController extends Controller
      */
     public function destroy(Request $request, $item = null)
     {
-        if ($request->items) 
+        if ($request->items)
         {
-            $count = collect($request->items)->each(function($item) {
+            $count = collect($request->items)->map(function($item) {
                 $plan = Plan::whereId($item)->first();
-                $plan->image && Storage::delete($plan->image);
-                $plan->delete();
+                if ($plan) {
+                    $plan->image && Storage::delete($plan->image);
+                    return $plan->delete();
+                }
+                return false;
+            })->filter(fn($i)=>$i!==false)->count();
 
-                return $this->buildResponse([
-                    'message' => "{$count} plans have been deleted.",
-                    'status' =>  'success',
-                    'response_code' => 200,
-                ]);
-            })->count();
+            return $this->buildResponse([
+                'message' => "{$count} plans have been deleted.",
+                'status' =>  'success',
+                'response_code' => 200,
+            ]);
         }
         else
         {

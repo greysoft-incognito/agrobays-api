@@ -101,19 +101,22 @@ class AdminFruitBayCategoryController extends Controller
      */
     public function destroy(Request $request, $item = null)
     {
-        if ($request->items) 
+        if ($request->items)
         {
-            $count = collect($request->items)->each(function($item) {
+            $count = collect($request->items)->map(function($item) {
                 $item = FruitBayCategory::whereId($item)->first();
-                $item->image && Storage::delete($item->image);
-                $item->delete();
+                if ($item) {
+                    $item->image && Storage::delete($item->image);
+                    return $item->delete();
+                }
+                return false;
+            })->filter(fn($i)=>$i!==false)->count();
 
-                return $this->buildResponse([
-                    'message' => "{$count} fruit bay categories have been deleted.",
-                    'status' =>  'success',
-                    'response_code' => 200,
-                ]);
-            })->count();
+            return $this->buildResponse([
+                'message' => "{$count} fruit bay categories have been deleted.",
+                'status' =>  'success',
+                'response_code' => 200,
+            ]);
         }
         else
         {

@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('front_contents', function (Blueprint $table) {
             $table->id();
             $table->string('slug')->nullable();
-            $table->string('type');
+            $table->string('type')->nullable();
             $table->string('image')->nullable();
             $table->string('title')->nullable();
             $table->text('content')->nullable();
