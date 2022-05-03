@@ -28,7 +28,19 @@ class FrontContentController extends Controller
             'message' => 'OK',
             'status' =>  $content->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'content' => $content??[],
+            'contents' => $content??[],
+        ]);
+    }
+
+    public function getContent(Request $request, $item)
+    {
+        $content = FrontContent::whereId($item)->orWhere('slug', $item)->first();
+
+        return $this->buildResponse([
+            'message' => !$content ? 'The requested content no longer exists' : 'OK',
+            'status' =>  !$content ? 'info' : 'success',
+            'response_code' => !$content ? 404 : 200,
+            'content' => $content ?? (object)[],
         ]);
     }
 }

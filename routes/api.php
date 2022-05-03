@@ -11,8 +11,8 @@ use App\Http\Controllers\Admin\AdminPlansController;
 use App\Http\Controllers\Admin\AdminSavingController;
 use App\Http\Controllers\Admin\AdminSubscriptionController;
 use App\Http\Controllers\Admin\AdminTransactionController;
-use App\Http\Controllers\Admin\FrontContentController;
 use App\Http\Controllers\Admin\UsersController;
+use App\Http\Controllers\FrontContentController;
 use App\Http\Controllers\FruitBayController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SavingsController;
@@ -44,6 +44,16 @@ Route::get('/get/settings', function() {
             "csrf_token" => csrf_token()
         ],
     ]);
+});
+
+// Front Content
+Route::controller(FrontContentController::class)
+->prefix('front/content')
+->name('front.content.')
+->group(function() {
+    Route::get('/', 'index');
+    Route::get('/type/{type?}/{limit?}', 'index');
+    Route::get('/{item}', 'getContent');
 });
 
 Route::middleware(['auth:sanctum'])->group(function() {
@@ -252,3 +262,4 @@ Route::middleware(['auth:sanctum'])->group(function() {
 Route::get('/payment/paystack/verify/{type?}', [PaymentController::class, 'paystackVerify'])->name('payment.paystack.verify');
 
 require __DIR__.'/auth.php';
+
