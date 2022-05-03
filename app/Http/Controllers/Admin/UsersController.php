@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Hash;
 
 class UsersController extends Controller
 {
@@ -121,7 +122,7 @@ class UsersController extends Controller
         $user->lastname = $request->lastname;
         $user->username = $request->username??$user->username;
         $user->email = $request->email;
-        $user->password = $request->password;
+        $user->password = Hash::make($request->password);
         $user->phone = $request->phone;
         $user->gender = $request->gender;
         $user->nextofkin = $request->nextofkin;
