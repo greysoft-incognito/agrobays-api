@@ -52,7 +52,9 @@ Route::controller(FrontContentController::class)
 ->name('front.content.')
 ->group(function() {
     Route::get('/', 'index');
-    Route::get('/type/{type?}/{limit?}', 'index');
+    Route::get('/list/{limit?}/{type?}', 'index');
+    Route::get('/type/{type?}', 'index');
+    Route::get('/type/{type?}/limit/{limit?}', 'index');
     Route::get('/{item}', 'getContent');
 });
 
@@ -80,7 +82,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
         ->name('front.content.')
         ->group(function() {
             Route::get('/', 'index');
-            Route::get('/type/{type?}/{limit?}', 'index');
+            Route::get('/list/{limit?}/{type?}', 'index');
             Route::get('/{item}', 'getContent');
             Route::post('/{item?}', 'store');
             Route::delete('/{item?}', 'destroy');
@@ -92,7 +94,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
         ->name('users.')
         ->group(function() {
             Route::get('/', 'index');
-            Route::get('/role/{role?}/{limit?}', 'index');
+            Route::get('/list/{limit?}/{role?}', 'index');
             Route::get('/{id}', 'getUser');
             Route::post('/{id?}', 'store');
             Route::delete('/{id?}', 'destroy');
@@ -262,4 +264,3 @@ Route::middleware(['auth:sanctum'])->group(function() {
 Route::get('/payment/paystack/verify/{type?}', [PaymentController::class, 'paystackVerify'])->name('payment.paystack.verify');
 
 require __DIR__.'/auth.php';
-

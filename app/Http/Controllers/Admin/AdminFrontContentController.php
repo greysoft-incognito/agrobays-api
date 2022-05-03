@@ -18,7 +18,7 @@ class AdminFrontContentController extends Controller
      * @param  String $type
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request, $type = 'faq', $limit = '15')
+    public function index(Request $request, $limit = '15', $type = 'faq')
     {
         $query = FrontContent::query();
 
@@ -26,7 +26,7 @@ class AdminFrontContentController extends Controller
             $query->where('type', $type);
         }
 
-        $content = $limit <= 0 ? $query->get() : $query->paginate($limit);
+        $content = ($limit <= 0 || $limit === 'all') ? $query->get() : $query->paginate($limit);
 
         return $this->buildResponse([
             'message' => 'OK',
