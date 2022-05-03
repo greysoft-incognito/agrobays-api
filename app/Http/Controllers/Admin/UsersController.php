@@ -157,10 +157,24 @@ class UsersController extends Controller
      */
     public function destroy(Request $request, $id = '')
     {
+        // Delete multiple users
         if ($request->users)
         {
-            $count = collect($request->users)->map(function($id) {
-                $user = User::whereId($id)->first();
+            $count = User::whereIn('id', $request->users)->with(['transactions', 'subscription'])->get()->map(function($user) {
+                // Delete Transactions
+                if ($user->transactions) {
+                    $user->transactions->map(function($transaction) {
+                        if ($transaction->transactable) {
+                            $transaction->transactable->delete();
+                        }
+                        $transaction->delete();
+                    });
+                }
+                if ($user->subscriptions) {
+                    $user->subscriptions->map(function($subscription) {
+                        $subscription->delete();
+                    });
+                }
                 if ($user) {
                     $user->image && Storage::delete($user->image);
                     return $user->delete();
@@ -179,9 +193,23 @@ class UsersController extends Controller
             $user = User::whereId($id)->first();
         }
 
+        // Delete single user
         if ($user)
         {
             $user->image && Storage::delete($user->image);
+            if ($user->transactions) {
+                $user->transactions->map(function($transaction) {
+                    if ($transaction->transactable) {
+                        $transaction->transactable->delete();
+                    }
+                    $transaction->delete();
+                });
+            }
+            if ($user->subscriptions) {
+                $user->subscriptions->map(function($subscription) {
+                    $subscription->delete();
+                });
+            }
             $user->delete();
 
             return $this->buildResponse([
