@@ -14,12 +14,32 @@ class FrontContentController extends Controller
      * @param  String $type
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request, $limit = '15', $type = 'faq')
+    public function index(Request $request, $limit = '15', $type = 'all')
     {
         $query = FrontContent::query();
 
         if ($type !== 'all') {
             $query->where('type', $type);
+        }
+
+        // Search and filter columns
+        if ($request->search) {
+            $query->where(function($query) use($request) {
+                $query->where('title', 'like', "%$request->search%")
+                    ->orWhere('type', 'like', "%$request->search%")
+                    ->orWhere('content', 'like', "%$request->search%");
+            });
+        }
+
+        // Reorder Columns
+        if ($request->order && is_array($request->order)) {
+            foreach ($request->order as $key => $dir) {
+                if ($dir === 'desc') {
+                    $query->orderByDesc($key??'id');
+                } else {
+                    $query->orderBy($key??'id');
+                }
+            }
         }
 
         $content = ($limit <= 0 || $limit === 'all') ? $query->get() : $query->paginate($limit);

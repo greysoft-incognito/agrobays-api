@@ -20,24 +20,38 @@ class UsersController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request, $limit = '15', $role = 'user')
-    {dd($limit);
+    {
         $query = User::query();
 
         if ($role !== 'all') {
             $query->where('role', $role);
         }
 
+        // Search and filter columns
         if ($request->search) {
             $query->where(function($query) use($request) {
                 $query->where('username', 'like', "%$request->search%")
                     ->orWhere('lastname', 'like', "%$request->search%")
                     ->orWhere('firstname', 'like', "%$request->search%")
+                    ->orWhere('address->home', 'like', "%$request->search%")
+                    ->orWhere('address->shipping', 'like', "%$request->search%")
                     ->orWhere('country->name', 'like', "%$request->search%")
                     ->orWhere('city->name', 'like', "%$request->search%")
                     ->orWhere('state->name', 'like', "%$request->search%")
                     ->orWhere('gender', 'like', "%$request->search%")
                     ->orWhere('state', 'like', "%$request->search%");
             });
+        }
+
+        // Reorder Columns
+        if ($request->order && is_array($request->order)) {
+            foreach ($request->order as $key => $dir) {
+                if ($dir === 'desc') {
+                    $query->orderByDesc($key??'id');
+                } else {
+                    $query->orderBy($key??'id');
+                }
+            }
         }
 
         $users = ($limit <= 0 || $limit === 'all') ? $query->get() : $query->paginate($limit);

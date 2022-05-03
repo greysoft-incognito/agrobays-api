@@ -26,6 +26,26 @@ class AdminFrontContentController extends Controller
             $query->where('type', $type);
         }
 
+        // Search and filter columns
+        if ($request->search) {
+            $query->where(function($query) use($request) {
+                $query->where('title', 'like', "%$request->search%")
+                    ->orWhere('type', 'like', "%$request->search%")
+                    ->orWhere('content', 'like', "%$request->search%");
+            });
+        }
+
+        // Reorder Columns
+        if ($request->order && is_array($request->order)) {
+            foreach ($request->order as $key => $dir) {
+                if ($dir === 'desc') {
+                    $query->orderByDesc($key??'id');
+                } else {
+                    $query->orderBy($key??'id');
+                }
+            }
+        }
+
         $content = ($limit <= 0 || $limit === 'all') ? $query->get() : $query->paginate($limit);
 
         return $this->buildResponse([

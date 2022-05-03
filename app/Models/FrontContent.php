@@ -45,4 +45,3 @@ class FrontContent extends Model
         );
     }
 }
-
