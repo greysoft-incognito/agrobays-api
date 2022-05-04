@@ -80,7 +80,7 @@ class AdminFrontContentController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'title' => ['required', 'min:3', 'max:55'],
+            'title' => ['required', 'min:3', 'max:150'],
             'type' => 'required|string',
             'image' => 'nullable|mimes:png,jpg',
             'content' => 'required|min:10|max:550',
