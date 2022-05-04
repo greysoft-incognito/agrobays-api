@@ -124,7 +124,7 @@ class UsersController extends Controller
         $user->email = $request->email;
         $user->password = Hash::make($request->password);
         $user->phone = $request->phone;
-        $user->gender = $request->gender;
+        $user->gender = $request->gender ?? 'male';
         $user->nextofkin = $request->nextofkin;
         $user->nextofkin_relationship = $request->nextofkin_relationship;
         $user->nextofkin_phone = $request->nextofkin_phone;
