@@ -34,6 +34,14 @@ class Order extends Model
     }
 
     /**
+     * Get the order's dispatch.
+     */
+    public function dispatch()
+    {
+        return $this->morphOne(Dispatch::class, 'dispatchable');
+    }
+
+    /**
      * Get the user that owns the Order
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo

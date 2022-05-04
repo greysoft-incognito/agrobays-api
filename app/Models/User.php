@@ -46,6 +46,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'phone_verified_at' => 'datetime',
         'last_attempt' => 'datetime',
         'address' => 'array',
         'country' => 'array',
@@ -182,12 +183,10 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected function imageUrl(): Attribute
     {
-        $image = $this->image
-            ? img($this->image, 'avatar', 'medium-square')
-            : asset('media/default_avatar.png');
-
         return Attribute::make(
-            get: fn () => $image,
+            get: fn ($value, $attributes) => ($attributes['image']
+                ? img($attributes['image'], 'avatar', 'medium-square')
+                : asset('media/default_avatar.png')),
         );
     }
 
@@ -273,4 +272,3 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Order::class);
     }
 }
-

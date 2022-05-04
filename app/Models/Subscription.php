@@ -21,6 +21,14 @@ class Subscription extends Model
     ];
 
     /**
+     * Get the foodbag's dispatch.
+     */
+    public function dispatch()
+    {
+        return $this->morphOne(Dispatch::class, 'dispatchable');
+    }
+
+    /**
      * Get all of the complete savings for the Subscription
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
@@ -67,7 +75,7 @@ class Subscription extends Model
      */
     public function bag(): HasOne
     {
-        return $this->hasOne(FoodBag::class);
+        return $this->hasOne(FoodBag::class, 'id', 'food_bag_id');
     }
 
     public function paidDays(): Attribute

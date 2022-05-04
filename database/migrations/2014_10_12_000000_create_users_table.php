@@ -30,10 +30,11 @@ return new class extends Migration
             $table->json('city')->nullable();
             $table->json('state')->nullable();
             $table->json('country')->nullable();
-            $table->enum('role', ['user', 'admin', 'staff'])->default('user');
+            $table->enum('role', ['admin', 'dispatch', 'manager', 'user'])->default('user');
             $table->string('email_verify_code')->nullable();
             $table->timestamp('last_attempt')->nullable();
             $table->timestamp('email_verified_at')->nullable();
+            $table->timestamp('phone_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

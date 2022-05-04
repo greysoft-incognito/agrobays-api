@@ -253,6 +253,7 @@ endif;
                     <option value="{{ url('artisan/list') }}">Go Back</option>
                 @else
                     <option value="{{ url('artisan/list') }}">Help and Info</option>
+                    <option value="{{ url('artisan/dispatch') }}">Manual Dispatch</option>
                     <option value="{{ url('artisan/storage:link') }}">Sym Link Storage</option>
                     <option value="{{ url('artisan/migrate') }}">Migrate Database</option>
                     <option value="{{ url('artisan/optimize:clear') }}">Clear Cache</option>
