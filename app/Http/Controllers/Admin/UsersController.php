@@ -132,6 +132,9 @@ class UsersController extends Controller
         $user->country = $request->country;
         $user->state = $request->state;
         $user->city = $request->city;
+        if ($request->role) {
+            $user->role = $request->role;
+        }
 
         if ($request->hasFile('image'))
         {
