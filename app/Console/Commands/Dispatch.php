@@ -39,7 +39,10 @@ class Dispatch extends Command
                 $dispatch->code = mt_rand(100000, 999999);
                 $saving->dispatch()->save($dispatch);
                 $saving->dispatch->notify(new Dispatched());
+                $this->info("Saving with ID of {$saving->id} has been dispatced for proccessing.");
             });
+        } else {
+            $this->error("No savings to dispatch.");
         }
         if ($orders->isNotEmpty()) {
             $orders->each(function($order) {
@@ -47,7 +50,10 @@ class Dispatch extends Command
                 $dispatch->code = mt_rand(100000, 999999);
                 $order->dispatch()->save($dispatch);
                 $order->dispatch->notify(new Dispatched);
+                $this->info("Order with ID of {$order->id} has been dispatced for proccessing.");
             });
+        } else {
+            $this->error("No orders to dispatch.");
         }
         return 0;
     }
