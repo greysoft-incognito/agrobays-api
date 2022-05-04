@@ -144,7 +144,7 @@ class UsersController extends Controller
         $user->save();
 
         return $this->buildResponse([
-            'message' => $id ? Str::of($user->name)->append(' Has been updated!') : 'New user has been created.',
+            'message' => $id ? Str::of($user->fullname)->append(' Has been updated!') : 'New user has been created.',
             'status' =>  'success',
             'response_code' => 200,
             'content' => $user,
