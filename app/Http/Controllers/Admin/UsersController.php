@@ -122,7 +122,6 @@ class UsersController extends Controller
         $user->lastname = $request->lastname;
         $user->username = $request->username??$user->username;
         $user->email = $request->email;
-        $user->password = Hash::make($request->password);
         $user->phone = $request->phone;
         $user->gender = $request->gender ?? 'male';
         $user->nextofkin = $request->nextofkin;
@@ -134,6 +133,9 @@ class UsersController extends Controller
         $user->city = $request->city;
         if ($request->role) {
             $user->role = $request->role;
+        }
+        if ($request->password) {
+            $user->password = Hash::make($request->password);
         }
 
         if ($request->hasFile('image'))
