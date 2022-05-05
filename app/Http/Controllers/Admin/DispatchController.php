@@ -22,7 +22,7 @@ class DispatchController extends Controller
     public function index(Request $request, $limit = '15', $status = 'pending')
     {
         \Gate::authorize('usable', 'dispatch.'.$status);
-        $query = Dispatch::query()->with('dispatchable');
+        $query = Dispatch::query()->with(['dispatchable', 'user']);
 
         if ($status !== 'all') {
             $query->where('status', $status);
@@ -61,7 +61,7 @@ class DispatchController extends Controller
 
     public function getDispatch(Request $request, $id)
     {
-        $item = Dispatch::with('dispatchable')->find($id);
+        $item = Dispatch::with(['dispatchable', 'user'])->find($id);
 
         $item && \Gate::authorize('usable', 'dispatch.'.$item->status);
 
