@@ -12,6 +12,7 @@ class AdminSubscriptionController extends Controller
 {
     public function index(Request $request)
     {
+        \Gate::authorize('usable', 'subscriptions');
         $model = Subscription::query();
         return app('datatables')->eloquent($model)
             ->editColumn('created_at', function(Subscription $item) {
@@ -37,6 +38,7 @@ class AdminSubscriptionController extends Controller
 
     public function getItem(Request $request, $item)
     {
+        \Gate::authorize('usable', 'subscriptions');
         $subscription = Subscription::whereId($item)->first();
 
         return $this->buildResponse([
@@ -56,6 +58,7 @@ class AdminSubscriptionController extends Controller
      */
     public function store(Request $request, $item = null)
     {
+        \Gate::authorize('usable', 'subscriptions');
         $subscription = Subscription::find($item);
         if (!$subscription) {
             return $this->buildResponse([
@@ -96,6 +99,7 @@ class AdminSubscriptionController extends Controller
      */
     public function destroy(Request $request, $item = null)
     {
+        \Gate::authorize('usable', 'subscriptions');
         if ($request->items)
         {
             $count = collect($request->items)->map(function($item) {

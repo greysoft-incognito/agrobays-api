@@ -14,6 +14,7 @@ class AdminSavingController extends Controller
 {
     public function index(Request $request)
     {
+        \Gate::authorize('usable', 'savings');
         $model = Saving::query();
         return app('datatables')->eloquent($model)
             ->editColumn('created_at', function(Saving $item) {
@@ -39,6 +40,7 @@ class AdminSavingController extends Controller
 
     public function getItem(Request $request, $item)
     {
+        \Gate::authorize('usable', 'savings');
         $saving = Saving::whereId($item)->first();
 
         return $this->buildResponse([
@@ -58,6 +60,7 @@ class AdminSavingController extends Controller
      */
     public function store(Request $request, $item = null)
     {
+        \Gate::authorize('usable', 'savings');
         $saving = Saving::find($item);
         if (!$saving) {
             return $this->buildResponse([
@@ -98,6 +101,7 @@ class AdminSavingController extends Controller
      */
     public function destroy(Request $request, $item = null)
     {
+        \Gate::authorize('usable', 'savings');
         if ($request->items)
         {
             $count = collect($request->items)->map(function($item) {

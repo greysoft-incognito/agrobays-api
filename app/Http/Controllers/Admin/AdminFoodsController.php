@@ -16,6 +16,7 @@ class AdminFoodsController extends Controller
 {
     public function index(Request $request)
     {
+        \Gate::authorize('usable', 'foods');
         $model = Food::query();
         return app('datatables')->eloquent($model)
             ->editColumn('created_at', function(Food $item) {
@@ -44,6 +45,7 @@ class AdminFoodsController extends Controller
 
     public function getItem(Request $request, $item)
     {
+        \Gate::authorize('usable', 'foods');
         $food = Food::whereId($item)->first();
 
         return $this->buildResponse([
@@ -56,6 +58,7 @@ class AdminFoodsController extends Controller
 
     public function store(Request $request, $item = null)
     {
+        \Gate::authorize('usable', 'foods');
         $validator = Validator::make($request->all(), [
             'name' => 'required|min:3|max:25', Rule::unique('foods')->ignore($item),
             'food_bag_id' => 'required|numeric|min:1',
@@ -107,6 +110,7 @@ class AdminFoodsController extends Controller
      */
     public function destroy(Request $request, $item = null)
     {
+        \Gate::authorize('usable', 'foods');
         if ($request->items)
         {
             $count = collect($request->items)->each(function($item) {

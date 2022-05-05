@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\AdminPlansController;
 use App\Http\Controllers\Admin\AdminSavingController;
 use App\Http\Controllers\Admin\AdminSubscriptionController;
 use App\Http\Controllers\Admin\AdminTransactionController;
+use App\Http\Controllers\Admin\DispatchController;
 use App\Http\Controllers\Admin\UsersController;
 use App\Http\Controllers\FrontContentController;
 use App\Http\Controllers\FruitBayController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\SavingsController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Gate;
 
 /*
 |--------------------------------------------------------------------------
@@ -97,6 +99,19 @@ Route::middleware(['auth:sanctum'])->group(function() {
             Route::get('/list/{limit?}/{role?}', 'index');
             Route::get('/{id}', 'getUser');
             Route::post('/{id?}', 'store');
+            Route::delete('/{id?}', 'destroy');
+        });
+
+        // Admin Dispatch
+        Route::controller(DispatchController::class)
+        ->prefix('dispatch')
+        ->name('dispatch.')
+        ->group(function() {
+            Route::get('/', 'index');
+            Route::get('/list/{limit?}/{role?}', 'index');
+            Route::get('/{id}', 'getDispatch');
+            Route::post('/{id?}', 'store');
+            Route::post('/uodate-status', 'setStatus');
             Route::delete('/{id?}', 'destroy');
         });
 

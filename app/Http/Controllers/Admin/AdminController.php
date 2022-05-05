@@ -15,7 +15,7 @@ class AdminController extends Controller
 
     public function charts($type = 'pie')
     {
-
+        \Gate::authorize('usable', 'dashboard');
         return $this->buildResponse([
             'message' => 'OK',
             'status' =>  'success',

@@ -197,7 +197,10 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         "Settings" => App\Actions\Greysoft\SettingsFacade::class,
+        "Permission" => App\Actions\Greysoft\PermissionsFacade::class,
         'Zipper' => Madnest\Madzipper\Madzipper::class,
+        'Gate' => Illuminate\Support\Facades\Gate::class,
     ])->toArray(),
 
 ];
+

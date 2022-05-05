@@ -119,7 +119,7 @@ class FruitBayController extends Controller
         $trans = $item->transaction();
         $transaction = $trans->create([
             'user_id' => Auth::id(),
-            'reference' => Str::random(12),
+            'reference' => config('settings.trx_prefix', 'AGB-') . Str::random(12),
             'method' => 'direct',
             'amount' => $item->price,
             'due' => $item->price,

@@ -20,6 +20,7 @@ class AdminFrontContentController extends Controller
      */
     public function index(Request $request, $limit = '15', $type = 'faq')
     {
+        \Gate::authorize('usable', 'content');
         $query = FrontContent::query();
 
         if ($type !== 'all') {
@@ -58,6 +59,7 @@ class AdminFrontContentController extends Controller
 
     public function getContent(Request $request, $item)
     {
+        \Gate::authorize('usable', 'content');
         $content = FrontContent::find($item);
 
         return $this->buildResponse([
@@ -70,6 +72,7 @@ class AdminFrontContentController extends Controller
 
     public function store(Request $request, $item = '')
     {
+        \Gate::authorize('usable', 'content');
         $content = FrontContent::find($item);
         if ($item && !$content) {
             return $this->buildResponse([
@@ -125,6 +128,7 @@ class AdminFrontContentController extends Controller
      */
     public function destroy(Request $request, $item = null)
     {
+        \Gate::authorize('usable', 'content');
         if ($request->items)
         {
             $count = collect($request->items)->map(function($item) {

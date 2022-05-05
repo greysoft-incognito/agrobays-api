@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained('users')->onUpdate('cascade')->onDelete('cascade');
             $table->morphs('dispatchable'); // App/Models/Orders or App/Models/FoodBag
             $table->string('code')->nullable();
+            $table->string('reference')->nullable();
             $table->json('last_location')->nullable();
             $table->enum('status', ['pending', 'confirmed', 'dispatched', 'delivered'])->default('pending');
             $table->timestamps();

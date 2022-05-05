@@ -16,6 +16,7 @@ class AdminFruitBayController extends Controller
 {
     public function index(Request $request)
     {
+        \Gate::authorize('usable', 'fruitbay');
         $model = FruitBay::query();
         return app('datatables')->eloquent($model)
             ->editColumn('created_at', function(FruitBay $item) {
@@ -44,6 +45,7 @@ class AdminFruitBayController extends Controller
 
     public function getItem(Request $request, $item)
     {
+        \Gate::authorize('usable', 'fruitbay');
         $item = FruitBay::whereId($item)->orWhere(['slug' => $item])->first();
 
         return $this->buildResponse([
@@ -56,6 +58,7 @@ class AdminFruitBayController extends Controller
 
     public function store(Request $request, $item = null)
     {
+        \Gate::authorize('usable', 'fruitbay');
         $validator = Validator::make($request->all(), [
             'name' => 'required|min:3|max:25',
             'price' => 'required|numeric|min:1',
@@ -102,6 +105,7 @@ class AdminFruitBayController extends Controller
      */
     public function destroy(Request $request, $item = null)
     {
+        \Gate::authorize('usable', 'fruitbay');
         if ($request->items)
         {
             $count = collect($request->items)->map(function($item) {

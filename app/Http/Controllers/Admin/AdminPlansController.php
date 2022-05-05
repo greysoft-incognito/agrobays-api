@@ -16,6 +16,7 @@ class AdminPlansController extends Controller
 {
     public function index(Request $request)
     {
+        \Gate::authorize('usable', 'savings_plans');
         $model = Plan::query();
         return app('datatables')->eloquent($model)
             ->editColumn('created_at', function(Plan $item) {
@@ -44,6 +45,7 @@ class AdminPlansController extends Controller
 
     public function getItem(Request $request, $item)
     {
+        \Gate::authorize('usable', 'savings_plans');
         $plan = Plan::whereId($item)->orWhere(['slug' => $item])->first();
 
         return $this->buildResponse([
@@ -56,6 +58,7 @@ class AdminPlansController extends Controller
 
     public function store(Request $request, $item = null)
     {
+        \Gate::authorize('usable', 'savings_plans');
         $validator = Validator::make($request->all(), [
             'title' => ['required', 'min:3', 'max:25', Rule::unique('plans')->ignore($item)],
             'amount' => 'required|numeric|min:1',
@@ -106,6 +109,7 @@ class AdminPlansController extends Controller
      */
     public function destroy(Request $request, $item = null)
     {
+        \Gate::authorize('usable', 'savings_plans');
         if ($request->items)
         {
             $count = collect($request->items)->map(function($item) {

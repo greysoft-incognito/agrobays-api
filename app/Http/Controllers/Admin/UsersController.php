@@ -22,6 +22,7 @@ class UsersController extends Controller
      */
     public function index(Request $request, $limit = '15', $role = 'user')
     {
+        \Gate::authorize('usable', 'users.'.$role);
         $query = User::query();
 
         if ($role !== 'all') {
@@ -68,6 +69,7 @@ class UsersController extends Controller
     public function getUser(Request $request, $id)
     {
         $user = User::find($id);
+        $user && \Gate::authorize('usable', 'users.'.$user->role);
 
         return $this->buildResponse([
             'message' => !$user ? 'The requested user no longer exists' : 'OK',
@@ -80,6 +82,7 @@ class UsersController extends Controller
     public function store(Request $request, $id = '')
     {
         $user = User::find($id);
+        $user && \Gate::authorize('usable', 'users.'.$user->role);
         if ($id && !$user) {
             return $this->buildResponse([
                 'message' => 'The requested user no longer exists',
@@ -167,6 +170,7 @@ class UsersController extends Controller
         if ($request->users)
         {
             $count = User::whereIn('id', $request->users)->with(['transactions', 'subscription'])->get()->map(function($user) {
+                $user && \Gate::authorize('usable', 'users.'.$user->role);
                 // Delete Transactions
                 if ($user->transactions) {
                     $user->transactions->map(function($transaction) {
@@ -197,6 +201,7 @@ class UsersController extends Controller
         else
         {
             $user = User::whereId($id)->first();
+            $user && \Gate::authorize('usable', 'users.'.$user->role);
         }
 
         // Delete single user

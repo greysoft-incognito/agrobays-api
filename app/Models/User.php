@@ -60,6 +60,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array
      */
     protected $appends = [
+        'permissions',
         'image_url',
         'fullname',
         'address',
@@ -197,6 +198,18 @@ class User extends Authenticatable implements MustVerifyEmail
         $name .= !isset($this->lastname) && !isset($this->firstname) && isset($this->username) ? ucfirst($this->username) : '';
         return new Attribute(
             get: fn () => $name,
+        );
+    }
+
+    /**
+     * Interact with the user's permissions.
+     *
+     * @return  \Illuminate\Database\Eloquent\Casts\Attribute
+     */
+    public function permissions(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => \Permission::getPermissions($this),
         );
     }
 

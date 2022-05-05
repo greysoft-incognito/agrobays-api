@@ -6,6 +6,7 @@ use App\Models\Dispatch as ModelsDispatch;
 use App\Models\Order;
 use App\Models\Subscription;
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 use App\Notifications\Dispatched;
 
 class Dispatch extends Command
@@ -37,6 +38,7 @@ class Dispatch extends Command
             $savings->each(function($saving) {
                 $dispatch = new ModelsDispatch;
                 $dispatch->code = mt_rand(100000, 999999);
+                $dispatch->reference = config('settings.trx_prefix', 'AGB-') . Str::random(12);
                 $saving->dispatch()->save($dispatch);
                 $saving->dispatch->notify(new Dispatched());
                 $this->info("Saving with ID of {$saving->id} has been dispatced for proccessing.");
@@ -48,6 +50,7 @@ class Dispatch extends Command
             $orders->each(function($order) {
                 $dispatch = new ModelsDispatch;
                 $dispatch->code = mt_rand(100000, 999999);
+                $dispatch->reference = config('settings.trx_prefix', 'AGB-') . Str::random(12);
                 $order->dispatch()->save($dispatch);
                 $order->dispatch->notify(new Dispatched);
                 $this->info("Order with ID of {$order->id} has been dispatced for proccessing.");

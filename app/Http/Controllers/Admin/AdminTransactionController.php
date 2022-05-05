@@ -13,6 +13,7 @@ class AdminTransactionController extends Controller
 {
     public function index(Request $request)
     {
+        \Gate::authorize('usable', 'transactions');
         $model = Transaction::query();
         return app('datatables')->eloquent($model)
             ->editColumn('created_at', function(Transaction $item) {
@@ -38,6 +39,7 @@ class AdminTransactionController extends Controller
 
     public function getItem(Request $request, $item)
     {
+        \Gate::authorize('usable', 'transactions');
         $transaction = Transaction::whereId($item)->first();
 
         return $this->buildResponse([
@@ -57,6 +59,7 @@ class AdminTransactionController extends Controller
      */
     public function store(Request $request, $item = null)
     {
+        \Gate::authorize('usable', 'transactions');
         $transaction = Transaction::find($item);
         if (!$transaction) {
             return $this->buildResponse([
@@ -97,6 +100,7 @@ class AdminTransactionController extends Controller
      */
     public function destroy(Request $request, $item = null)
     {
+        \Gate::authorize('usable', 'transactions');
         if ($request->items)
         {
             $count = collect($request->items)->map(function($item) {
