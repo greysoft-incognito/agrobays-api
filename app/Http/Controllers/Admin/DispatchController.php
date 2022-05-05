@@ -62,7 +62,9 @@ class DispatchController extends Controller
     public function getDispatch(Request $request, $id)
     {
         $item = Dispatch::with(['dispatchable', 'user', 'dispatchable.user'])->find($id);
-
+        if ($item->type === 'order') {
+            $item->load('transaction');
+        }
         $item && \Gate::authorize('usable', 'dispatch.'.$item->status);
 
         return $this->buildResponse([
