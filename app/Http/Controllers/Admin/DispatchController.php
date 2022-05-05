@@ -63,7 +63,7 @@ class DispatchController extends Controller
     {
         $item = Dispatch::with(['dispatchable', 'user', 'dispatchable.user'])->find($id);
         if ($item->type === 'order') {
-            $item->load('transaction');
+            $item->load('dispatchable.transaction');
         }
         $item && \Gate::authorize('usable', 'dispatch.'.$item->status);
 
