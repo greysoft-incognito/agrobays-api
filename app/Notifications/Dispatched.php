@@ -57,16 +57,16 @@ class Dispatched extends Notification
         $message = [
             'order' => [
                 'name' => $notifiable->dispatchable->user->firstname,
-                'cta' => ['code' => $notifiable->code],
+                'cta' => $status === 'shipped' ? ['code' => $notifiable->code] : null,
                 'message_line1' => $line1[$status]??'Your package has been shipped and will be delivered soon.',
                 'close_greeting' => __('Regards, <br/>:0', [config('settings.site_name')]),
-                'message_help' => $status === 'pending'
+                'message_help' => $status === 'shipped'
                     ? 'Don\'t give this code to the dispatch rider till you have received your package.'
                     : 'You can call our help lines or email us if you encounter any challenges.',
             ],
             'bag' => [
                 'name' => $notifiable->dispatchable->user->firstname,
-                'cta' => ['code' => $notifiable->code],
+                'cta' => $status === 'shipped' ? ['code' => $notifiable->code] : null,
                 'message_line1' => 'Your food bag is on it\'s way to you, we will let you know when it\'s available, you will need the code below to confirm when you receive your bag.',
                 'close_greeting' => __('Regards, <br/>:0', [config('settings.site_name')]),
                 'message_help' => 'Don\'t give this code to the dispatch rider till you have received your package.',

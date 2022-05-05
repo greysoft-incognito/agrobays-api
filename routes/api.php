@@ -110,8 +110,8 @@ Route::middleware(['auth:sanctum'])->group(function() {
             Route::get('/', 'index');
             Route::get('/list/{limit?}/{role?}', 'index');
             Route::get('/{id}', 'getDispatch');
+            Route::post('/update-status', 'setStatus');
             Route::post('/{id?}', 'store');
-            Route::post('/uodate-status', 'setStatus');
             Route::delete('/{id?}', 'destroy');
         });
 

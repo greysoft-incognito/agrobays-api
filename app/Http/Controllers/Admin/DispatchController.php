@@ -100,7 +100,7 @@ class DispatchController extends Controller
         $item->save();
 
         // Notify the user of the change
-        // $item->dispatchable>notify(new Dispatched());
+        $item->notify(new Dispatched());
 
         return $this->buildResponse([
             'message' => 'Item status has been updated.',
@@ -153,7 +153,7 @@ class DispatchController extends Controller
         $item->save();
 
         // Notify the user of the change
-        // $item->dispatchable>notify(new Dispatched());
+        $item->notify(new Dispatched());
 
         return $this->buildResponse([
             'message' => $id ? 'Item has been updated' : 'New item created.',
