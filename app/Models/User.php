@@ -224,6 +224,16 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Get all of the dispatches for the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function dispatches(): HasMany
+    {
+        return $this->hasMany(Dispatch::class);
+    }
+
+    /**
      * Get all of the savings for the User
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

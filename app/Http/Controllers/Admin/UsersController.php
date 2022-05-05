@@ -58,6 +58,10 @@ class UsersController extends Controller
 
         $users = ($limit <= 0 || $limit === 'all') ? $query->get() : $query->paginate($limit);
 
+        if ($role === 'dispatch') {
+            $users->load('dispatches');
+        }
+
         return $this->buildResponse([
             'message' => 'OK',
             'status' =>  $users->isEmpty() ? 'info' : 'success',

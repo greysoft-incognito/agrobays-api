@@ -39,7 +39,11 @@ class AccountController extends Controller
     public function index(Auth $auth)
     {
         $user = $auth::user();
-        $user->subscription;
+        $user->load('subscription');
+
+        if ($user->role === 'dispatch') {
+            $user->load('dispatches');
+        }
         return $this->buildResponse([
             'message' => 'OK',
             'status' => 'success',
