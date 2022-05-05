@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Notifications\Notifiable;
 
 class Dispatch extends Model
@@ -27,6 +28,7 @@ class Dispatch extends Model
      */
     protected $appends = [
         'last_location',
+        'item_type',
     ];
 
     /**
@@ -80,6 +82,25 @@ class Dispatch extends Model
     }
 
     /**
+     * Interact with the dispatch's last type.
+     *
+     * @return  \Illuminate\Database\Eloquent\Casts\Attribute
+     */
+    public function itemType(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value, $attributes) {
+                if ($this->dispatchable instanceof Order) {
+                    return 'Fruit/Food Order';
+                } elseif ($this->dispatchable instanceof Subscription) {
+                    return 'Subscription';
+                }
+                return 'Package';
+            }
+        );
+    }
+
+    /**
      * Route notifications for the mail channel.
      *
      * @param  \Illuminate\Notifications\Notification  $notification
@@ -89,5 +110,15 @@ class Dispatch extends Model
     {
         // Return email address and name...
         return [$this->dispatchable->user->email => $this->dispatchable->user->firstname];
+    }
+
+    /**
+     * Get the user that owns the Dispatch (Handler/Rider)
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

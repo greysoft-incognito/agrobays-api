@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Dispatch;
+use App\Notifications\Dispatched;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -98,6 +99,9 @@ class DispatchController extends Controller
 
         $item->save();
 
+        // Notify the user of the change
+        // $item->dispatchable>notify(new Dispatched());
+
         return $this->buildResponse([
             'message' => 'Item status has been updated.',
             'status' =>  'success',
@@ -147,6 +151,9 @@ class DispatchController extends Controller
         $item->status = $request->status ?? 'pending';
 
         $item->save();
+
+        // Notify the user of the change
+        // $item->dispatchable>notify(new Dispatched());
 
         return $this->buildResponse([
             'message' => $id ? 'Item has been updated' : 'New item created.',
