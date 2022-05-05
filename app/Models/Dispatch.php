@@ -93,7 +93,7 @@ class Dispatch extends Model
                 if ($this->dispatchable instanceof Order) {
                     return 'Fruit/Food Order';
                 } elseif ($this->dispatchable instanceof Subscription) {
-                    return 'Subscription';
+                    return 'Food Bag';
                 }
                 return 'Package';
             }
