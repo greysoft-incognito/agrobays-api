@@ -29,6 +29,7 @@ class Dispatch extends Model
     protected $appends = [
         'last_location',
         'item_type',
+        'type',
     ];
 
     /**
@@ -82,20 +83,39 @@ class Dispatch extends Model
     }
 
     /**
-     * Interact with the dispatch's last type.
+     * Interact with the dispatch's type name.
      *
      * @return  \Illuminate\Database\Eloquent\Casts\Attribute
      */
     public function itemType(): Attribute
     {
         return Attribute::make(
-            get: function ($value, $attributes) {
+            get: function () {
                 if ($this->dispatchable instanceof Order) {
                     return 'Fruit/Food Order';
                 } elseif ($this->dispatchable instanceof Subscription) {
                     return 'Food Bag';
                 }
                 return 'Package';
+            }
+        );
+    }
+
+    /**
+     * Interact with the dispatch's type.
+     *
+     * @return  \Illuminate\Database\Eloquent\Casts\Attribute
+     */
+    public function type(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                if ($this->dispatchable instanceof Order) {
+                    return 'order';
+                } elseif ($this->dispatchable instanceof Subscription) {
+                    return 'foodbag';
+                }
+                return 'package';
             }
         );
     }
