@@ -65,7 +65,7 @@ class DispatchController extends Controller
         if ($item->type === 'order') {
             $item->load('dispatchable.transaction', 'dispatchable.user');
         } elseif ($item->type === 'foodbag') {
-            $item->load('dispatchable.bag');
+            $item->load('dispatchable.bag', 'dispatchable.user');
         }
         $item && \Gate::authorize('usable', 'dispatch.'.$item->status);
 
