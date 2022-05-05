@@ -12,6 +12,15 @@ class Dispatch extends Model
     use HasFactory, Notifiable;
 
     /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'code',
+    ];
+
+    /**
      * The accessors to append to the model's array form.
      *
      * @var array
