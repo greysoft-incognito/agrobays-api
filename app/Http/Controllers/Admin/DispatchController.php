@@ -61,7 +61,7 @@ class DispatchController extends Controller
 
     public function getDispatch(Request $request, $id)
     {
-        $item = Dispatch::with(['dispatchable', 'user'])->find($id);
+        $item = Dispatch::with(['dispatchable', 'user', 'dispatchable.user'])->find($id);
 
         $item && \Gate::authorize('usable', 'dispatch.'.$item->status);
 
