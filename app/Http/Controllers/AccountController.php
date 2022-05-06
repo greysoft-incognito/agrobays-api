@@ -206,10 +206,13 @@ class AccountController extends Controller
             'nextofkin_phone' => ['required', 'string', 'max:255'],
             'address.home' => ['required', 'string', 'max:255'],
             'address.shipping' => ['nullable', 'string', 'max:255'],
-            'country.*' => ['required', 'string', 'max:255'],
-            'state.*' => ['required', 'string', 'max:255'],
-            'city.*' => ['required', 'string', 'max:255'],
+            'country.name' => ['required', 'string', 'max:255'],
+            'state.name' => ['required', 'string', 'max:255'],
+            'city.name' => ['required', 'string', 'max:255'],
         ], [], [
+            'country.name' => "Country",
+            'state.name' => "State",
+            'city.name' => "City",
             'address.home' => "Home Address",
             'address.shipping' => "Shipping Address"
         ]);
