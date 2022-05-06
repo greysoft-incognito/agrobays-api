@@ -19,7 +19,14 @@ use Illuminate\Support\Facades\Auth;
 */
 
 Route::get('/', function () {
-    return ['Agrobays' => env('APP_VERSION', '1.0.6-beta')];
+    return [
+        'Welcome to Agrobays API v1' => [
+            'name' => 'Agrobays',
+            'version' => env('APP_VERSION', '1.0.6-beta'),
+            'author' => 'Greysoft Limited',
+            'updated' => now(),
+        ],
+    ];
 });
 
 Route::middleware(['auth:sanctum', 'admin'])->group(function() {

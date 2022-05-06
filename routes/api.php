@@ -35,6 +35,12 @@ use Illuminate\Support\Facades\Gate;
 
 Route::get('/get/settings', function() {
     return response([
+        'api' => [
+            'name' => 'Agrobays',
+            'version' => env('APP_VERSION', '1.0.6-beta'),
+            'author' => 'Greysoft Limited',
+            'updated' => now(),
+        ],
         'message' => "OK",
         'status' => "success",
         'response_code' => 200,
