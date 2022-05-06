@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Auth;
 */
 
 Route::get('/', function () {
-    return ['Agrobays' => '1.0.5-beta'];
+    return ['Agrobays' => env('APP_VERSION', '1.0.6-beta')];
 });
 
 Route::middleware(['auth:sanctum', 'admin'])->group(function() {

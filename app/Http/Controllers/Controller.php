@@ -34,6 +34,12 @@ class Controller extends BaseController
         unset($data['message'], $data['response_code'], $data['status'], $data['errors'], $data['token'], $data['response_data']);
 
         $response = [
+            'api' => [
+                'name' => 'Agrobays',
+                'version' => env('APP_VERSION', '1.0.6-beta'),
+                'author' => 'Greysoft Limited',
+                'updated' => now(),
+            ],
             'message' => $message,
             'status' => $status,
             'response_code' => $code,

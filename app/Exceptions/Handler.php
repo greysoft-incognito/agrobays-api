@@ -5,6 +5,7 @@ namespace App\Exceptions;
 use App\Http\Controllers\Controller;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Support\Facades\Request;
 use Throwable;
@@ -42,21 +43,14 @@ class Handler extends ExceptionHandler
             //
         });
 
-        $this->renderable(function (NotFoundHttpException $e) {
-            return $this->renderException('Not Found.', 404);
-        });
-
-        $this->renderable(function (AccessDeniedHttpException $e) {
-            return $this->renderException($e->getMessage(), 403);
+        $this->renderable(function (AccessDeniedHttpException | MethodNotAllowedHttpException | NotFoundHttpException | UnprocessableEntityHttpException $e) {
+            return $this->renderException($e->getMessage(), $e->getStatusCode());
         });
 
         $this->renderable(function (UnauthorizedHttpException $e) {
             return $this->renderException('You are not logged in.', 401);
         });
 
-        $this->renderable(function (UnprocessableEntityHttpException $e) {
-            return $this->renderException('Unprocessable Entity.', 433);
-        });
     }
 
     protected function renderException($msg, $code = 404)
