@@ -7,7 +7,7 @@ use App\Models\Dispatch;
 use App\Notifications\Dispatched;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class DispatchController extends Controller
@@ -23,6 +23,10 @@ class DispatchController extends Controller
     {
         \Gate::authorize('usable', 'dispatch.'.$status);
         $query = Dispatch::query()->with(['dispatchable', 'user']);
+
+        if (Auth::user()->role === 'dispatch') {
+            $query->where('user_id', Auth::id());
+        }
 
         if ($status !== 'all') {
             $query->where('status', $status);
@@ -61,7 +65,14 @@ class DispatchController extends Controller
 
     public function getDispatch(Request $request, $id)
     {
-        $item = Dispatch::with(['dispatchable', 'user', 'dispatchable.user'])->find($id);
+        $query = Dispatch::query();
+
+        if (Auth::user()->role === 'dispatch') {
+            $query->where('user_id', Auth::id());
+        }
+
+        $item = $query->with(['dispatchable', 'user', 'dispatchable.user'])->find($id);
+
         if ($item->type === 'order') {
             $item->load('dispatchable.transaction', 'dispatchable.user');
         } elseif ($item->type === 'foodbag') {
@@ -86,7 +97,13 @@ class DispatchController extends Controller
      */
     public function setStatus(Request $request)
     {
-        $item = Dispatch::find($request->id);
+        $query = Dispatch::query();
+
+        if (Auth::user()->role === 'dispatch') {
+            $query->where('user_id', Auth::id());
+        }
+
+        $item = $query->find($request->id);
         $item && \Gate::authorize('usable', 'dispatch.'.$item->status);
         if (!$item) {
             return $this->buildResponse([
@@ -123,7 +140,13 @@ class DispatchController extends Controller
      */
     public function store(Request $request, $id = '')
     {
-        $item = Dispatch::find($id);
+        $query = Dispatch::query();
+
+        if (Auth::user()->role === 'dispatch') {
+            $query->where('user_id', Auth::id());
+        }
+
+        $item = $query->find($id);
         $item && \Gate::authorize('usable', 'dispatch.'.$item->status);
         if ($id && !$item) {
             return $this->buildResponse([
@@ -174,10 +197,16 @@ class DispatchController extends Controller
      */
     public function destroy(Request $request, $id = null)
     {
+        $query = Dispatch::query();
+
+        if (Auth::user()->role === 'dispatch') {
+            $query->where('user_id', Auth::id());
+        }
+
         if ($request->items)
         {
-            $count = collect($request->items)->map(function($id) {
-                $item = Dispatch::whereId($id)->first();
+            $count = collect($request->items)->map(function($id) use($query) {
+                $item = $query->whereId($id)->first();
                 $item && \Gate::authorize('usable', 'dispatch.'.$item->status);
                 if ($item) {
                     return $item->delete();
@@ -193,7 +222,7 @@ class DispatchController extends Controller
         }
         else
         {
-            $item = Dispatch::whereId($id)->first();
+            $item = $query->whereId($id)->first();
             $item && \Gate::authorize('usable', 'dispatch.'.$item->status);
         }
 
