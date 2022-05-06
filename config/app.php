@@ -172,6 +172,7 @@ return [
         Yajra\DataTables\DataTablesServiceProvider::class,
         Spatie\SlashCommand\SlashCommandServiceProvider::class,
         Madnest\Madzipper\MadzipperServiceProvider::class,
+        hrace009\ConfigWriter\ServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -203,4 +204,3 @@ return [
     ])->toArray(),
 
 ];
-

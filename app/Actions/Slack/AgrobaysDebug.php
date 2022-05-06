@@ -19,11 +19,9 @@ class AgrobaysDebug extends SignatureHandler
     }
 
     public function handle(Request $request): Response
-    {   
+    {
         $action = $this->getArgument('action');
-        $settings = \Settings::options(['settings' => 'settings']);
-        $json = \Settings::fresh()->json()->options(['settings' => 'settings'])->get();
-        $settings->saveConfigFile(['slack_debug' => ($action === 'on' ? 'true' : 'false')], $json);
+        \Config::write('settings.slack_debug', $action === 'on');
 
         return $this->respondToSlack('')
             ->withAttachment(Attachment::create()

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "dd4d4d0b265bbeb95f54c4296d214d77",
+    "content-hash": "27ff60a3e529c27ba7552bf6c9d411ac",
     "packages": [
         {
             "name": "brick/math",
@@ -892,6 +892,50 @@
                 }
             ],
             "time": "2022-03-20T21:55:58+00:00"
+        },
+        {
+            "name": "hrace009/config-writer",
+            "version": "1.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hrace009/config-writer.git",
+                "reference": "f8848e78609ffad651fd07ee50bf6bbd65d7fbf3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/hrace009/config-writer/zipball/f8848e78609ffad651fd07ee50bf6bbd65d7fbf3",
+                "reference": "f8848e78609ffad651fd07ee50bf6bbd65d7fbf3",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/config": "^5.0|^6.0|^7.0|^8.0|^9.0",
+                "php": ">=7.1.0|^8.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^8.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "hrace009\\ConfigWriter\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Harris Marfel",
+                    "email": "hrace009@gmail.com"
+                }
+            ],
+            "description": "Write to Laravel Config files and maintain file integrity",
+            "support": {
+                "issues": "https://github.com/hrace009/config-writer/issues",
+                "source": "https://github.com/hrace009/config-writer/tree/v1.3"
+            },
+            "time": "2022-02-15T07:42:17+00:00"
         },
         {
             "name": "intervention/image",

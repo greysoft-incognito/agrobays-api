@@ -19,6 +19,7 @@ return [
     'default_banner' => env('ASSETS_URL', 'http://localhost:8080') . '/media/default_banner.png',
     'paystack_public_key' => env('PAYSTACK_PUBLIC_KEY', 'pk_'),
     'trx_prefix' => 'AGB-',
+    'contact_address' => 'http://domain.com',
     'permissions' => [
         'manage_guests' => 'View, manage and get notifications for guest and bootcamp registrations',
         'manage_users' => 'Create, view, manage and get notifications for user access',
