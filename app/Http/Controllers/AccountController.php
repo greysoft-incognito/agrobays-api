@@ -101,12 +101,7 @@ class AccountController extends Controller
     public function updateField(Request $request, $identifier = 'password')
     {
         $filled = collect($request->all());
-        $fields = collect($request->all())->keys();
-
-        foreach ($fields as $key => $_field) {
-            $allow = in_array($_field, $this->fillable);
-            if (!$allow) break;
-        }
+        $fields = collect($request->all())->only($this->fillable)->keys();
 
         $updated = [];
         $user = User::find(Auth::id());
@@ -138,12 +133,12 @@ class AccountController extends Controller
             return collect(array_keys($filled[$field]))->mapWithKeys(fn($k)=>["$field.$k" => "$k $field"]);
         })->all());
 
-        if ($validator->fails() || !$allow) {
+        if ($validator->fails()) {
             return $this->buildResponse([
-                'message' => !$allow ? 'An error occured!' : $validator->errors()->first(),
+                'message' => $validator->errors()->first(),
                 'status' => 'error',
                 'response_code' => 422,
-                'errors' => !$allow ? ["You are not allowed to update $_field"] : $validator->errors(),
+                'errors' => $validator->errors(),
             ]);
         }
 
@@ -164,8 +159,6 @@ class AccountController extends Controller
                 if (Str::contains($_field, ':image')) {
                     $_field = current(explode(':image', (string)$_field));
                 }
-                $allow = in_array($_field, $this->fillable);
-                if (!$allow) break;
 
                 if ($_field !== 'password') {
                     $updated[$_field] = $request->{$_field};
