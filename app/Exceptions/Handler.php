@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Support\Facades\Request;
 use Throwable;
@@ -43,7 +44,7 @@ class Handler extends ExceptionHandler
             //
         });
 
-        $this->renderable(function (AccessDeniedHttpException | MethodNotAllowedHttpException | NotFoundHttpException | UnprocessableEntityHttpException $e) {
+        $this->renderable(function (AccessDeniedHttpException | MethodNotAllowedHttpException | NotFoundHttpException | UnprocessableEntityHttpException | ThrottleRequestsException $e) {
             return $this->renderException($e->getMessage(), $e->getStatusCode());
         });
 
