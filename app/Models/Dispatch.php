@@ -77,7 +77,7 @@ class Dispatch extends Model
             },
             set: fn($value) => ["last_location" => json_encode([
                 "lon" => $value->lon??$value['lon']??'',
-                "lat" => $value->lat??$value['lat']??$value??'',
+                "lat" => $value->lat??$value['lat']??'',
             ])]
         );
     }
