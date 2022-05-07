@@ -115,6 +115,7 @@ class DispatchController extends Controller
         }
 
         $item = $item ?? new Dispatch;
+        $item_status = $item->status;
 
         $item->last_location = $request->last_location ?? $item->last_location;
         $item->status = $request->status ?? 'pending';
@@ -122,7 +123,9 @@ class DispatchController extends Controller
         $item->save();
 
         // Notify the user of the change
-        $item->notify(new Dispatched());
+        if ((!$item->user_id && $request->status === 'pending') || $item_status !== $request->status) {
+            $item->notify(new Dispatched());
+        }
 
         return $this->buildResponse([
             'message' => 'Item status has been updated.',
@@ -174,6 +177,7 @@ class DispatchController extends Controller
         }
 
         $item = $item ?? new Dispatch;
+        $item_status = $item->status;
 
         $item->user_id = $request->user_id ?? null;
         $item->last_location = $request->last_location ?? $item->last_location;
@@ -182,7 +186,9 @@ class DispatchController extends Controller
         $item->save();
 
         // Notify the user of the change
-        $item->notify(new Dispatched());
+        if ((!$item->user_id && $request->status === 'pending') || $item_status !== $request->status) {
+            $item->notify(new Dispatched());
+        }
 
         return $this->buildResponse([
             'message' => $id ? 'Item has been updated' : 'New item created.',
