@@ -59,7 +59,7 @@ class Permissions
     ];
 
     public function check(User $user, $permission)
-    {dd($this->allowed[$user->role??'user']);
+    {
         if (in_array($permission, $this->allowed[$user->role??'user'], true)) {
             return true;
         }
