@@ -153,7 +153,6 @@ class DispatchController extends Controller
         }
 
         $item = $query->find($id);
-        $item && \Gate::authorize('usable', 'dispatch.'.$item->status);
         if ($id && !$item) {
             return $this->buildResponse([
                 'message' => 'The requested item no longer exists',
@@ -238,7 +237,6 @@ class DispatchController extends Controller
         else
         {
             $item = $query->whereId($id)->first();
-            $item && \Gate::authorize('usable', 'dispatch.'.$item->status);
         }
 
         if ($item)
