@@ -99,6 +99,7 @@ class DispatchController extends Controller
     {
         $query = Dispatch::query();
 
+        \Gate::authorize('usable', 'dispatch.status');
         if (Auth::user()->role === 'dispatch') {
             $query->where('user_id', Auth::id());
         }
@@ -142,7 +143,7 @@ class DispatchController extends Controller
     {
         $query = Dispatch::query();
 
-        \Gate::authorize('usable', 'dispatch.delete');
+        \Gate::authorize('usable', 'dispatch.update');
         if (Auth::user()->role === 'dispatch') {
             $query->where('user_id', Auth::id());
         }
