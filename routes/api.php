@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\DispatchController;
 use App\Http\Controllers\Admin\UsersController;
 use App\Http\Controllers\FrontContentController;
 use App\Http\Controllers\FruitBayController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SavingsController;
 use App\Http\Controllers\SubscriptionController;
@@ -243,6 +244,18 @@ Route::middleware(['auth:sanctum'])->group(function() {
             Route::get('/{transaction_id?}', 'index')->name('index');
             Route::get('/invoice/{transaction_id?}', 'invoice')->name('invoice');
             Route::get('/limit/{limit?}/{status?}', 'transactions')->name('limited');
+        });
+
+        // Orders Controller Routes
+        Route::prefix('orders')->name('orders.')
+        ->controller(OrderController::class)
+        ->group(function() {
+            Route::get('/dispatch/limit/{limit?}', 'dispatches');
+            Route::get('/dispatch/{id?}', 'getDispatch');
+            Route::get('/dispatch', 'dispatches');
+            Route::get('/limit/{limit?}', 'index');
+            Route::get('/{id}', 'getOrder');
+            Route::get('/', 'index');
         });
 
         // Savings Routes

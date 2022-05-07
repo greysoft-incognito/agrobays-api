@@ -63,6 +63,14 @@ class DispatchController extends Controller
         ]);
     }
 
+
+    /**
+     * Get a particular dispatch
+     *
+     * @param Request $request
+     * @param string $id
+     * @return void
+     */
     public function getDispatch(Request $request, $id)
     {
         $query = Dispatch::query();
