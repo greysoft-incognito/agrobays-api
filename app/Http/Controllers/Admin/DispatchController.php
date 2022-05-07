@@ -116,6 +116,7 @@ class DispatchController extends Controller
 
         $item = $item ?? new Dispatch;
         $item_status = $item->status;
+        $item_user_id = $item->user_id;
 
         $item->last_location = $request->last_location ?? $item->last_location;
         $item->status = $request->status ?? 'pending';
@@ -123,7 +124,7 @@ class DispatchController extends Controller
         $item->save();
 
         // Notify the user of the change
-        if ((!$item->user_id && $request->status === 'pending') || $item_status !== $request->status) {
+        if ((!$item_user_id && $request->status === 'pending') || $item_status !== $request->status) {
             $item->notify(new Dispatched());
         }
 
@@ -178,6 +179,7 @@ class DispatchController extends Controller
 
         $item = $item ?? new Dispatch;
         $item_status = $item->status;
+        $item_user_id = $item->user_id;
 
         $item->user_id = $request->user_id ?? null;
         $item->last_location = $request->last_location ?? $item->last_location;
@@ -185,8 +187,12 @@ class DispatchController extends Controller
 
         $item->save();
 
+        if ($item_user_id !== $item->user_id) {
+            $item->notify(new Dispatched('assigned'));
+        }
+
         // Notify the user of the change
-        if ((!$item->user_id && $request->status === 'pending') || $item_status !== $request->status) {
+        if ((!$item_user_id && $request->status === 'pending') || $item_status !== $request->status) {
             $item->notify(new Dispatched());
         }
 

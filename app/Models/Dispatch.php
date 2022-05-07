@@ -129,7 +129,11 @@ class Dispatch extends Model
     public function routeNotificationForMail($notification)
     {
         // Return email address and name...
-        return [$this->dispatchable->user->email => $this->dispatchable->user->firstname];
+        if ($notification->status === 'assigned') {
+            return $this->user ? [$this->user->email => $this->user->firstname] : null;
+        } else {
+            return [$this->dispatchable->user->email => $this->dispatchable->user->firstname];
+        }
     }
 
     /**
