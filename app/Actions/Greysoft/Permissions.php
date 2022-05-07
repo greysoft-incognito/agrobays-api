@@ -23,6 +23,7 @@ class Permissions
             'transactions',
             'dispatch',
             'dispatch.pending',
+            'dispatch.assigned',
             'dispatch.confirmed',
             'dispatch.dispatched',
             'dispatch.delivered',
@@ -39,12 +40,14 @@ class Permissions
             'savings_plans',
             'subscriptions',
             'transactions',
+            'dispatch.pending',
             'dispatch.assigned',
             'dispatch.confirmed',
             'dispatch.dispatched',
             'dispatch.delivered',
         ],
         'dispatch' => [
+            'dispatch.pending',
             'dispatch.assigned',
             'dispatch.confirmed',
             'dispatch.dispatched',
@@ -56,7 +59,7 @@ class Permissions
     ];
 
     public function check(User $user, $permission)
-    {
+    {dd($this->allowed[$user->role??'user']);
         if (in_array($permission, $this->allowed[$user->role??'user'], true)) {
             return true;
         }
