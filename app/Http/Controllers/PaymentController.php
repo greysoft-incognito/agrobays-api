@@ -145,11 +145,11 @@ class PaymentController extends Controller
 
             $delivery_method = $request->delivery_method ?? 'delivery';
 
-            if ($request->address && $request->address !== Auth::user()->address){
-                $user = User::find(Auth::id());
-                $user->address = $request->address;
-                $user->save();
-            }
+            // if ($request->address && $request->address !== Auth::user()->address){
+            //     $user = User::find(Auth::id());
+            //     $user->address = $request->address;
+            //     $user->save();
+            // }
 
             $real_due = 0;
             $code = 403;
