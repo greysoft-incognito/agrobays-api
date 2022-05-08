@@ -50,7 +50,7 @@ class Dispatched extends Notification
         $fl = env('FRONTEND_LINK');
         $line1 = [
             'shipped' => "Your {$package} with REF: {$n->reference} is on it's way to you, we will let you know when it's available, you will need the code below to confirm when you receive your order.",
-            'confirmed' => "Your {$package} with REF: {$n->reference} has been confirmed and will be dispatched soon. Track your package <a href=\"{$l}/track/order/{$n->reference}\">Here</a>",
+            'confirmed' => "Your {$package} with REF: {$n->reference} has been confirmed and will be dispatched soon. Track your package <a href=\"{$fl}/track/order/{$n->reference}\">Here</a>",
             'dispatched' => "Your {$package} with REF: {$n->reference} has been dispatched and will be delivered soon, your handler will call you from {$handler_phone}, please keep your phone reachable.",
             'delivered' => 'Congratulations, you package has been delivered, thanks for engaging our services.',
             'assigned' => "You have been assigned to deliver {$package} package with REF: {$n->reference} to {$n->dispatchable->user->fullname} ({$n->dispatchable->user->phone}), you are required to visit the dispatch facility for further instructions.",

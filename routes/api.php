@@ -50,7 +50,7 @@ Route::get('/get/settings', function() {
 });
 
 Route::get('/track/order/{reference?}', function($reference = null) {
-    $order = Dispatch::whereReference($reference)->first();
+    $order = Dispatch::whereReference($reference)->where('status', '!=', 'delivered')->first();
     return (new Controller)->buildResponse([
         "message" => $order ? "OK" : "Invalid tracking code",
         "status" =>  $order ? "success" : "info",

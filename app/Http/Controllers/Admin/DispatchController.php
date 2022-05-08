@@ -133,7 +133,9 @@ class DispatchController extends Controller
 
         // Update the location of all this dispatch user's packages
         if ($item->last_location->lon && $item->last_location->lat) {
-            Dispatch::where('user_id', $item->user_id)->update(['last_location' => ['lon' => $item->last_location->lon, 'lat' => $item->last_location->lat]]);
+            Dispatch::where('user_id', $item->user_id)
+                ->where('status', 'confirmed')
+                ->update(['last_location' => ['lon' => $item->last_location->lon, 'lat' => $item->last_location->lat]]);
         }
 
         // Notify the user of the change
