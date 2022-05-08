@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Subscription extends Model
@@ -18,6 +19,7 @@ class Subscription extends Model
         'days_left',
         'total_saved',
         'total_left',
+        'items'
     ];
 
     /**
@@ -76,6 +78,18 @@ class Subscription extends Model
     public function bag(): HasOne
     {
         return $this->hasOne(FoodBag::class, 'id', 'food_bag_id');
+    }
+
+    /**
+     * Get the items in the foodBag associated with the Subscription
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
+     */
+    public function items(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->bag->foods
+        );
     }
 
     public function paidDays(): Attribute
