@@ -46,7 +46,7 @@ class Handler extends ExceptionHandler
 
         $this->renderable(function (
             \ErrorException | AccessDeniedHttpException | MethodNotAllowedHttpException | NotFoundHttpException | UnprocessableEntityHttpException | ThrottleRequestsException $e) {
-            return $this->renderException($e->getMessage(), $e->getStatusCode());
+            return $this->renderException($e->getMessage(), $e instanceof \ErrorException ? 500 : $e->getStatusCode());
         });
 
         $this->renderable(function (UnauthorizedHttpException $e) {
