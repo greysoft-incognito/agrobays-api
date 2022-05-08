@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AdminFoodbagsController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SavingsController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TransactionController;
+use App\Models\Dispatch;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Gate;
 
@@ -35,23 +37,25 @@ use Illuminate\Support\Facades\Gate;
 */
 
 Route::get('/get/settings', function() {
-    return response([
-        'api' => [
-            'name' => 'Agrobays',
-            'version' => env('APP_VERSION', '1.0.6-beta'),
-            'author' => 'Greysoft Limited',
-            'updated' => now(),
-        ],
-        'message' => "OK",
-        'status' => "success",
-        'response_code' => 200,
-        'response' => [
-            "settings" => collect(config("settings"))->except(['permissions', 'messages']),
-            "fruitbay_categories" => \App\Models\FruitBayCategory::all(),
-            "foodbags" => \App\Models\FoodBag::all(),
-            "plans" => \App\Models\Plan::all(),
-            "csrf_token" => csrf_token()
-        ],
+    return (new Controller)->buildResponse([
+        "message" => "OK",
+        "status" =>  "success",
+        "response_code" => 200,
+        "settings" => collect(config("settings"))->except(['permissions', 'messages']),
+        "fruitbay_categories" => \App\Models\FruitBayCategory::all(),
+        "foodbags" => \App\Models\FoodBag::all(),
+        "plans" => \App\Models\Plan::all(),
+        "csrf_token" => csrf_token()
+    ]);
+});
+
+Route::get('/track/order/{reference?}', function($reference = null) {
+    $order = Dispatch::whereReference($reference)->first();
+    return (new Controller)->buildResponse([
+        "message" => $order ? "OK" : "Invalid tracking code",
+        "status" =>  $order ? "success" : "info",
+        "response_code" => $order ? 200 : 404,
+        "order" => $order ? $order->only(['id', 'last_location', 'status']) : []
     ]);
 });
 
