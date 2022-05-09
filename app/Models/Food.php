@@ -43,6 +43,6 @@ class Food extends Model
      */
     public function foodbag(): BelongsTo
     {
-        return $this->belongsTo(Plan::class);
+        return $this->belongsTo(FoodBag::class, 'food_bag_id');
     }
 }
