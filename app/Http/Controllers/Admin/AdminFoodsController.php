@@ -17,7 +17,7 @@ class AdminFoodsController extends Controller
     public function index(Request $request, $limit = '15')
     {
         \Gate::authorize('usable', 'foods');
-        $query = Food::query();
+        $query = Food::query()->with('plan');
 
         // Search and filter columns
         if ($request->search) {
@@ -158,4 +158,3 @@ class AdminFoodsController extends Controller
         ]);
     }
 }
-
