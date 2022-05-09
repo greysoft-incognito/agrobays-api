@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Food extends Model
 {
@@ -33,5 +34,15 @@ class Food extends Model
         return Attribute::make(
             get: fn () => $image,
         );
+    }
+
+    /**
+     * Get the foodbag that owns the food
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function foodbag(): BelongsTo
+    {
+        return $this->belongsTo(Plan::class);
     }
 }
