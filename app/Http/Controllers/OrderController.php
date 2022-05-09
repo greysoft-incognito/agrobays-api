@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Dispatch;
+use App\Models\Order;
+use App\Models\Subscription;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Carbon\CarbonImmutable as Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -81,7 +84,13 @@ class OrderController extends Controller
      */
     public function dispatches(Request $request, $limit = '15')
     {
-        $query = Dispatch::where('user_id', '!=', null)->whereRelation('dispatchable.user', 'id', Auth::id());
+        $query = Dispatch::where('user_id', '!=', null)->whereHasMorph(
+            'dispatchable',
+            [Order::class, Subscription::class],
+            function($query) {
+                $query->where('user_id', Auth::id());
+            }
+        );
 
         if (is_numeric($limit) && $limit > 0)
         {
@@ -120,7 +129,13 @@ class OrderController extends Controller
      */
     public function getDispatch(Request $request, $id)
     {
-        $query = Dispatch::where('user_id', '!=', null)->whereRelation('dispatchable.user', 'id', Auth::id());
+        $query = Dispatch::where('user_id', '!=', null)->whereHasMorph(
+            'dispatchable',
+            [Order::class, Subscription::class],
+            function($query) {
+                $query->where('user_id', Auth::id());
+            }
+        );
 
         $item = $query->with(['dispatchable', 'user', 'dispatchable.user'])->find($id);
 
