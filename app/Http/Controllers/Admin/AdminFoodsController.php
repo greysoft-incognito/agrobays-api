@@ -14,33 +14,38 @@ use Nette\Utils\Html;
 
 class AdminFoodsController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, $limit = '15')
     {
         \Gate::authorize('usable', 'foods');
-        $model = Food::query();
-        return app('datatables')->eloquent($model)
-            ->editColumn('created_at', function(Food $item) {
-                return $item->created_at->format('Y-m-d H:i');
-            })
-            ->editColumn('description', function(Food $item) {
-                return Str::words($item->description, '8');
-            })
-            ->addColumn('action', function (Food $item) {
-                return implode([
-                    Html::el('a', ["onclick"=>"hotLink('/admin/edit-food/".$item->id."')", "href"=>"javascript:void(0)"])->title(__('Edit'))->setHtml(Html::el('i')->class('ri-edit-circle-fill ri-2x text-primary')),
-                    Html::el('a', ["onclick"=>"hotLink('/admin/food/delete/".$item->id."')", "href"=>"javascript:void(0)"])->title(__('Delete'))->setHtml(Html::el('i')->class('ri-delete-bin-2-fill ri-2x text-negative'))
-                ]);
-            })
-            ->removeColumn('updated_at')->toJson();
+        $query = Food::query();
 
-        // $foods = Plan::paginate(15);
+        // Search and filter columns
+        if ($request->search) {
+            $query->where(function($query) use($request) {
+                $query->where('name', 'like', "%$request->search%")
+                    ->orWhere('description', 'like', "%$request->search%");
+            });
+        }
 
-        // return $this->buildResponse([
-        //     'message' => $foods->isEmpty() ? 'No food has been created' : '',
-        //     'status' => $foods->isEmpty() ? 'info' : 'success',
-        //     'response_code' => 200,
-        //     'foods' => $foods,
-        // ]);
+        // Reorder Columns
+        if ($request->order && is_array($request->order)) {
+            foreach ($request->order as $key => $dir) {
+                if ($dir === 'desc') {
+                    $query->orderByDesc($key??'id');
+                } else {
+                    $query->orderBy($key??'id');
+                }
+            }
+        }
+
+        $items = ($limit <= 0 || $limit === 'all') ? $query->get() : $query->paginate($limit);
+
+        return $this->buildResponse([
+            'message' => 'OK',
+            'status' =>  $items->isEmpty() ? 'info' : 'success',
+            'response_code' => 200,
+            'items' => $items??[],
+        ]);
     }
 
     public function getItem(Request $request, $item)
@@ -153,3 +158,4 @@ class AdminFoodsController extends Controller
         ]);
     }
 }
+

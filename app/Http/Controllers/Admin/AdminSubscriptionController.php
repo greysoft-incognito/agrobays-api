@@ -10,30 +10,37 @@ use Nette\Utils\Html;
 
 class AdminSubscriptionController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, $limit = '15')
     {
         \Gate::authorize('usable', 'subscriptions');
-        $model = Subscription::query();
-        return app('datatables')->eloquent($model)
-            ->editColumn('created_at', function(Subscription $item) {
-                return $item->created_at->format('Y-m-d H:i');
-            })
-            ->addColumn('action', function (Subscription $item) {
-                return implode([
-                    Html::el('a')->title(__('Edit'))->href('transactions/invoice/'.$item->id)->setHtml(Html::el('i')->class('ri-edit-circle-fill ri-2x text-primary')),
-                    Html::el('a')->title(__('Delete'))->href('transactions/invoice/'.$item->id)->setHtml(Html::el('i')->class('ri-delete-bin-2-fill ri-2x text-primary'))
-                ]);
-            })
-            ->removeColumn('updated_at')->toJson();
+        $query = Subscription::query();
 
-        // $subscription = Subscription::paginate(15);
+        // Search and filter columns
+        if ($request->search) {
+            $query->where(function($query) use($request) {
+                $query->where('status', 'like', "%$request->search%");
+            });
+        }
 
-        // return $this->buildResponse([
-        //     'message' => $subscription->isEmpty() ? 'No food has been created' : '',
-        //     'status' => $subscription->isEmpty() ? 'info' : 'success',
-        //     'response_code' => 200,
-        //     'subscription' => $subscription,
-        // ]);
+        // Reorder Columns
+        if ($request->order && is_array($request->order)) {
+            foreach ($request->order as $key => $dir) {
+                if ($dir === 'desc') {
+                    $query->orderByDesc($key??'id');
+                } else {
+                    $query->orderBy($key??'id');
+                }
+            }
+        }
+
+        $items = ($limit <= 0 || $limit === 'all') ? $query->get() : $query->paginate($limit);
+
+        return $this->buildResponse([
+            'message' => 'OK',
+            'status' =>  $items->isEmpty() ? 'info' : 'success',
+            'response_code' => 200,
+            'items' => $items??[],
+        ]);
     }
 
     public function getItem(Request $request, $item)

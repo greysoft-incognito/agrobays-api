@@ -12,33 +12,38 @@ use Illuminate\Validation\Rule;
 
 class AdminFoodbagsController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, $limit = '15')
     {
         \Gate::authorize('usable', 'foodbags');
-        $model = FoodBag::query();
-        return app('datatables')->eloquent($model)
-            ->editColumn('created_at', function(FoodBag $item) {
-                return $item->created_at->format('Y-m-d H:i');
-            })
-            ->editColumn('description', function(FoodBag $item) {
-                return Str::words($item->description, '8');
-            })
-            ->addColumn('action', function (FoodBag $item) {
-                return implode([
-                    Html::el('a', ["onclick"=>"hotLink('/admin/edit-foodbag/".$item->id."')", "href"=>"javascript:void(0)"])->title(__('Edit'))->setHtml(Html::el('i')->class('ri-edit-circle-fill ri-2x text-primary')),
-                    Html::el('a', ["onclick"=>"hotLink('/admin/foodbag/delete/".$item->id."')", "href"=>"javascript:void(0)"])->title(__('Delete'))->setHtml(Html::el('i')->class('ri-delete-bin-2-fill ri-2x text-negative'))
-                ]);
-            })
-            ->removeColumn('updated_at')->toJson();
+        $query = FoodBag::query();
 
-        // $bags = FoodBag::paginate(15);
+        // Search and filter columns
+        if ($request->search) {
+            $query->where(function($query) use($request) {
+                $query->where('title', 'like', "%$request->search%")
+                    ->orWhere('description', 'like', "%$request->search%");
+            });
+        }
 
-        // return $this->buildResponse([
-        //     'message' => $bags->isEmpty() ? 'No foodbag has been created' : '',
-        //     'status' => $bags->isEmpty() ? 'info' : 'success',
-        //     'response_code' => 200,
-        //     'bags' => $bags,
-        // ]);
+        // Reorder Columns
+        if ($request->order && is_array($request->order)) {
+            foreach ($request->order as $key => $dir) {
+                if ($dir === 'desc') {
+                    $query->orderByDesc($key??'id');
+                } else {
+                    $query->orderBy($key??'id');
+                }
+            }
+        }
+
+        $items = ($limit <= 0 || $limit === 'all') ? $query->get() : $query->paginate($limit);
+
+        return $this->buildResponse([
+            'message' => 'OK',
+            'status' =>  $items->isEmpty() ? 'info' : 'success',
+            'response_code' => 200,
+            'items' => $items??[],
+        ]);
     }
 
     public function getItem(Request $request, $item)

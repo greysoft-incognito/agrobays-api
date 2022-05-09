@@ -15,52 +15,53 @@ use Nette\Utils\Html;
 
 class AdminFruitBayCategoryController extends Controller
 {
-    public function index(Request $request, DataTables $dataTables)
+    public function index(Request $request, $limit = '15')
     {
-        \Gate::authorize('usable', 'fruitbay_category');
-        $model = FruitBayCategory::query();
+        $query = FruitBayCategory::query();
 
-        return app('datatables')->eloquent($model)
-            ->editColumn('created_at', function(FruitBayCategory $cat) {
-                return $cat->created_at->format('Y-m-d H:i');
-            })
-            ->editColumn('description', function(FruitBayCategory $cat) {
-                return Str::words($cat->description, '8');
-            })
-            ->addColumn('action', function (FruitBayCategory $cat) {
-                return implode([
-                    Html::el('a')->title(__('Edit'))->href('transactions/invoice/'.$cat->id)->setHtml(Html::el('i')->class('ri-edit-circle-fill ri-2x text-primary')),
-                    Html::el('a')->title(__('Delete'))->href('transactions/invoice/'.$cat->id)->setHtml(Html::el('i')->class('ri-delete-bin-2-fill ri-2x text-primary'))
-                ]);
-            })
-            ->removeColumn('updated_at')->toJson();
+        // Search and filter columns
+        if ($request->search) {
+            $query->where(function($query) use($request) {
+                $query->where('title', 'like', "%$request->search%")
+                    ->orWhere('description', 'like', "%$request->search%");
+            });
+        }
 
-        // $items = FruitBayCategory::paginate(15);
+        // Reorder Columns
+        if ($request->order && is_array($request->order)) {
+            foreach ($request->order as $key => $dir) {
+                if ($dir === 'desc') {
+                    $query->orderByDesc($key??'id');
+                } else {
+                    $query->orderBy($key??'id');
+                }
+            }
+        }
 
-        // return $this->buildResponse([
-        //     'message' => $items->isEmpty() ? 'No categories have been added.' : '',
-        //     'status' => $items->isEmpty() ? 'info' : 'success',
-        //     'response_code' => 200,
-        //     'items' => $items,
-        // ]);
+        $items = ($limit <= 0 || $limit === 'all') ? $query->get() : $query->paginate($limit);
+
+        return $this->buildResponse([
+            'message' => 'OK',
+            'status' =>  $items->isEmpty() ? 'info' : 'success',
+            'response_code' => 200,
+            'items' => $items??[],
+        ]);
     }
 
     public function getItem(Request $request, $item)
     {
-        \Gate::authorize('usable', 'fruitbay_category');
         $item = FruitBayCategory::whereId($item)->orWhere(['slug' => $item])->first();
 
         return $this->buildResponse([
             'message' => !$item ? 'The requested category no longer exists.' : 'OK',
             'status' =>  !$item ? 'info' : 'success',
             'response_code' => !$item ? 404 : 200,
-            'item' => $item,
+            'item' => $item ?? (object)[],
         ]);
     }
 
     public function store(Request $request, $item = null)
     {
-        \Gate::authorize('usable', 'fruitbay_category');
         $validator = Validator::make($request->all(), [
             'title' => 'required|min:3|max:25',
             'description' => 'nullable|min:10|max:550',
@@ -104,7 +105,6 @@ class AdminFruitBayCategoryController extends Controller
      */
     public function destroy(Request $request, $item = null)
     {
-        \Gate::authorize('usable', 'fruitbay_category');
         if ($request->items)
         {
             $count = collect($request->items)->map(function($item) {

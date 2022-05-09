@@ -12,30 +12,39 @@ use Nette\Utils\Html;
 
 class AdminSavingController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, $limit = '15')
     {
         \Gate::authorize('usable', 'savings');
-        $model = Saving::query();
-        return app('datatables')->eloquent($model)
-            ->editColumn('created_at', function(Saving $item) {
-                return $item->created_at->format('Y-m-d H:i');
-            })
-            ->addColumn('action', function (Saving $item) {
-                return implode([
-                    Html::el('a')->title(__('Edit'))->href('transactions/invoice/'.$item->id)->setHtml(Html::el('i')->class('ri-edit-circle-fill ri-2x text-primary')),
-                    Html::el('a')->title(__('Delete'))->href('transactions/invoice/'.$item->id)->setHtml(Html::el('i')->class('ri-delete-bin-2-fill ri-2x text-primary'))
-                ]);
-            })
-            ->removeColumn('updated_at')->toJson();
+        $query = Saving::query();
 
-        // $saving = Saving::paginate(15);
+        // Search and filter columns
+        if ($request->search) {
+            $query->where(function($query) use($request) {
+                $query->where('payment_ref', 'like', "%$request->search%")
+                    ->orWhere('status', 'like', "%$request->search%")
+                    ->orWhere('amount', 'like', "%$request->search%");
+            });
+        }
 
-        // return $this->buildResponse([
-        //     'message' => $saving->isEmpty() ? 'No food has been created' : '',
-        //     'status' => $saving->isEmpty() ? 'info' : 'success',
-        //     'response_code' => 200,
-        //     'saving' => $saving,
-        // ]);
+        // Reorder Columns
+        if ($request->order && is_array($request->order)) {
+            foreach ($request->order as $key => $dir) {
+                if ($dir === 'desc') {
+                    $query->orderByDesc($key??'id');
+                } else {
+                    $query->orderBy($key??'id');
+                }
+            }
+        }
+
+        $items = ($limit <= 0 || $limit === 'all') ? $query->get() : $query->paginate($limit);
+
+        return $this->buildResponse([
+            'message' => 'OK',
+            'status' =>  $items->isEmpty() ? 'info' : 'success',
+            'response_code' => 200,
+            'items' => $items??[],
+        ]);
     }
 
     public function getItem(Request $request, $item)

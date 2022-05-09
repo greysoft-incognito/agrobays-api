@@ -14,33 +14,38 @@ use Nette\Utils\Html;
 
 class AdminFruitBayController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, $limit = '15')
     {
         \Gate::authorize('usable', 'fruitbay');
-        $model = FruitBay::query();
-        return app('datatables')->eloquent($model)
-            ->editColumn('created_at', function(FruitBay $item) {
-                return $item->created_at->format('Y-m-d H:i');
-            })
-            ->editColumn('description', function(FruitBay $item) {
-                return Str::words($item->description, '8');
-            })
-            ->addColumn('action', function (FruitBay $item) {
-                return implode([
-                    Html::el('a')->title(__('Edit'))->href('transactions/invoice/'.$item->id)->setHtml(Html::el('i')->class('ri-edit-circle-fill ri-2x text-primary')),
-                    Html::el('a')->title(__('Delete'))->href('transactions/invoice/'.$item->id)->setHtml(Html::el('i')->class('ri-delete-bin-2-fill ri-2x text-primary'))
-                ]);
-            })
-            ->removeColumn('updated_at')->toJson();
+        $query = FruitBay::query();
 
-        // $items = FruitBay::paginate(15);
+        // Search and filter columns
+        if ($request->search) {
+            $query->where(function($query) use($request) {
+                $query->where('name', 'like', "%$request->search%")
+                    ->orWhere('description', 'like', "%$request->search%");
+            });
+        }
 
-        // return $this->buildResponse([
-        //     'message' => $items->isEmpty() ? 'No Fruit Bay item has been added' : '',
-        //     'status' => $items->isEmpty() ? 'info' : 'success',
-        //     'response_code' => 200,
-        //     'items' => $items,
-        // ]);
+        // Reorder Columns
+        if ($request->order && is_array($request->order)) {
+            foreach ($request->order as $key => $dir) {
+                if ($dir === 'desc') {
+                    $query->orderByDesc($key??'id');
+                } else {
+                    $query->orderBy($key??'id');
+                }
+            }
+        }
+
+        $items = ($limit <= 0 || $limit === 'all') ? $query->get() : $query->paginate($limit);
+
+        return $this->buildResponse([
+            'message' => 'OK',
+            'status' =>  $items->isEmpty() ? 'info' : 'success',
+            'response_code' => 200,
+            'items' => $items??[],
+        ]);
     }
 
     public function getItem(Request $request, $item)

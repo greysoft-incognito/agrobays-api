@@ -37,7 +37,6 @@ class DispatchController extends Controller
             $query->where(function($query) use($request) {
                 $query->where('dispatchable_type', 'like', "%$request->search%")
                     ->orWhere('reference', 'like', "%$request->search%")
-                    ->orWhere('status', "%$request->search%")
                     ->orWhere('created_at', 'like', "%$request->search%");
             });
         }

@@ -132,6 +132,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
         ->name('fruitbay.')
         ->group(function() {
             Route::get('/', 'index');
+            Route::get('/limit/{limit?}', 'index');
             Route::get('/{item}', 'getItem');
             Route::post('/{item?}', 'store');
             Route::delete('/{item?}', 'destroy');
@@ -143,6 +144,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
         ->name('categories.fruitbay.')
         ->group(function() {
             Route::get('/', 'index');
+            Route::get('/limit/{limit?}', 'index');
             Route::get('/{item}', 'getItem');
             Route::post('/{item?}', 'store');
             Route::delete('/{item?}', 'destroy');
@@ -154,6 +156,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
         ->name('savings.plan.')
         ->group(function() {
             Route::get('/', 'index');
+            Route::get('/limit/{limit?}', 'index');
             Route::get('/{item}', 'getItem');
             Route::post('/{item?}', 'store');
             Route::delete('/{item?}', 'destroy');
@@ -165,6 +168,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
         ->name('foodbags.foods')
         ->group(function() {
             Route::get('/', 'index');
+            Route::get('/limit/{limit?}', 'index');
             Route::get('/{item}', 'getItem');
             Route::post('/{item?}', 'store');
             Route::delete('/{item?}', 'destroy');
@@ -176,6 +180,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
         ->name('foodbags.')
         ->group(function() {
             Route::get('/', 'index');
+            Route::get('/limit/{limit?}', 'index');
             Route::get('/{item}', 'getItem');
             Route::post('/{item?}', 'store');
             Route::delete('/{item?}', 'destroy');
@@ -187,6 +192,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
         ->name('transactions.')
         ->group(function() {
             Route::get('/', 'index');
+            Route::get('/limit/{limit?}', 'index');
             Route::get('/{item}', 'getItem');
             Route::post('/{item?}', 'store');
             Route::delete('/{item?}', 'destroy');
@@ -198,6 +204,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
         ->name('subscriptions.')
         ->group(function() {
             Route::get('/', 'index');
+            Route::get('/limit/{limit?}', 'index');
             Route::get('/{item}', 'getItem');
             Route::post('/{item?}', 'store');
             Route::delete('/{item?}', 'destroy');
@@ -209,6 +216,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
         ->name('savings.')
         ->group(function() {
             Route::get('/', 'index');
+            Route::get('/limit/{limit?}', 'index');
             Route::get('/{item}', 'getItem');
             Route::post('/{item?}', 'store');
             Route::delete('/{item?}', 'destroy');
