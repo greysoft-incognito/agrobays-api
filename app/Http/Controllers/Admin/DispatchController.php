@@ -203,13 +203,14 @@ class DispatchController extends Controller
         $item = $item ?? new Dispatch;
         $item_status = $item->status;
         $item_user_id = $item->user_id;
+        $item_code = $item->code;
 
         $item->user_id = $request->user_id ?? null;
         $item->last_location = $request->last_location ?? $item->last_location;
         $item->status = $request->status ?? 'pending';
 
         // Verify confirmation code
-        if (Auth::user()->role !== 'admin' && $request->status === 'delivered' && (!$request->code || $request->code !== $item->code)) {
+        if (Auth::user()->role !== 'admin' && $request->status === 'delivered' && (!$request->code || $request->code !== $item_code)) {
             return $this->buildResponse([
                 'message' => 'Your input has a few errors',
                 'status' => 'error',
