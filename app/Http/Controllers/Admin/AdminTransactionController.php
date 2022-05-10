@@ -14,7 +14,7 @@ class AdminTransactionController extends Controller
     public function index(Request $request, $limit = '15')
     {
         \Gate::authorize('usable', 'transactions');
-        $query = Transaction::query();
+        $query = Transaction::query()->with('user');
 
         // Search and filter columns
         if ($request->search) {
