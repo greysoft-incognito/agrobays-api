@@ -5,17 +5,14 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Saving;
-use App\Models\Transaction;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
-use Nette\Utils\Html;
 
 class AdminSavingController extends Controller
 {
     public function index(Request $request, $limit = '15')
     {
         \Gate::authorize('usable', 'savings');
-        $query = Saving::query();
+        $query = Saving::query()->with('user');
 
         // Search and filter columns
         if ($request->search) {
