@@ -128,6 +128,16 @@ class DispatchController extends Controller
         $item->last_location = $request->last_location ?? $item->last_location;
         $item->status = $request->status ?? 'pending';
 
+        // Verify confirmation code
+        if ($request->status === 'delivered' && (!$request->code || $request->code !== $item->code)) {
+            return $this->buildResponse([
+                'message' => 'Your input has a few errors',
+                'status' => 'error',
+                'response_code' => 422,
+                'errors' => ['code' => 'The confirmation code you entered is incorrect.'],
+            ]);
+        }
+
         $item->save();
 
         // Update the location of all this dispatch user's packages
@@ -197,6 +207,16 @@ class DispatchController extends Controller
         $item->user_id = $request->user_id ?? null;
         $item->last_location = $request->last_location ?? $item->last_location;
         $item->status = $request->status ?? 'pending';
+
+        // Verify confirmation code
+        if (Auth::user()->role !== 'admin' && $request->status === 'delivered' && (!$request->code || $request->code !== $item->code)) {
+            return $this->buildResponse([
+                'message' => 'Your input has a few errors',
+                'status' => 'error',
+                'response_code' => 422,
+                'errors' => ['code' => 'The confirmation code you entered is incorrect.'],
+            ]);
+        }
 
         $item->save();
 

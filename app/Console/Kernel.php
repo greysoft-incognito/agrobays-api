@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\Dispatch;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Console\Commands\HandleTransactions;
@@ -30,6 +31,16 @@ class Kernel extends ConsoleKernel
             ->onFailure(function (Stringable $output) {
                 SlackAlert::message($output);
             });
+
+            $schedule->command(Dispatch::class)
+                ->everyThirtyMinutes()
+                ->withoutOverlapping()
+                ->onSuccess(function (Stringable $output) {
+                    SlackAlert::message($output);
+                })
+                ->onFailure(function (Stringable $output) {
+                    SlackAlert::message($output);
+                });
         // $schedule->command('inspire')->hourly();
     }
 
