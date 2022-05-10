@@ -13,7 +13,7 @@ class AdminSubscriptionController extends Controller
     public function index(Request $request, $limit = '15')
     {
         \Gate::authorize('usable', 'subscriptions');
-        $query = Subscription::query();
+        $query = Subscription::query()->with('user');
 
         // Search and filter columns
         if ($request->search) {
