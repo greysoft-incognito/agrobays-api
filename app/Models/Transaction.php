@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -31,7 +32,8 @@ class Transaction extends Model
      * @var array
      */
     protected $appends = [
-        'content'
+        'content',
+        'type'
     ];
 
     /**
@@ -46,6 +48,13 @@ class Transaction extends Model
     {
         return new Attribute(
             get: fn () => $this->transactable()->get(),
+        );
+    }
+
+    public function type(): Attribute
+    {
+        return new Attribute(
+            get: fn () => Str::replace('App\\Models\\', '', $this->transactable_type),
         );
     }
 
