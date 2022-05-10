@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\AdminFoodsController;
 use App\Http\Controllers\Admin\AdminFrontContentController;
 use App\Http\Controllers\Admin\AdminFruitBayCategoryController;
 use App\Http\Controllers\Admin\AdminFruitBayController;
+use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\AdminPlansController;
 use App\Http\Controllers\Admin\AdminSavingController;
 use App\Http\Controllers\Admin\AdminSubscriptionController;
@@ -210,6 +211,18 @@ Route::middleware(['auth:sanctum'])->group(function() {
             Route::delete('/{item?}', 'destroy');
         });
 
+        // Admin Orders
+        Route::controller(AdminOrderController::class)
+        ->prefix('orders')
+        ->name('orders.')
+        ->group(function() {
+            Route::get('/', 'index');
+            Route::get('/limit/{limit?}', 'index');
+            Route::get('/{item}', 'getItem');
+            Route::post('/{item?}', 'store');
+            Route::delete('/{item?}', 'destroy');
+        });
+
         // Admin Savings
         Route::controller(AdminSavingController::class)
         ->prefix('savings')
@@ -310,3 +323,4 @@ Route::middleware(['auth:sanctum'])->group(function() {
 Route::get('/payment/paystack/verify/{type?}', [PaymentController::class, 'paystackVerify'])->name('payment.paystack.verify');
 
 require __DIR__.'/auth.php';
+
