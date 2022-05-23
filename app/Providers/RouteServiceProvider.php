@@ -61,10 +61,10 @@ class RouteServiceProvider extends ServiceProvider
                 $datetime = $check->created_at??null;
                 $action = 'reset your password';
             }
-            return (!$datetime || $datetime->diffInMinutes(now()) >= 30)
+            return (!$datetime || $datetime->diffInMinutes(now()) >= config('settings.token_lifespan', 30))
                 ? Limit::none()
                 : (new Controller)->buildResponse([
-                    'message' => __("We already sent a mail to help you {$action}, you can try again :0 minutes.", [30 - $datetime->diffInMinutes(now())]),
+                    'message' => __("We already sent a message to help you {$action}, you can try again :0 minutes.", [config('settings.token_lifespan', 30) - $datetime->diffInMinutes(now())]),
                     'status' => 'success',
                     'response_code' => 429,
                 ]);

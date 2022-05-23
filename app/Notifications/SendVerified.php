@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use NotificationChannels\Twilio\TwilioSmsMessage;
 
 class SendVerified extends Notification //implements ShouldQueue
 {
@@ -16,8 +17,9 @@ class SendVerified extends Notification //implements ShouldQueue
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($type = 'mail')
     {
+        $this->type = $type;
         $this->afterCommit();
     }
 
@@ -29,7 +31,7 @@ class SendVerified extends Notification //implements ShouldQueue
      */
     public function via($notifiable)
     {
-        return ['mail'];
+        return [$this->type];
     }
 
     /**
@@ -49,6 +51,25 @@ class SendVerified extends Notification //implements ShouldQueue
             ['email', 'email-plain'], $message
         )
         ->subject('Welcome to the '  . config('settings.site_name') . ' community.');
+    }
+
+    /**
+     * Get the sms representation of the notification.
+     *
+     * @param  mixed  $n    notifiable
+     * @return \NotificationChannels\Twilio\TwilioSmsMessage
+     */
+    public function toTwilio($n)
+    {
+        $message = __("Your :0 account has been verified successfully, welcome to our community.", [config('settings.site_name')]);
+
+        if (isset($message[$this->type])) {
+            $message = __('Hi :0, ', [$n->firstname]) . $message;
+            return (new TwilioSmsMessage())
+                ->content($message);
+        }
+
+        return false;
     }
 
     /**

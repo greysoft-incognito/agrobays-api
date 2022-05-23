@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Events\PhoneVerified;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Verified;
@@ -9,7 +10,7 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class VerifyEmailController extends Controller
+class VerifyEmailPhoneController extends Controller
 {
     /**
      * Mark the authenticated user's email address as verified.
@@ -40,11 +41,14 @@ class VerifyEmailController extends Controller
      * @param  \Illuminate\Foundation\Auth\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, $type = 'email')
     {
-        if ($request->user()->hasVerifiedEmail()) {
+        $set_type = ($type == 'phone') ? 'phone number' : 'email address';
+        $hasVerified = ($type == 'phone') ? $request->user()->hasVerifiedPhone() : $request->user()->hasVerifiedEmail();
+
+        if ($hasVerified) {
             return $this->buildResponse([
-                'message' => 'Your email is already verified.',
+                'message' => "Your $set_type is already verified.",
                 'status' => 'success',
                 'response_code' => 200,
             ]);
@@ -58,8 +62,10 @@ class VerifyEmailController extends Controller
             return $this->validatorFails($validator);
         }
 
+        $code = ($type == 'email') ? $request->user()->email_verify_code : ($type == 'phone' ? $request->user()->phone_verify_code : null);
+
         // check if it has not expired: the time is 30 minutes and that the code is valid
-        if ($request->code !== $request->user()->email_verify_code || $request->user()->last_attempt->diffInMinutes(now()) >= 30) {
+        if ($request->code !== $code || $request->user()->last_attempt->diffInMinutes(now()) >= config('settings.token_lifespan', 30)) {
             return $this->buildResponse([
                 'message' => 'An error occured.',
                 'status' => 'error',
@@ -70,12 +76,16 @@ class VerifyEmailController extends Controller
             ]);
         }
 
-        if ($request->user()->markEmailAsVerified()) {
+        if ($type == 'email' && $request->user()->markEmailAsVerified()) {
             event(new Verified($request->user()));
         }
 
+        if ($type == 'phone' && $request->user()->markPhoneAsVerified()) {
+            event(new PhoneVerified($request->user()));
+        }
+
         return $this->buildResponse([
-            'message' => 'We have successfully verified your email address, welcome to our community.',
+            'message' => "We have successfully verified your $set_type, welcome to our community.",
             'status' => 'success',
             'response_code' => 200,
         ]);

@@ -8,6 +8,8 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use NotificationChannels\Twilio\TwilioChannel;
+use NotificationChannels\Twilio\TwilioSmsMessage;
 
 class Dispatched extends Notification
 {
@@ -32,7 +34,13 @@ class Dispatched extends Notification
      */
     public function via()
     {
-        return ['mail'];
+        $pref = config('settings.prefered_notification_channels', ['mail', 'sms']);
+        $channels = in_array('sms', $pref) && in_array('mail', $pref)
+            ? ['mail', TwilioChannel::class]
+            : (in_array('sms', $pref)
+                ? [TwilioChannel::class]
+                : ['mail']);
+        return $channels;
     }
 
     /**
@@ -80,6 +88,32 @@ class Dispatched extends Notification
             ['email', 'email-plain'], $message[$type]??$message['order']
         )
         ->subject(__($type === 'order' ? "Order {$status} - :0" : "Food Bag {$status} - :0", [config('settings.site_name')]));
+    }
+
+    /**
+     * Get the sms representation of the notification.
+     *
+     * @param  mixed  $n    notifiable
+     * @return \NotificationChannels\Twilio\TwilioSmsMessage
+     */
+    public function toTwilio($n)
+    {
+        $type = $n->dispatchable instanceof Order ? 'order' : ($n->dispatchable instanceof Subscription ? 'bag' : 'package');
+        $status = $this->status ?? (($n->status === 'pending') ? 'shipped' : $n->status);
+        $package = $type === 'order' ? "fruit order" : "food bag";
+        $handler_phone = $n->user->phone ?? '';
+        $fl = env('FRONTEND_LINK');
+        $text = [
+            'shipped' => "Your {$package} is on it's way, you will need this code {$n->code}, to confirm when you receive your order.",
+            'confirmed' => "Your {$package} is confirmed and will be dispatched soon. Track package with this link {$fl}/track/order/{$n->reference}.",
+            'dispatched' => "Your {$package} has been dispatched, your handler will call you from {$handler_phone}, please keep your phone reachable.",
+            'delivered' => 'Congratulations, you package has been delivered, thanks for using our services.',
+            'assigned' => "A {$package} package with REF: {$n->reference} is assigned to you for {$n->dispatchable->user->fullname} ({$n->dispatchable->user->phone}), please visit the dispatch facility for further instructions.",
+        ];
+
+        $message = __('Hi :0, ', [$n->dispatchable->user->firstname]) . ($text[$this->status??$status]);
+        return (new TwilioSmsMessage())
+            ->content($message);
     }
 
     /**

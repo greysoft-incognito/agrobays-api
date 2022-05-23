@@ -11,6 +11,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use App\Notifications\SendCode;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Propaganistas\LaravelPhone\PhoneNumber;
+use Illuminate\Support\Facades\Http;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -25,6 +27,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'firstname',
         'lastname',
         'email',
+        'phone',
         'username',
         'password',
     ];
@@ -178,6 +181,34 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Interact with the user's phone.
+     *
+     * @return  \Illuminate\Database\Eloquent\Casts\Attribute
+     */
+    public function phone(): Attribute
+    {
+        $cIso2 = "NG";
+        if (($ipInpfo = \Illuminate\Support\Facades\Http::get('ipinfo.io/'.request()->ip().'?token='.config('settings.ipinfo_access_token')))->status() === 200) {
+            $cIso2 = $ipInpfo->json('country') ?? $cIso2;
+        }
+        return Attribute::make(
+            get: function ($value) use ($cIso2) {
+                if (!empty($this->country->iso2??$this->country['iso2'])) {
+                    return (string) PhoneNumber::make($value, $this->country->iso2??$this->country['iso2'])->formatE164();
+                }
+                return $value ? (string) PhoneNumber::make($value, $cIso2)->formatE164() : $value;
+            },
+            set: function ($value) use ($cIso2) {
+                $value = str_ireplace('-', '', $value);
+                if (!empty($this->country->iso2??$this->country['iso2'])) {
+                    return ['phone' => (string) PhoneNumber::make($value, $this->country->iso2??$this->country['iso2'])->formatE164()];
+                }
+                return ['phone' => $value ? (string) PhoneNumber::make($value, $cIso2)->formatE164() : $value];
+            }
+        );
+    }
+
+    /**
      * Get the URL to the fruit bay category's photo.
      *
      * @return string
@@ -243,6 +274,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Saving::class);
     }
 
+    public function routeNotificationForTwilio()
+    {
+        return $this->phone;
+    }
+
     public function sendEmailVerificationNotification()
     {
         $this->last_attempt = now();
@@ -250,6 +286,20 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->save();
 
         $this->notify(new SendCode($this->email_verify_code, 'verify'));
+    }
+
+    public function sendPhoneVerificationNotification()
+    {
+        $this->last_attempt = now();
+        $this->phone_verify_code = mt_rand(100000, 999999);
+        $this->save();
+
+        $this->notify(new SendCode($this->phone_verify_code, 'verify-phone'));
+    }
+
+    public function hasVerifiedPhone()
+    {
+        return $this->phone_verified_at !== null;
     }
 
     public function markEmailAsVerified()
@@ -260,6 +310,19 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->save();
 
         if ($this->wasChanged('email_verified_at')) {
+            return true;
+        }
+        return false;
+    }
+
+    public function markPhoneAsVerified()
+    {
+        $this->last_attempt = null;
+        $this->phone_verify_code = null;
+        $this->phone_verified_at = now();
+        $this->save();
+
+        if ($this->wasChanged('phone_verified_at')) {
             return true;
         }
         return false;

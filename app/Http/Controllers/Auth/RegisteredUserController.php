@@ -26,12 +26,20 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request)
     {
+        $cIso2 = "NG";
+        if (($ipInpfo = \Illuminate\Support\Facades\Http::get('ipinfo.io/'.request()->ip().'?token='.config('settings.ipinfo_access_token')))->status() === 200) {
+            $cIso2 = $ipInpfo->json('country') ?? $cIso2;
+        }
+
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
             // 'lastname' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'email' => [config('settings.verify_email', true) ? 'required' : 'nullable', 'string', 'email', 'max:255', 'unique:users'],
+            'phone' => config('settings.verify_phone', false) ? "required|phone:$cIso2" : 'nullable|string|max:255|unique:users',
             // 'username' => ['required', 'string', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ], [], [
+            'phone' => 'Phone Number'
         ]);
 
         if ($validator->fails()) {
@@ -46,6 +54,7 @@ class RegisteredUserController extends Controller
             'firstname' => ($firstname = $name->first(fn($k)=>$k!==null, $request->name)),
             'lastname' => $name->last(fn($k)=>$k!==$firstname, ''),
             'email' => $request->email,
+            'phone' => $request->phone,
             'username' => $username,
             'password' => Hash::make($request->password),
         ]);

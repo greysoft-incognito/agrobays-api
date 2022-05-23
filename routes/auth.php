@@ -1,11 +1,11 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\EmailVerificationNotificationController;
+use App\Http\Controllers\Auth\EmailPhoneVerificationNotificationController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
-use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\Auth\VerifyEmailPhoneController;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Route;
 
@@ -41,11 +41,11 @@ Route::get('/verify-email/{id}/{hash}', [VerifyEmailController::class, '__invoke
     ->middleware(['auth:sanctum', 'signed', 'throttle:6,1'])
     ->name('verification.verify');
 
-Route::post('/verify-email/with-code', [VerifyEmailController::class, 'store'])
+Route::post('/verify/with-code/{type?}', [VerifyEmailPhoneController::class, 'store'])
     ->middleware(['auth:sanctum', 'throttle:6,1'])
     ->name('verification.verify.code');
 
-Route::get('/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
+Route::get('/send/verification-notification/{type?}', [EmailPhoneVerificationNotificationController::class, 'store'])
     ->middleware(['auth:sanctum', 'throttle:code-requests'])
     ->name('verification.send');
 

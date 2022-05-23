@@ -47,7 +47,7 @@ class PasswordResetLinkController extends Controller
 
         // And finally return a response
         return $this->buildResponse([
-            'message' => __('We have sent a message to your email address to help with recovering your password.'),
+            'message' => __('We have sent you a message to help with recovering your password.'),
             'status' => 'success',
             'response_code' => 200,
         ]);

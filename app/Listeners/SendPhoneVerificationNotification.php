@@ -7,7 +7,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-class SendEmailVerificationNotification
+class SendPhoneVerificationNotification
 {
     /**
      * Create the event listener.
@@ -27,8 +27,8 @@ class SendEmailVerificationNotification
      */
     public function handle($event)
     {
-        if ($event->user instanceof MustVerifyEmail && ! $event->user->hasVerifiedEmail() && config('settings.verify_email', false)) {
-            $event->user->sendEmailVerificationNotification();
+        if (config('settings.verify_phone', false) && ! $event->user->hasVerifiedPhone()) {
+            $event->user->sendPhoneVerificationNotification();
         }
     }
 }

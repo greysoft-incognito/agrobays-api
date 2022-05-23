@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\Mailer\Exception\TransportException;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Support\Facades\Request;
@@ -44,9 +45,13 @@ class Handler extends ExceptionHandler
             //
         });
 
-        $this->renderable(function (
-            \ErrorException | AccessDeniedHttpException | MethodNotAllowedHttpException | NotFoundHttpException | UnprocessableEntityHttpException | ThrottleRequestsException $e) {
-            return $this->renderException($e->getMessage(), $e instanceof \ErrorException ? 500 : $e->getStatusCode());
+        $this->renderable(function (AccessDeniedHttpException | MethodNotAllowedHttpException | NotFoundHttpException | UnprocessableEntityHttpException | ThrottleRequestsException $e) {
+            return $this->renderException($e->getMessage(), $e->getStatusCode());
+        });
+
+        $this->renderable(function (\ErrorException | TransportException $e) {
+            $line = ($e instanceof \ErrorException ? ' in ' . $e->getFile() . ' on line '.$e->getLine() :'');
+            return $this->renderException($e->getMessage() . $line, 500);
         });
 
         $this->renderable(function (UnauthorizedHttpException $e) {

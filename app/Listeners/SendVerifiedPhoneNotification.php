@@ -2,12 +2,12 @@
 
 namespace App\Listeners;
 
+use App\Notifications\SendVerified;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+use NotificationChannels\Twilio\TwilioChannel;
 
-class SendEmailVerificationNotification
+class SendVerifiedPhoneNotification
 {
     /**
      * Create the event listener.
@@ -27,8 +27,6 @@ class SendEmailVerificationNotification
      */
     public function handle($event)
     {
-        if ($event->user instanceof MustVerifyEmail && ! $event->user->hasVerifiedEmail() && config('settings.verify_email', false)) {
-            $event->user->sendEmailVerificationNotification();
-        }
+        $event->user->notify(new SendVerified, TwilioChannel::class);
     }
 }
