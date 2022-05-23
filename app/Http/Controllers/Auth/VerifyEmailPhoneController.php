@@ -65,7 +65,8 @@ class VerifyEmailPhoneController extends Controller
         $code = ($type == 'email') ? $request->user()->email_verify_code : ($type == 'phone' ? $request->user()->phone_verify_code : null);
 
         // check if it has not expired: the time is 30 minutes and that the code is valid
-        if ($request->code !== $code || $request->user()->last_attempt->diffInMinutes(now()) >= config('settings.token_lifespan', 30)) {
+        $last_attempt = ($request->user()->hasVerifiedPhone() && $request->user()->last_attempt === null) ? $request->user()->phone_verified_at : $request->user()->last_attempt;
+        if ($request->code !== $code || $last_attempt->diffInMinutes(now()) >= config('settings.token_lifespan', 30)) {
             return $this->buildResponse([
                 'message' => 'An error occured.',
                 'status' => 'error',

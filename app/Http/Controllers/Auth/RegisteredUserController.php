@@ -47,8 +47,13 @@ class RegisteredUserController extends Controller
         }
 
         $name = Str::of($request->name)->explode(' ');
-        $eser = Str::of($request->email)->explode('@');
-        $username = $eser->first(fn($k)=>(User::where('username', $k)->doesntExist()), $eser->first().rand());
+
+        if (config('settings.verify_email', true)) {
+            $eser = Str::of($request->email)->explode('@');
+            $username = $eser->first(fn($k)=>(User::where('username', $k)->doesntExist()), $eser->first().rand());
+        } else {
+            $username = Str::of($name)->append();
+        }
 
         $user = User::create([
             'firstname' => ($firstname = $name->first(fn($k)=>$k!==null, $request->name)),

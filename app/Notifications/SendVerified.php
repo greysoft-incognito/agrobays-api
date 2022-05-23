@@ -63,11 +63,9 @@ class SendVerified extends Notification //implements ShouldQueue
     {
         $message = __("Your :0 account has been verified successfully, welcome to our community.", [config('settings.site_name')]);
 
-        if (isset($message[$this->type])) {
-            $message = __('Hi :0, ', [$n->firstname]) . $message;
-            return (new TwilioSmsMessage())
-                ->content($message);
-        }
+        $message = __('Hi :0, ', [$n->firstname]) . $message;
+        return (new TwilioSmsMessage())
+            ->content($message);
 
         return false;
     }
