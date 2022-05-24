@@ -149,7 +149,7 @@ class DispatchController extends Controller
 
         // Notify the user of the change
         if ((!$item_user_id && $request->status === 'pending') || $item_status !== $request->status) {
-            $item->notify(new Dispatched());
+            $item->dispatchable->user->notify(new Dispatched($item));
         }
 
         return $this->buildResponse([
@@ -221,13 +221,14 @@ class DispatchController extends Controller
 
         $item->save();
 
+        // Notify the Dispatch Rider
         if ($item_user_id !== $item->user_id) {
-            $item->notify(new Dispatched('assigned'));
+            $item->user->notify(new Dispatched($item, 'assigned'));
         }
 
         // Notify the user of the change
         if ((!$item_user_id && $request->status === 'pending') || $item_status !== $request->status) {
-            $item->notify(new Dispatched());
+            $item->dispatchable->user->notify(new Dispatched($item));
         }
 
         return $this->buildResponse([

@@ -200,7 +200,7 @@ endif;
         }
 
         /*-- Responsive CSS --*/
-        @media(max-width: 576px) {
+        @@media(max-width: 576px) {
             .loginform {
                 width: 90%;
             }
@@ -285,14 +285,13 @@ endif;
 
         <div style="text-align: center; margin-top: 1em;">This page does not give you access to
             {{ config('settings.site_name') }}, but <a
-                href="{{ env('FRONTEND_LINK', 'http://localhost:8080') . '/login' }}">this</a> does!
+                href="{{ config('settings.frontend_link', env('FRONTEND_LINK', 'http://localhost:8080')) . '/login' }}">this</a>
+            does!
         </div>
     </div>
     <script>
         let artisan = document.querySelector('select#artisan');
-        document.addEventListener('alpine:initialized', () => {
-            console.log(this);
-        })
+        document.addEventListener('alpine:initialized', () => {})
     </script>
 </body>
 

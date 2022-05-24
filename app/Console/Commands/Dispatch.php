@@ -40,7 +40,7 @@ class Dispatch extends Command
                 $dispatch->code = mt_rand(100000, 999999);
                 $dispatch->reference = config('settings.trx_prefix', 'AGB-') . Str::random(12);
                 $saving->dispatch()->save($dispatch);
-                $saving->dispatch->notify(new Dispatched());
+                $saving->dispatchable->user->notify(new Dispatched($saving));
                 $this->info("Saving with ID of {$saving->id} has been dispatced for proccessing.");
             });
         } else {
@@ -52,7 +52,7 @@ class Dispatch extends Command
                 $dispatch->code = mt_rand(100000, 999999);
                 $dispatch->reference = config('settings.trx_prefix', 'AGB-') . Str::random(12);
                 $order->dispatch()->save($dispatch);
-                $order->dispatch->notify(new Dispatched);
+                $order->dispatchable->user->notify(new Dispatched($order));
                 $this->info("Order with ID of {$order->id} has been dispatced for proccessing.");
             });
         } else {

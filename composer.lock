@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "28676744841e083d9e4017279ad191ce",
+    "content-hash": "27b86ec07da76169ca0f09821ba58e58",
     "packages": [
         {
             "name": "brick/math",
@@ -5964,6 +5964,68 @@
             "time": "2021-12-08T09:12:39+00:00"
         },
         {
+            "name": "toneflix-code/cuttly-laravel",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/toneflix/cuttly-laravel.git",
+                "reference": "05596d638847b5a4c1a437493e9a040af5b4b1c9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/toneflix/cuttly-laravel/zipball/05596d638847b5a4c1a437493e9a040af5b4b1c9",
+                "reference": "05596d638847b5a4c1a437493e9a040af5b4b1c9",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^7.0",
+                "illuminate/support": "^8.0|^9.0",
+                "php": "^7.4|^8.0"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^6.0",
+                "phpunit/phpunit": "^9.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "ToneflixCode\\Cuttly\\CuttlyServiceProvider"
+                    ],
+                    "aliases": {
+                        "Cuttly": "ToneflixCode\\Cuttly\\CuttlyFacade"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "ToneflixCode\\Cuttly\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Toneflix Code",
+                    "email": "code@toneflix.com.ng",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A Laravel API wrapper for Cutt.ly API.",
+            "homepage": "https://github.com/toneflix-code/cuttly-laravel",
+            "keywords": [
+                "cuttly-laravel",
+                "toneflix-code"
+            ],
+            "support": {
+                "issues": "https://github.com/toneflix/cuttly-laravel/issues",
+                "source": "https://github.com/toneflix/cuttly-laravel/tree/1.0.0"
+            },
+            "time": "2022-05-22T18:13:20+00:00"
+        },
+        {
             "name": "twilio/sdk",
             "version": "6.37.1",
             "source": {
@@ -9107,7 +9169,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": "^8.0.2"
+        "php": "^8.1"
     },
     "platform-dev": [],
     "plugin-api-version": "2.2.0"

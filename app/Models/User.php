@@ -274,6 +274,24 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Saving::class);
     }
 
+    /**
+     * Route notifications for the mail channel.
+     *
+     * @param  \Illuminate\Notifications\Notification  $notification
+     * @return array|string
+     */
+    public function routeNotificationForMail()
+    {
+        // Return email address and name...
+        return [$this->email => $this->firstname];
+    }
+
+    /**
+     * Route notifications for the twillio channel.
+     *
+     * @param  \Illuminate\Notifications\Notification  $notification
+     * @return array|string
+     */
     public function routeNotificationForTwilio()
     {
         return $this->phone;

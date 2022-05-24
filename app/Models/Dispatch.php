@@ -127,7 +127,7 @@ class Dispatch extends Model
      * @return array|string
      */
     public function routeNotificationForMail($notification)
-    {return false;
+    {
         // Return email address and name...
         if ($notification->status === 'assigned') {
             return $this->user ? [$this->user->email => $this->user->firstname] : null;
@@ -135,7 +135,6 @@ class Dispatch extends Model
             return [$this->dispatchable->user->email => $this->dispatchable->user->firstname];
         }
     }
-
 
     /**
      * Route notifications for the twillio channel.

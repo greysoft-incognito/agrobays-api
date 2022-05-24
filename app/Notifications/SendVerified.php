@@ -31,7 +31,7 @@ class SendVerified extends Notification //implements ShouldQueue
      */
     public function via($notifiable)
     {
-        return [$this->type];
+        return [$this->type, 'database'];
     }
 
     /**
@@ -76,10 +76,12 @@ class SendVerified extends Notification //implements ShouldQueue
      * @param  mixed  $notifiable
      * @return array
      */
-    public function toArray($notifiable)
+    public function toArray($n)
     {
         return [
-            //
+            'type' => 'verification',
+            'title' => ($this->type === 'mail') ? 'Email Address Verified' : 'Phone Number Verified',
+            'message' => __("Your account has been verified successfully, welcome to our community."),
         ];
     }
 }

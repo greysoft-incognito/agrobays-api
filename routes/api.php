@@ -17,12 +17,14 @@ use App\Http\Controllers\Admin\DispatchController;
 use App\Http\Controllers\Admin\UsersController;
 use App\Http\Controllers\FrontContentController;
 use App\Http\Controllers\FruitBayController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SavingsController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TransactionController;
 use App\Models\Dispatch;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Gate;
 
@@ -37,7 +39,7 @@ use Illuminate\Support\Facades\Gate;
 |
 */
 
-Route::get('/get/settings', function() {
+Route::get('/get/settings', function(Request $request) {
     return (new Controller)->buildResponse([
         "message" => "OK",
         "status" =>  "success",
@@ -271,6 +273,14 @@ Route::middleware(['auth:sanctum'])->group(function() {
             Route::get('/limit/{limit?}/{status?}', 'transactions')->name('limited');
         });
 
+        // Notifications Controller Routes
+        Route::prefix('notifications')->name('notifications.')
+        ->controller(NotificationController::class)
+        ->group(function() {
+            Route::get('/{type?}', 'index')->name('index');
+            Route::post('/mark/read', 'markAsRead')->name('mark.read');
+        });
+
         // Orders Controller Routes
         Route::prefix('orders')->name('orders.')
         ->controller(OrderController::class)
@@ -323,4 +333,3 @@ Route::middleware(['auth:sanctum'])->group(function() {
 Route::get('/payment/paystack/verify/{type?}', [PaymentController::class, 'paystackVerify'])->name('payment.paystack.verify');
 
 require __DIR__.'/auth.php';
-

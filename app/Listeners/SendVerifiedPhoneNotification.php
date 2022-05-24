@@ -27,6 +27,6 @@ class SendVerifiedPhoneNotification
      */
     public function handle($event)
     {
-        $event->user->notify(new SendVerified, TwilioChannel::class);
+        $event->user->notify(new SendVerified, TwilioChannel::class, 'phone');
     }
 }

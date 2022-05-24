@@ -75,7 +75,7 @@ class AdminOrderController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'status' => 'required|in:pending,active,complete',
+            'status' => 'required|in:pending,rejected,shipped,delivered',
         ]);
 
         if ($validator->fails()) {
