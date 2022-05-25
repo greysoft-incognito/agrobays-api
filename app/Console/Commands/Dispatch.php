@@ -41,8 +41,8 @@ class Dispatch extends Command
                 $dispatch = new ModelsDispatch;
                 $dispatch->code = mt_rand(100000, 999999);
                 $dispatch->reference = config('settings.trx_prefix', 'AGB-') . Str::random(12);
-                $saving->dispatch()->save($saving->dispatch);
-                $saving->user->notify(new Dispatched($dispatch, 'pending'));
+                $saving->dispatch()->save($dispatch);
+                $saving->user->notify(new Dispatched($saving->dispatch, 'pending'));
                 $this->info("Saving with ID of {$saving->id} has been dispatced for proccessing.");
             });
         } else {
