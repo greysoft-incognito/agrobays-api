@@ -38,6 +38,7 @@ class NotificationController extends Controller
                 "has_more"  => $list->hasMorePages(),
                 "per_page"  => $list->perPage(),
                 "count"  => $list->count(),
+                "unread"  => \Auth::user()->unreadNotifications()->count(),
             ]
         ]);
     }
