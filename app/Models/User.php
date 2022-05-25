@@ -192,13 +192,16 @@ class User extends Authenticatable implements MustVerifyEmail
         if (($ipInpfo = \Illuminate\Support\Facades\Http::get('ipinfo.io/'.request()->ip().'?token='.config('settings.ipinfo_access_token')))->status() === 200) {
             $cIso2 = $ipInpfo->json('country') ?? $cIso2;
         }
-        try {
             return Attribute::make(
                 get: function ($value) use ($cIso2) {
-                    if (!empty($this->country->iso2??$this->country['iso2'])) {
-                        return (string) PhoneNumber::make($value, $this->country->iso2??$this->country['iso2'])->formatE164();
+                    try {
+                        if (!empty($this->country->iso2??$this->country['iso2'])) {
+                            return (string) PhoneNumber::make($value, $this->country->iso2??$this->country['iso2'])->formatE164();
+                        }
+                        return $value ? (string) PhoneNumber::make($value, $cIso2)->formatE164() : $value;
+                    } catch (NumberParseException $th) {
+                        return $value;
                     }
-                    return $value ? (string) PhoneNumber::make($value, $cIso2)->formatE164() : $value;
                 },
                 set: function ($value) use ($cIso2) {
                     $value = str_ireplace('-', '', $value);
@@ -208,12 +211,6 @@ class User extends Authenticatable implements MustVerifyEmail
                     return ['phone' => $value ? (string) PhoneNumber::make($value, $cIso2)->formatE164() : $value];
                 }
             );
-        } catch (NumberParseException $th) {
-            return Attribute::make(
-                get: fn($value) => $value,
-                set: fn($value)=> ['phone' => $value]
-            );
-        }
     }
 
     /**
