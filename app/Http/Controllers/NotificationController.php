@@ -64,6 +64,9 @@ class NotificationController extends Controller
             "message" => $list ? $list->count() . " Marked as read." : "No notifications available!",
             "status" =>  $list ? "success" : "info",
             "response_code" => 200,
+            "data" => [
+                "unread" => \Auth::user()->unreadNotifications()->count()
+            ],
         ]);
     }
 }
