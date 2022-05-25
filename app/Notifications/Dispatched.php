@@ -143,7 +143,7 @@ class Dispatched extends Notification
 
             // (new \Cuttly)->delete($this->shortUrl);
         }
-dd($item);
+
         $text = [
             'shipped' => "Your {$package} is on it's way, you will need this code {$item->code}, to confirm when you receive your order.",
             'confirmed' => "Your {$package} is confirmed and will be dispatched soon. Track package with <a href=\"{$link}\">this link</a>.",
