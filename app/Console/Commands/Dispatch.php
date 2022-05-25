@@ -33,7 +33,9 @@ class Dispatch extends Command
     public function handle()
     {
         $orders = Order::whereRelation('transaction', 'status', 'complete')->doesntHave('dispatch')->get();
-        $savings = Subscription::whereRelation('allSavings', 'status', 'complete')->with(['user', 'bag'])->doesntHave('dispatch')->get()->filter(fn($s)=>$s->days_left<=0);
+        $savings = Subscription::whereRelation('allSavings', 'status', 'complete')->with(['user', 'bag'])
+                    ->doesntHave('dispatch')->get()->filter(fn($s)=>$s->days_left<=0);
+
         if ($savings->isNotEmpty()) {
             $savings->each(function($saving) {
                 $dispatch = new ModelsDispatch;
