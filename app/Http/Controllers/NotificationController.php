@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Validator;
 
 class NotificationController extends Controller
 {
-    public function index($type = 'unread')
+    public function index(Request $request, $type = 'unread')
     {
         if ($type === 'unread') {
             $list = \Auth::user()->unreadNotifications()->cursorPaginate(2);
@@ -17,6 +17,9 @@ class NotificationController extends Controller
         $items = [];
         foreach ($list as $key => $item) {
             $items[] = $item;
+            if ($request->get($list->getCursorName())) {
+                $item->markAsRead();
+            }
         }
         preg_match('/[?&]' . $list->getCursorName() . '=([^&]+).*$/', $list->previousPageUrl(), $prev_cursor);
         preg_match('/[?&]' . $list->getCursorName() . '=([^&]+).*$/', $list->nextPageUrl(), $next_cursor);
