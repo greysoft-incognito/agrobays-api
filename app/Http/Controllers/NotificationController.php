@@ -10,9 +10,9 @@ class NotificationController extends Controller
     public function index(Request $request, $type = 'unread')
     {
         if ($type === 'unread') {
-            $list = \Auth::user()->unreadNotifications()->cursorPaginate(2);
+            $list = \Auth::user()->unreadNotifications()->cursorPaginate(15);
         } else {
-            $list = \Auth::user()->notifications()->cursorPaginate(2);
+            $list = \Auth::user()->notifications()->cursorPaginate(15);
         }
         $items = [];
         foreach ($list as $key => $item) {
