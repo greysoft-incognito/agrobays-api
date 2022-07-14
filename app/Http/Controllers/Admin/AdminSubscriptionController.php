@@ -3,10 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Subscription;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Nette\Utils\Html;
 
 class AdminSubscriptionController extends Controller
 {
@@ -17,7 +16,7 @@ class AdminSubscriptionController extends Controller
 
         // Search and filter columns
         if ($request->search) {
-            $query->where(function($query) use($request) {
+            $query->where(function ($query) use ($request) {
                 $query->where('status', 'like', "%$request->search%");
             });
         }
@@ -26,9 +25,9 @@ class AdminSubscriptionController extends Controller
         if ($request->order && is_array($request->order)) {
             foreach ($request->order as $key => $dir) {
                 if ($dir === 'desc') {
-                    $query->orderByDesc($key??'id');
+                    $query->orderByDesc($key ?? 'id');
                 } else {
-                    $query->orderBy($key??'id');
+                    $query->orderBy($key ?? 'id');
                 }
             }
         }
@@ -39,7 +38,7 @@ class AdminSubscriptionController extends Controller
             'message' => 'OK',
             'status' =>  $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'items' => $items??[],
+            'items' => $items ?? [],
         ]);
     }
 
@@ -49,9 +48,9 @@ class AdminSubscriptionController extends Controller
         $subscription = Subscription::whereId($item)->first();
 
         return $this->buildResponse([
-            'message' => !$subscription ? 'The requested subscription no longer exists' : 'OK',
-            'status' =>  !$subscription ? 'info' : 'success',
-            'response_code' => !$subscription ? 404 : 200,
+            'message' => ! $subscription ? 'The requested subscription no longer exists' : 'OK',
+            'status' =>  ! $subscription ? 'info' : 'success',
+            'response_code' => ! $subscription ? 404 : 200,
             'subscription' => $subscription,
         ]);
     }
@@ -59,15 +58,15 @@ class AdminSubscriptionController extends Controller
     /**
      * Update the subscription status
      *
-     * @param Request $request
-     * @param integer $item
+     * @param  Request  $request
+     * @param  int  $item
      * @return void
      */
     public function store(Request $request, $item = null)
     {
         \Gate::authorize('usable', 'subscriptions');
         $subscription = Subscription::find($item);
-        if (!$subscription) {
+        if (! $subscription) {
             return $this->buildResponse([
                 'message' => 'The requested subscription no longer exists',
                 'status' => 'error',
@@ -107,33 +106,30 @@ class AdminSubscriptionController extends Controller
     public function destroy(Request $request, $item = null)
     {
         \Gate::authorize('usable', 'subscriptions');
-        if ($request->items)
-        {
-            $count = collect($request->items)->map(function($item) {
+        if ($request->items) {
+            $count = collect($request->items)->map(function ($item) {
                 $subscription = Subscription::whereId($item)->first();
                 if ($subscription) {
                     return $subscription->delete();
                 }
+
                 return false;
-            })->filter(fn($i)=>$i!==false)->count();
+            })->filter(fn ($i) =>$i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} subscriptions bags have been deleted.",
                 'status' =>  'success',
                 'response_code' => 200,
             ]);
-        }
-        else
-        {
+        } else {
             $subscription = Subscription::whereId($item)->first();
         }
 
-        if ($subscription)
-        {
+        if ($subscription) {
             $food->delete();
 
             return $this->buildResponse([
-                'message' => "Subscription has been deleted.",
+                'message' => 'Subscription has been deleted.',
                 'status' =>  'success',
                 'response_code' => 200,
             ]);

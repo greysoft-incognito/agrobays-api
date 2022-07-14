@@ -3,14 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Plan;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\File;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use Nette\Utils\Html;
 
 class AdminPlansController extends Controller
 {
@@ -21,7 +19,7 @@ class AdminPlansController extends Controller
 
         // Search and filter columns
         if ($request->search) {
-            $query->where(function($query) use($request) {
+            $query->where(function ($query) use ($request) {
                 $query->where('title', 'like', "%$request->search%")
                     ->orWhere('description', 'like', "%$request->search%");
             });
@@ -31,9 +29,9 @@ class AdminPlansController extends Controller
         if ($request->order && is_array($request->order)) {
             foreach ($request->order as $key => $dir) {
                 if ($dir === 'desc') {
-                    $query->orderByDesc($key??'id');
+                    $query->orderByDesc($key ?? 'id');
                 } else {
-                    $query->orderBy($key??'id');
+                    $query->orderBy($key ?? 'id');
                 }
             }
         }
@@ -44,7 +42,7 @@ class AdminPlansController extends Controller
             'message' => 'OK',
             'status' =>  $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'items' => $items??[],
+            'items' => $items ?? [],
         ]);
     }
 
@@ -54,9 +52,9 @@ class AdminPlansController extends Controller
         $plan = Plan::whereId($item)->orWhere(['slug' => $item])->first();
 
         return $this->buildResponse([
-            'message' => !$plan ? 'The requested plan no longer exists' : 'OK',
-            'status' =>  !$plan ? 'info' : 'success',
-            'response_code' => !$plan ? 404 : 200,
+            'message' => ! $plan ? 'The requested plan no longer exists' : 'OK',
+            'status' =>  ! $plan ? 'info' : 'success',
+            'response_code' => ! $plan ? 404 : 200,
             'plan' => $plan,
         ]);
     }
@@ -90,11 +88,10 @@ class AdminPlansController extends Controller
         $plan->description = $request->description;
         $plan->status = $request->status ?? true;
 
-        if ($request->image)
-        {
-            $plan->image && Storage::delete($plan->image??'');
+        if ($request->image) {
+            $plan->image && Storage::delete($plan->image ?? '');
             $plan->image = $request->file('image')->storeAs(
-                'public/uploads/images', rand() . '_' . rand() . '.' . $request->file('image')->extension()
+                'public/uploads/images', rand().'_'.rand().'.'.$request->file('image')->extension()
             );
         }
         $plan->save();
@@ -115,30 +112,28 @@ class AdminPlansController extends Controller
     public function destroy(Request $request, $item = null)
     {
         \Gate::authorize('usable', 'savings_plans');
-        if ($request->items)
-        {
-            $count = collect($request->items)->map(function($item) {
+        if ($request->items) {
+            $count = collect($request->items)->map(function ($item) {
                 $plan = Plan::whereId($item)->first();
                 if ($plan) {
                     $plan->image && Storage::delete($plan->image);
+
                     return $plan->delete();
                 }
+
                 return false;
-            })->filter(fn($i)=>$i!==false)->count();
+            })->filter(fn ($i) =>$i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} plans have been deleted.",
                 'status' =>  'success',
                 'response_code' => 200,
             ]);
-        }
-        else
-        {
+        } else {
             $plan = Plan::whereId($item)->first();
         }
 
-        if ($plan)
-        {
+        if ($plan) {
             $plan->image && Storage::delete($plan->image);
             $plan->delete();
 

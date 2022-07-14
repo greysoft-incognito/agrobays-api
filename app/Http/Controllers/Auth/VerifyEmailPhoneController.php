@@ -72,8 +72,8 @@ class VerifyEmailPhoneController extends Controller
                 'status' => 'error',
                 'response_code' => 422,
                 'errors' => [
-                    'code' => __('The code you provided has expired or does not exist.')
-                ]
+                    'code' => __('The code you provided has expired or does not exist.'),
+                ],
             ]);
         }
 

@@ -5,17 +5,17 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\FrontContent;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
 
 class AdminFrontContentController extends Controller
 {
     /**
      * Display a listing of all front content based on the type.
      *
-     * @param \Illuminate\Http\Request  $request
-     * @param  String $type
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $type
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request, $limit = '15', $type = 'faq')
@@ -29,7 +29,7 @@ class AdminFrontContentController extends Controller
 
         // Search and filter columns
         if ($request->search) {
-            $query->where(function($query) use($request) {
+            $query->where(function ($query) use ($request) {
                 $query->where('title', 'like', "%$request->search%")
                     ->orWhere('type', 'like', "%$request->search%")
                     ->orWhere('content', 'like', "%$request->search%");
@@ -40,9 +40,9 @@ class AdminFrontContentController extends Controller
         if ($request->order && is_array($request->order)) {
             foreach ($request->order as $key => $dir) {
                 if ($dir === 'desc') {
-                    $query->orderByDesc($key??'id');
+                    $query->orderByDesc($key ?? 'id');
                 } else {
-                    $query->orderBy($key??'id');
+                    $query->orderBy($key ?? 'id');
                 }
             }
         }
@@ -53,7 +53,7 @@ class AdminFrontContentController extends Controller
             'message' => 'OK',
             'status' =>  $content->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'contents' => $content??[],
+            'contents' => $content ?? [],
         ]);
     }
 
@@ -63,10 +63,10 @@ class AdminFrontContentController extends Controller
         $content = FrontContent::find($item);
 
         return $this->buildResponse([
-            'message' => !$content ? 'The requested content no longer exists' : 'OK',
-            'status' =>  !$content ? 'info' : 'success',
-            'response_code' => !$content ? 404 : 200,
-            'content' => $content ?? (object)[],
+            'message' => ! $content ? 'The requested content no longer exists' : 'OK',
+            'status' =>  ! $content ? 'info' : 'success',
+            'response_code' => ! $content ? 404 : 200,
+            'content' => $content ?? (object) [],
         ]);
     }
 
@@ -74,7 +74,7 @@ class AdminFrontContentController extends Controller
     {
         \Gate::authorize('usable', 'content');
         $content = FrontContent::find($item);
-        if ($item && !$content) {
+        if ($item && ! $content) {
             return $this->buildResponse([
                 'message' => 'The requested content no longer exists',
                 'status' => 'info',
@@ -104,11 +104,10 @@ class AdminFrontContentController extends Controller
         $content->type = $request->type;
         $content->content = $request->content;
 
-        if ($request->hasFile('image'))
-        {
-            $content->image && Storage::delete($content->image??'');
+        if ($request->hasFile('image')) {
+            $content->image && Storage::delete($content->image ?? '');
             $content->image = $request->file('image')->storeAs(
-                'public/uploads/images', rand() . '_' . rand() . '.' . $request->file('image')->extension()
+                'public/uploads/images', rand().'_'.rand().'.'.$request->file('image')->extension()
             );
         }
         $content->save();
@@ -129,30 +128,28 @@ class AdminFrontContentController extends Controller
     public function destroy(Request $request, $item = null)
     {
         \Gate::authorize('usable', 'content');
-        if ($request->items)
-        {
-            $count = collect($request->items)->map(function($item) {
+        if ($request->items) {
+            $count = collect($request->items)->map(function ($item) {
                 $content = FrontContent::whereId($item)->first();
                 if ($content) {
                     $content->image && Storage::delete($content->image);
+
                     return $content->delete();
                 }
+
                 return false;
-            })->filter(fn($i)=>$i!==false)->count();
+            })->filter(fn ($i) =>$i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} contents have been deleted.",
                 'status' =>  'success',
                 'response_code' => 200,
             ]);
-        }
-        else
-        {
+        } else {
             $content = FrontContent::whereId($item)->first();
         }
 
-        if ($content)
-        {
+        if ($content) {
             $content->delete();
 
             return $this->buildResponse([

@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\FruitBay;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class FruitBaySeeder extends Seeder

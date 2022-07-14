@@ -3,14 +3,14 @@
 namespace App\Exceptions;
 
 use App\Http\Controllers\Controller;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
-use Symfony\Component\Mailer\Exception\TransportException;
-use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Support\Facades\Request;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Mailer\Exception\TransportException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -51,14 +51,14 @@ class Handler extends ExceptionHandler
         });
 
         $this->renderable(function (\ErrorException|TransportException|QueryException $e) {
-            $line = ($e instanceof \ErrorException ? ' in ' . $e->getFile() . ' on line '.$e->getLine() :'');
-            return $this->renderException($e->getMessage() . $line, 500);
+            $line = ($e instanceof \ErrorException ? ' in '.$e->getFile().' on line '.$e->getLine() : '');
+
+            return $this->renderException($e->getMessage().$line, 500);
         });
 
         $this->renderable(function (UnauthorizedHttpException $e) {
             return $this->renderException('You are not logged in.', 401);
         });
-
     }
 
     protected function renderException($msg, $code = 404)

@@ -44,13 +44,14 @@ class SendVerified extends Notification //implements ShouldQueue
     {
         $message = [
             'name' => $notifiable->firstname,
-            'message_line1' => 'You are receiving this email because you just verified your at account ' . config('settings.site_name'). ' and we want to use this medium to welcome you into our community',
-            'close_greeting' => 'Regards, <br/>' . config('settings.site_name'),
+            'message_line1' => 'You are receiving this email because you just verified your at account '.config('settings.site_name').' and we want to use this medium to welcome you into our community',
+            'close_greeting' => 'Regards, <br/>'.config('settings.site_name'),
         ];
+
         return (new MailMessage)->view(
             ['email', 'email-plain'], $message
         )
-        ->subject('Welcome to the '  . config('settings.site_name') . ' community.');
+        ->subject('Welcome to the '.config('settings.site_name').' community.');
     }
 
     /**
@@ -61,9 +62,10 @@ class SendVerified extends Notification //implements ShouldQueue
      */
     public function toTwilio($n)
     {
-        $message = __("Your :0 account has been verified successfully, welcome to our community.", [config('settings.site_name')]);
+        $message = __('Your :0 account has been verified successfully, welcome to our community.', [config('settings.site_name')]);
 
-        $message = __('Hi :0, ', [$n->firstname]) . $message;
+        $message = __('Hi :0, ', [$n->firstname]).$message;
+
         return (new TwilioSmsMessage())
             ->content($message);
 
@@ -81,7 +83,7 @@ class SendVerified extends Notification //implements ShouldQueue
         return [
             'type' => 'verification',
             'title' => ($this->type === 'mail') ? 'Email Address Verified' : 'Phone Number Verified',
-            'message' => __("Your account has been verified successfully, welcome to our community."),
+            'message' => __('Your account has been verified successfully, welcome to our community.'),
         ];
     }
 }

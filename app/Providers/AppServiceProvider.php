@@ -4,10 +4,10 @@ namespace App\Providers;
 
 require_once base_path('vendor/matomo/device-detector/autoload.php');
 
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Stringable;
+use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Illuminate\Support\Stringable;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,7 +31,7 @@ class AppServiceProvider extends ServiceProvider
         // Load Custom Helpers
         array_filter(File::files(app_path('Helpers')), function ($file) {
             if ($file->getExtension() === 'php' && stripos($file->getFileName(), 'helper') !== false) {
-                require_once app_path('Helpers/' . $file->getFileName());
+                require_once app_path('Helpers/'.$file->getFileName());
             }
         });
 

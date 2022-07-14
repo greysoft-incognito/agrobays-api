@@ -2,18 +2,17 @@
 
 namespace App\Models;
 
+use App\Notifications\SendCode;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use App\Notifications\SendCode;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Propaganistas\LaravelPhone\PhoneNumber;
-use Illuminate\Support\Facades\Http;
 use Propaganistas\LaravelPhone\Exceptions\NumberParseException;
+use Propaganistas\LaravelPhone\PhoneNumber;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -94,17 +93,18 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return Attribute::make(
             get: function ($value, $attributes) {
-                if (!$value || !is_string($value) || is_null($val = json_decode($value))) {
+                if (! $value || ! is_string($value) || is_null($val = json_decode($value))) {
                     return [
-                        "shipping" => "",
-                        "home" => "",
+                        'shipping' => '',
+                        'home' => '',
                     ];
                 }
+
                 return $val;
             },
-            set: fn($value) => ["address" => json_encode([
-                "shipping" => $value->shipping??$value['shipping']??'',
-                "home" => $value->home??$value['home']??'',
+            set: fn ($value) => ['address' => json_encode([
+                'shipping' => $value->shipping ?? $value['shipping'] ?? '',
+                'home' => $value->home ?? $value['home'] ?? '',
             ])]
         );
     }
@@ -118,19 +118,20 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return Attribute::make(
             get: function ($value, $attributes) {
-                if (!$value || !is_string($value) || is_null($val = json_decode($value))) {
+                if (! $value || ! is_string($value) || is_null($val = json_decode($value))) {
                     return [
-                        "name" => "",
-                        "iso2" => "",
-                        "emoji" => "",
+                        'name' => '',
+                        'iso2' => '',
+                        'emoji' => '',
                     ];
                 }
+
                 return $val;
             },
-            set: fn($value) => ["country" => json_encode([
-                "name" => $value->name??$value['name']??'',
-                "iso2" => $value->iso2??$value['iso2']??'',
-                "emoji" => $value->emoji??$value['emoji']??'',
+            set: fn ($value) => ['country' => json_encode([
+                'name' => $value->name ?? $value['name'] ?? '',
+                'iso2' => $value->iso2 ?? $value['iso2'] ?? '',
+                'emoji' => $value->emoji ?? $value['emoji'] ?? '',
             ])]
         );
     }
@@ -144,17 +145,18 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return Attribute::make(
             get: function ($value, $attributes) {
-                if (!$value || !is_string($value) || is_null($val = json_decode($value))) {
+                if (! $value || ! is_string($value) || is_null($val = json_decode($value))) {
                     return [
-                        "name" => "",
-                        "iso2" => "",
+                        'name' => '',
+                        'iso2' => '',
                     ];
                 }
+
                 return $val;
             },
-            set: fn($value) => ["state" => json_encode([
-                "name" => $value->name??$value['name']??'',
-                "iso2" => $value->iso2??$value['iso2']??'',
+            set: fn ($value) => ['state' => json_encode([
+                'name' => $value->name ?? $value['name'] ?? '',
+                'iso2' => $value->iso2 ?? $value['iso2'] ?? '',
             ])]
         );
     }
@@ -168,15 +170,16 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return Attribute::make(
             get: function ($value, $attributes) {
-                if (!$value || !is_string($value) || is_null($val = json_decode($value))) {
+                if (! $value || ! is_string($value) || is_null($val = json_decode($value))) {
                     return [
-                        "name" => "",
+                        'name' => '',
                     ];
                 }
+
                 return $val;
             },
-            set: fn($value) => ["city" => json_encode([
-                "name" => $value->name??$value['name']??$value??'',
+            set: fn ($value) => ['city' => json_encode([
+                'name' => $value->name ?? $value['name'] ?? $value ?? '',
             ])]
         );
     }
@@ -188,16 +191,18 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function phone(): Attribute
     {
-        $cIso2 = "NG";
+        $cIso2 = 'NG';
         if (($ipInpfo = \Illuminate\Support\Facades\Http::get('ipinfo.io/'.request()->ip().'?token='.config('settings.ipinfo_access_token')))->status() === 200) {
             $cIso2 = $ipInpfo->json('country') ?? $cIso2;
         }
-            return Attribute::make(
+
+        return Attribute::make(
                 get: function ($value) use ($cIso2) {
                     try {
-                        if (!empty($this->country->iso2??$this->country['iso2'])) {
-                            return (string) PhoneNumber::make($value, $this->country->iso2??$this->country['iso2'])->formatE164();
+                        if (! empty($this->country->iso2 ?? $this->country['iso2'])) {
+                            return (string) PhoneNumber::make($value, $this->country->iso2 ?? $this->country['iso2'])->formatE164();
                         }
+
                         return $value ? (string) PhoneNumber::make($value, $cIso2)->formatE164() : $value;
                     } catch (NumberParseException $th) {
                         return $value;
@@ -205,9 +210,10 @@ class User extends Authenticatable implements MustVerifyEmail
                 },
                 set: function ($value) use ($cIso2) {
                     $value = str_ireplace('-', '', $value);
-                    if (!empty($this->country->iso2??$this->country['iso2'])) {
-                        return ['phone' => (string) PhoneNumber::make($value, $this->country->iso2??$this->country['iso2'])->formatE164()];
+                    if (! empty($this->country->iso2 ?? $this->country['iso2'])) {
+                        return ['phone' => (string) PhoneNumber::make($value, $this->country->iso2 ?? $this->country['iso2'])->formatE164()];
                     }
+
                     return ['phone' => $value ? (string) PhoneNumber::make($value, $cIso2)->formatE164() : $value];
                 }
             );
@@ -230,8 +236,9 @@ class User extends Authenticatable implements MustVerifyEmail
     public function fullname(): Attribute
     {
         $name = isset($this->firstname) ? ucfirst($this->firstname) : '';
-        $name .= isset($this->lastname) ? ' ' . ucfirst($this->lastname) : '';
-        $name .= !isset($this->lastname) && !isset($this->firstname) && isset($this->username) ? ucfirst($this->username) : '';
+        $name .= isset($this->lastname) ? ' '.ucfirst($this->lastname) : '';
+        $name .= ! isset($this->lastname) && ! isset($this->firstname) && isset($this->username) ? ucfirst($this->username) : '';
+
         return new Attribute(
             get: fn () => $name,
         );
@@ -335,6 +342,7 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($this->wasChanged('email_verified_at')) {
             return true;
         }
+
         return false;
     }
 
@@ -348,6 +356,7 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($this->wasChanged('phone_verified_at')) {
             return true;
         }
+
         return false;
     }
 

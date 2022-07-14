@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Saving;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class AdminSavingController extends Controller
@@ -16,7 +16,7 @@ class AdminSavingController extends Controller
 
         // Search and filter columns
         if ($request->search) {
-            $query->where(function($query) use($request) {
+            $query->where(function ($query) use ($request) {
                 $query->where('payment_ref', 'like', "%$request->search%")
                     ->orWhere('status', 'like', "%$request->search%")
                     ->orWhere('amount', 'like', "%$request->search%");
@@ -27,9 +27,9 @@ class AdminSavingController extends Controller
         if ($request->order && is_array($request->order)) {
             foreach ($request->order as $key => $dir) {
                 if ($dir === 'desc') {
-                    $query->orderByDesc($key??'id');
+                    $query->orderByDesc($key ?? 'id');
                 } else {
-                    $query->orderBy($key??'id');
+                    $query->orderBy($key ?? 'id');
                 }
             }
         }
@@ -40,7 +40,7 @@ class AdminSavingController extends Controller
             'message' => 'OK',
             'status' =>  $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'items' => $items??[],
+            'items' => $items ?? [],
         ]);
     }
 
@@ -50,9 +50,9 @@ class AdminSavingController extends Controller
         $saving = Saving::whereId($item)->first();
 
         return $this->buildResponse([
-            'message' => !$saving ? 'The requested saving no longer exists' : 'OK',
-            'status' =>  !$saving ? 'info' : 'success',
-            'response_code' => !$saving ? 404 : 200,
+            'message' => ! $saving ? 'The requested saving no longer exists' : 'OK',
+            'status' =>  ! $saving ? 'info' : 'success',
+            'response_code' => ! $saving ? 404 : 200,
             'saving' => $saving,
         ]);
     }
@@ -60,15 +60,15 @@ class AdminSavingController extends Controller
     /**
      * Update the saving status
      *
-     * @param Request $request
-     * @param integer $item
+     * @param  Request  $request
+     * @param  int  $item
      * @return void
      */
     public function store(Request $request, $item = null)
     {
         \Gate::authorize('usable', 'savings');
         $saving = Saving::find($item);
-        if (!$saving) {
+        if (! $saving) {
             return $this->buildResponse([
                 'message' => 'The requested saving no longer exists',
                 'status' => 'error',
@@ -108,31 +108,28 @@ class AdminSavingController extends Controller
     public function destroy(Request $request, $item = null)
     {
         \Gate::authorize('usable', 'savings');
-        if ($request->items)
-        {
-            $count = collect($request->items)->map(function($item) {
+        if ($request->items) {
+            $count = collect($request->items)->map(function ($item) {
                 $saving = Saving::whereId($item)->first();
                 if ($saving) {
                     return $saving->delete();
                 }
+
                 return false;
-            })->filter(fn($i)=>$i!==false)->count();
+            })->filter(fn ($i) =>$i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} savings bags have been deleted.",
                 'status' =>  'success',
                 'response_code' => 200,
             ]);
-        }
-        else
-        {
+        } else {
             $saving = Saving::whereId($item)->first();
         }
 
-        if ($saving)
-        {
+        if ($saving) {
             return $this->buildResponse([
-                'message' => "Saving has been deleted.",
+                'message' => 'Saving has been deleted.',
                 'status' =>  'success',
                 'response_code' => 200,
             ]);

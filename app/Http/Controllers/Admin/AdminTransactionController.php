@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Transaction;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
-use Nette\Utils\Html;
 
 class AdminTransactionController extends Controller
 {
@@ -18,7 +16,7 @@ class AdminTransactionController extends Controller
 
         // Search and filter columns
         if ($request->search) {
-            $query->where(function($query) use($request) {
+            $query->where(function ($query) use ($request) {
                 $query->where('reference', 'like', "%$request->search%")
                     ->orWhere('amount', 'like', "%$request->search%")
                     ->orWhere('status', 'like', "%$request->search%")
@@ -30,9 +28,9 @@ class AdminTransactionController extends Controller
         if ($request->order && is_array($request->order)) {
             foreach ($request->order as $key => $dir) {
                 if ($dir === 'desc') {
-                    $query->orderByDesc($key??'id');
+                    $query->orderByDesc($key ?? 'id');
                 } else {
-                    $query->orderBy($key??'id');
+                    $query->orderBy($key ?? 'id');
                 }
             }
         }
@@ -43,7 +41,7 @@ class AdminTransactionController extends Controller
             'message' => 'OK',
             'status' =>  $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'items' => $items??[],
+            'items' => $items ?? [],
         ]);
     }
 
@@ -53,9 +51,9 @@ class AdminTransactionController extends Controller
         $transaction = Transaction::whereId($item)->first();
 
         return $this->buildResponse([
-            'message' => !$transaction ? 'The requested transaction no longer exists' : 'OK',
-            'status' =>  !$transaction ? 'info' : 'success',
-            'response_code' => !$transaction ? 404 : 200,
+            'message' => ! $transaction ? 'The requested transaction no longer exists' : 'OK',
+            'status' =>  ! $transaction ? 'info' : 'success',
+            'response_code' => ! $transaction ? 404 : 200,
             'transaction' => $transaction,
         ]);
     }
@@ -63,15 +61,15 @@ class AdminTransactionController extends Controller
     /**
      * Update the transaction status
      *
-     * @param Request $request
-     * @param integer $item
+     * @param  Request  $request
+     * @param  int  $item
      * @return void
      */
     public function store(Request $request, $item = null)
     {
         \Gate::authorize('usable', 'transactions');
         $transaction = Transaction::find($item);
-        if (!$transaction) {
+        if (! $transaction) {
             return $this->buildResponse([
                 'message' => 'The requested transaction no longer exists',
                 'status' => 'error',
@@ -111,33 +109,30 @@ class AdminTransactionController extends Controller
     public function destroy(Request $request, $item = null)
     {
         \Gate::authorize('usable', 'transactions');
-        if ($request->items)
-        {
-            $count = collect($request->items)->map(function($item) {
+        if ($request->items) {
+            $count = collect($request->items)->map(function ($item) {
                 $transaction = Transaction::whereId($item)->first();
                 if ($transaction) {
                     return $transaction->delete();
                 }
+
                 return false;
-            })->filter(fn($i)=>$i!==false)->count();
+            })->filter(fn ($i) =>$i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} transactions bags have been deleted.",
                 'status' =>  'success',
                 'response_code' => 200,
             ]);
-        }
-        else
-        {
+        } else {
             $transaction = Transaction::whereId($item)->first();
         }
 
-        if ($transaction)
-        {
+        if ($transaction) {
             $food->delete();
 
             return $this->buildResponse([
-                'message' => "Transaction has been deleted.",
+                'message' => 'Transaction has been deleted.',
                 'status' =>  'success',
                 'response_code' => 200,
             ]);

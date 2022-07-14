@@ -11,7 +11,7 @@ class Order extends Model
     use HasFactory;
 
     protected $casts = [
-        'items' => 'array'
+        'items' => 'array',
     ];
 
     protected $fillable = [

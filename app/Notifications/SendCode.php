@@ -40,7 +40,7 @@ class SendCode extends Notification //implements ShouldQueue
                 ? [TwilioChannel::class]
                 : ['mail']);
 
-        return collect($channels)->filter(fn($ch)=>$this->type !== 'verify-phone' || $ch !== 'mail')->filter(fn($ch)=>$this->type !== 'verify' || $ch !== TwilioChannel::class)->toArray();
+        return collect($channels)->filter(fn ($ch) =>$this->type !== 'verify-phone' || $ch !== 'mail')->filter(fn ($ch) =>$this->type !== 'verify' || $ch !== TwilioChannel::class)->toArray();
     }
 
     /**
@@ -69,7 +69,7 @@ class SendCode extends Notification //implements ShouldQueue
                 'message_line3' => 'If you do not recognize this activity, no further action is required as the associated account will be deleted in few days if left unverified.',
                 'close_greeting' => __('Regards, <br/>', [config('settings.site_name')]),
                 'message_help' => 'Please use the code above to verify your account ',
-            ]
+            ],
         ];
 
         if (isset($message[$this->type])) {
@@ -90,11 +90,12 @@ class SendCode extends Notification //implements ShouldQueue
     {
         $message = [
             'reset' => __("Use this code {$this->token} to reset your :0 password, It expires in :1 minutes.", [config('settings.site_name'), config('settings.token_lifespan', 30)]),
-            'verify-phone' => __("use this code {$this->token} to verify your :0 phone number, It expires in :1 minutes.", [config('settings.site_name'),config('settings.token_lifespan', 30)]),
+            'verify-phone' => __("use this code {$this->token} to verify your :0 phone number, It expires in :1 minutes.", [config('settings.site_name'), config('settings.token_lifespan', 30)]),
         ];
 
         if (isset($message[$this->type])) {
-            $message = __('Hi :0, ', [$n->firstname]) . $message[$this->type];
+            $message = __('Hi :0, ', [$n->firstname]).$message[$this->type];
+
             return (new TwilioSmsMessage())
                 ->content($message);
         }

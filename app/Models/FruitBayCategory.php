@@ -24,7 +24,7 @@ class FruitBayCategory extends Model
     public static function boot()
     {
         parent::boot();
-        static::creating(function($category) {
+        static::creating(function ($category) {
             $slug = Str::of($category->title)->slug();
             $category->slug = (string) FruitBayCategory::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
         });
@@ -39,7 +39,7 @@ class FruitBayCategory extends Model
     {
         $image = $this->image
             ? img($this->image, 'banner', 'large')
-            : 'https://loremflickr.com/320/320/'.urlencode($this->title??'fruit').'?random='.rand();
+            : 'https://loremflickr.com/320/320/'.urlencode($this->title ?? 'fruit').'?random='.rand();
 
         return Attribute::make(
             get: fn () => $image,

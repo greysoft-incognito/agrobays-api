@@ -30,7 +30,7 @@ class Saving extends Model
      */
     public function subscription(): BelongsTo
     {
-        return $this->belongsTo(Subscription::class);//->where('status', '!=', 'complete');
+        return $this->belongsTo(Subscription::class); //->where('status', '!=', 'complete');
     }
 
     /**
@@ -44,7 +44,7 @@ class Saving extends Model
     public function getSubscription(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->subscription
+            get: fn () => $this->subscription
         );
     }
 
@@ -61,7 +61,7 @@ class Saving extends Model
     public function total(): Attribute
     {
         return Attribute::make(
-            get: fn()=> $this->amount
+            get: fn () => $this->amount
         );
     }
 

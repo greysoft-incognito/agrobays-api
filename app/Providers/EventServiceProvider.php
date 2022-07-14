@@ -3,12 +3,12 @@
 namespace App\Providers;
 
 use App\Events\PhoneVerified;
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Auth\Events\Verified;
-use App\Listeners\SendPhoneVerificationNotification;
 use App\Listeners\SendEmailVerificationNotification;
+use App\Listeners\SendPhoneVerificationNotification;
 use App\Listeners\SendVerifiedEmailNotification;
 use App\Listeners\SendVerifiedPhoneNotification;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
 

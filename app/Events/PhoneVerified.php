@@ -11,7 +11,6 @@ class PhoneVerified
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-
     /**
      * The verified user.
      *

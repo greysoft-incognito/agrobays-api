@@ -3,9 +3,9 @@
 namespace App\Console;
 
 use App\Console\Commands\Dispatch;
+use App\Console\Commands\HandleTransactions;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
-use App\Console\Commands\HandleTransactions;
 use Illuminate\Support\Stringable;
 use Spatie\SlackAlerts\Facades\SlackAlert;
 
@@ -32,7 +32,7 @@ class Kernel extends ConsoleKernel
                 SlackAlert::message($output);
             });
 
-            $schedule->command(Dispatch::class)
+        $schedule->command(Dispatch::class)
                 ->everyThirtyMinutes()
                 ->withoutOverlapping()
                 ->onSuccess(function (Stringable $output) {

@@ -3,9 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\Food;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use Faker\Generator;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class FoodSeeder extends Seeder
@@ -48,7 +47,7 @@ class FoodSeeder extends Seeder
                     'description' => $faker->text(),
                     'weight' => '10kg',
                     'created_at' => \Carbon\Carbon::now(),
-                ]
+                ],
             ]);
         }
     }

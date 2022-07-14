@@ -67,17 +67,18 @@ class Dispatch extends Model
     {
         return Attribute::make(
             get: function ($value, $attributes) {
-                if (!$value || !is_string($value) || is_null($val = json_decode($value))) {
+                if (! $value || ! is_string($value) || is_null($val = json_decode($value))) {
                     return [
-                        "lon" => "",
-                        "lat" => "",
+                        'lon' => '',
+                        'lat' => '',
                     ];
                 }
+
                 return $val;
             },
-            set: fn($value) => ["last_location" => json_encode([
-                "lon" => $value->lon??$value['lon']??'',
-                "lat" => $value->lat??$value['lat']??'',
+            set: fn ($value) => ['last_location' => json_encode([
+                'lon' => $value->lon ?? $value['lon'] ?? '',
+                'lat' => $value->lat ?? $value['lat'] ?? '',
             ])]
         );
     }
@@ -96,6 +97,7 @@ class Dispatch extends Model
                 } elseif ($this->dispatchable instanceof Subscription) {
                     return 'Food Bag';
                 }
+
                 return 'Package';
             }
         );
@@ -115,6 +117,7 @@ class Dispatch extends Model
                 } elseif ($this->dispatchable instanceof Subscription) {
                     return 'foodbag';
                 }
+
                 return 'package';
             }
         );

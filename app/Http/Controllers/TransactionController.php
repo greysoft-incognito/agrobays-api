@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Transaction;
+use Carbon\CarbonImmutable as Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use Carbon\CarbonImmutable as Carbon;
 use Nette\Utils\Html;
 
 class TransactionController extends Controller
@@ -14,7 +14,7 @@ class TransactionController extends Controller
     /**
      * Display a listing of the user's transactions for datatables.
      *
-     * @param \Illuminate\Support\Facades\Auth $auth
+     * @param  \Illuminate\Support\Facades\Auth  $auth
      * @return \Illuminate\Http\Response
      */
     public function index(Auth $auth)
@@ -23,10 +23,10 @@ class TransactionController extends Controller
 
         return app('datatables')->eloquent($model)
             ->rawColumns(['action'])
-            ->editColumn('created_at', function(Transaction $item) {
+            ->editColumn('created_at', function (Transaction $item) {
                 return $item->created_at->format('Y-m-d H:i');
             })
-            ->addColumn('type', function(Transaction $item) {
+            ->addColumn('type', function (Transaction $item) {
                 return Str::replace('App\\Models\\', '', $item->transactable_type);
             })
             ->editColumn('amount', function (Transaction $item) {
@@ -34,7 +34,7 @@ class TransactionController extends Controller
             })
             ->addColumn('action', function (Transaction $item) {
                 return implode([
-                    Html::el('a', ["onclick"=>"hotLink('/transactions/invoice/".$item->id."')", "href"=>"javascript:void(0)"])->title(__('View Invoice'))->setHtml(Html::el('i')->class('ri-file-list-2-fill ri-2x text-primary'))
+                    Html::el('a', ['onclick'=>"hotLink('/transactions/invoice/".$item->id."')", 'href'=>'javascript:void(0)'])->title(__('View Invoice'))->setHtml(Html::el('i')->class('ri-file-list-2-fill ri-2x text-primary')),
                 ]);
             })
             ->removeColumn('updated_at')->toJson();
@@ -51,26 +51,23 @@ class TransactionController extends Controller
      * Display a listing of the user's transactions.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  Integer $limit
-     * @param  String $status
+     * @param  int  $limit
+     * @param  string  $status
      * @return \Illuminate\Http\Response
      */
     public function transactions(Request $request, $limit = 1, $status = null)
     {
         $trans = Auth::user()->transactions()->orderBy('id', 'DESC');
 
-        if (is_numeric($limit) && $limit > 0)
-        {
+        if (is_numeric($limit) && $limit > 0) {
             $trans->limit($limit);
         }
 
-        if ($status !== null && in_array($status, ['rejected', 'pending', 'complete']))
-        {
+        if ($status !== null && in_array($status, ['rejected', 'pending', 'complete'])) {
             $trans->where('status', $status);
         }
 
-        if ($p = $request->query('period'))
-        {
+        if ($p = $request->query('period')) {
             $period = explode('-', $p);
             $from = new Carbon($period[0]);
             $to = new Carbon($period[1]);
@@ -80,30 +77,30 @@ class TransactionController extends Controller
         $transactions = $trans->get();
 
         if ($transactions->isNotEmpty()) {
-            $transactions->each(function($tr) {
-                $tr->type = Str::replace('App\\Models\\', '', $tr->transactable_type );
+            $transactions->each(function ($tr) {
+                $tr->type = Str::replace('App\\Models\\', '', $tr->transactable_type);
                 $tr->date = $tr->created_at->format('Y-m-d H:i');
             });
         }
 
         $msg = $transactions->isEmpty() ? 'You have not made any transactions.' : 'OK';
         $_period = $transactions->isNotEmpty()
-            ? ($transactions->last()->created_at->format('Y/m/d') . '-' . $transactions->first()->created_at->format('Y/m/d'))
-            : "";
+            ? ($transactions->last()->created_at->format('Y/m/d').'-'.$transactions->first()->created_at->format('Y/m/d'))
+            : '';
 
         return $this->buildResponse([
             'message' => $msg,
             'status' =>  $transactions->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'transactions' => $transactions??[],
-            'period' => $p ? urldecode($p) : $_period
+            'transactions' => $transactions ?? [],
+            'period' => $p ? urldecode($p) : $_period,
         ]);
     }
 
     /**
      * Display an invoice of the user's transactions.
      *
-     * @param \Illuminate\Support\Facades\Auth $auth
+     * @param  \Illuminate\Support\Facades\Auth  $auth
      * @return \Illuminate\Http\Response
      */
     public function invoice($transaction_id = null)
@@ -116,8 +113,8 @@ class TransactionController extends Controller
             'message' => $msg,
             'status' =>  $transaction ? 'success' : 'info',
             'response_code' => $transaction ? 200 : 404,
-            'transaction' => $transaction??[],
-            'items' => $transaction->transactable->items??[($transaction->transactable??null)],
+            'transaction' => $transaction ?? [],
+            'items' => $transaction->transactable->items ?? [($transaction->transactable ?? null)],
         ]);
     }
 }

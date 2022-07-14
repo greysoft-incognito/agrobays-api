@@ -4,15 +4,16 @@ namespace App\Notifications;
 
 use App\Models\Order;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Str;
 use NotificationChannels\Twilio\TwilioChannel;
 use NotificationChannels\Twilio\TwilioSmsMessage;
-use Illuminate\Support\Str;
+
 class Dispatched extends Notification
 {
     use Queueable;
+
     protected $shortUrl;
 
     /**
@@ -41,6 +42,7 @@ class Dispatched extends Notification
             : (in_array('sms', $pref)
                 ? [TwilioChannel::class]
                 : ['mail']);
+
         return collect($channels)->merge(['database'])->toArray();
     }
 
@@ -55,7 +57,7 @@ class Dispatched extends Notification
         $item = $this->item;
         $type = $this->item instanceof Order ? 'order' : ($this->item instanceof Subscription ? 'bag' : 'package');
         $status = $this->status ?? (($item->status === 'pending') ? 'shipped' : $item->status);
-        $package = $type === 'order' ? "fruit order" : "food bag";
+        $package = $type === 'order' ? 'fruit order' : 'food bag';
         $handler_phone = $item->user->phone ?? '';
 
         $link = env('FRONTEND_LINK')."/track/order/{$item->reference}";
@@ -72,7 +74,7 @@ class Dispatched extends Notification
             'order' => [
                 'name' => $item->dispatchable->user->firstname,
                 'cta' => $status === 'shipped' ? ['code' => $item->code] : null,
-                'message_line1' => $line1[$status]??'Your package has been shipped and will be delivered soon.',
+                'message_line1' => $line1[$status] ?? 'Your package has been shipped and will be delivered soon.',
                 'close_greeting' => __('Regards, <br/>:0', [config('settings.site_name')]),
                 'message_help' => $status === 'shipped'
                     ? 'Don\'t give this code to the dispatch rider till you have received your package.'
@@ -81,15 +83,16 @@ class Dispatched extends Notification
             'bag' => [
                 'name' => $item->dispatchable->user->firstname,
                 'cta' => $status === 'shipped' ? ['code' => $item->code] : null,
-                'message_line1' => $line1[$status]??'Your package has been shipped and will be delivered soon.',
+                'message_line1' => $line1[$status] ?? 'Your package has been shipped and will be delivered soon.',
                 'close_greeting' => __('Regards, <br/>:0', [config('settings.site_name')]),
                 'message_help' => $status === 'shipped'
                     ? 'Don\'t give this code to the dispatch rider till you have received your package.'
                     : 'You can call our help lines or email us if you encounter any challenges.',
-            ]
+            ],
         ];
+
         return (new MailMessage)->view(
-            ['email', 'email-plain'], $message[$type]??$message['order']
+            ['email', 'email-plain'], $message[$type] ?? $message['order']
         )
         ->subject(__($type === 'order' ? "Order {$status} - :0" : "Food Bag {$status} - :0", [config('settings.site_name')]));
     }
@@ -105,7 +108,7 @@ class Dispatched extends Notification
         $item = $this->item;
         $type = $this->item instanceof Order ? 'order' : ($this->item instanceof Subscription ? 'bag' : 'package');
         $status = $this->status ?? (($item->status === 'pending') ? 'shipped' : $item->status);
-        $package = $type === 'order' ? "fruit order" : "food bag";
+        $package = $type === 'order' ? 'fruit order' : 'food bag';
         $handler_phone = $item->user->phone ?? '';
 
         $link = env('FRONTEND_LINK')."/track/order/{$item->reference}";
@@ -118,7 +121,8 @@ class Dispatched extends Notification
             'assigned' => "A {$package} package with REF: {$item->reference} is assigned to you for {$item->dispatchable->user->fullname} ({$item->dispatchable->user->phone}), please visit the dispatch facility for further instructions.",
         ];
 
-        $message = __('Hi :0, ', [$item->dispatchable->user->firstname]) . ($text[$status]);
+        $message = __('Hi :0, ', [$item->dispatchable->user->firstname]).($text[$status]);
+
         return (new TwilioSmsMessage())
             ->content($message);
     }
@@ -134,7 +138,7 @@ class Dispatched extends Notification
         $item = $this->item;
         $type = $this->item instanceof Order ? 'order' : ($this->item instanceof Subscription ? 'bag' : 'package');
         $status = $this->status ?? (($item->status === 'pending') ? 'shipped' : $item->status);
-        $package = $type === 'order' ? "fruit order" : "food bag";
+        $package = $type === 'order' ? 'fruit order' : 'food bag';
         $handler_phone = $item->user->phone ?? '';
 
         $link = "/track/order/{$item->reference}";

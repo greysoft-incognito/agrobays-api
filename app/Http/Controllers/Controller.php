@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
-use Illuminate\Contracts\Validation\Validator;
 
 /**
- *
  * @return \Illuminate\Http\Response|\Illuminate\Contracts\Routing\ResponseFactory
  */
 class Controller extends BaseController
@@ -19,17 +18,17 @@ class Controller extends BaseController
     /**
      * Prepare the API response
      *
-     * @param array $data
+     * @param  array  $data
      * @return void
      */
     public function buildResponse($data = [], $extra_data = null)
     {
         $message = $data['message'] ?? 'Request was successful';
-        $code   = $data['response_code'] ?? 200;
-        $resp   = $data['response_data'] ?? null;
+        $code = $data['response_code'] ?? 200;
+        $resp = $data['response_data'] ?? null;
         $status = $data['status'] ?? 'success';
         $errors = $data['errors'] ?? null;
-        $token  = $data['token'] ?? null;
+        $token = $data['token'] ?? null;
 
         unset($data['message'], $data['response_code'], $data['status'], $data['errors'], $data['token'], $data['response_data']);
 
@@ -46,23 +45,19 @@ class Controller extends BaseController
             'response' => $data ?? [],
         ];
 
-        if ($extra_data)
-        {
+        if ($extra_data) {
             $response = array_merge($response, is_array($extra_data) ? $extra_data : ['load' => $extra_data]);
         }
 
-        if ($errors)
-        {
+        if ($errors) {
             $response['errors'] = $errors;
         }
 
-        if ($token)
-        {
+        if ($token) {
             $response['token'] = $token;
         }
 
-        if ($resp)
-        {
+        if ($resp) {
             $response['response_data'] = $resp;
         }
 
@@ -72,7 +67,7 @@ class Controller extends BaseController
     /**
      * Prepare the validation error.
      *
-     * @param Validator $validator
+     * @param  Validator  $validator
      * @return void
      */
     public function validatorFails(Validator $validator, $field = null)

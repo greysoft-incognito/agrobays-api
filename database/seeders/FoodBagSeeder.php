@@ -3,9 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\FoodBag;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use Faker\Generator;
+use Illuminate\Database\Seeder;
 
 class FoodBagSeeder extends Seeder
 {
@@ -16,7 +15,7 @@ class FoodBagSeeder extends Seeder
      */
     public function run(Generator $faker)
     {
-        FoodBag::where('id', '!=', NULL)->delete();
+        FoodBag::where('id', '!=', null)->delete();
         FoodBag::insert([
             [
                 'plan_id' => 1,
@@ -48,7 +47,7 @@ class FoodBagSeeder extends Seeder
                 'title' => 'Food Bag C',
                 'description' => 'Specially Packed for your Nourishment.',
                 'created_at' => \Carbon\Carbon::now(),
-            ],[
+            ], [
                 'plan_id' => 3,
                 'title' => 'Food Bag A',
                 'description' => 'Specially Packed for your daily routine Nourishment.',

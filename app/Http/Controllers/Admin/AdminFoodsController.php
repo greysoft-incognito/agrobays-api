@@ -3,14 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Food;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\File;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use Nette\Utils\Html;
 
 class AdminFoodsController extends Controller
 {
@@ -21,7 +19,7 @@ class AdminFoodsController extends Controller
 
         // Search and filter columns
         if ($request->search) {
-            $query->where(function($query) use($request) {
+            $query->where(function ($query) use ($request) {
                 $query->where('name', 'like', "%$request->search%")
                     ->orWhere('description', 'like', "%$request->search%");
             });
@@ -31,9 +29,9 @@ class AdminFoodsController extends Controller
         if ($request->order && is_array($request->order)) {
             foreach ($request->order as $key => $dir) {
                 if ($dir === 'desc') {
-                    $query->orderByDesc($key??'id');
+                    $query->orderByDesc($key ?? 'id');
                 } else {
-                    $query->orderBy($key??'id');
+                    $query->orderBy($key ?? 'id');
                 }
             }
         }
@@ -44,7 +42,7 @@ class AdminFoodsController extends Controller
             'message' => 'OK',
             'status' =>  $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'items' => $items??[],
+            'items' => $items ?? [],
         ]);
     }
 
@@ -54,9 +52,9 @@ class AdminFoodsController extends Controller
         $food = Food::whereId($item)->first();
 
         return $this->buildResponse([
-            'message' => !$food ? 'The requested food no longer exists' : 'OK',
-            'status' =>  !$food ? 'info' : 'success',
-            'response_code' => !$food ? 404 : 200,
+            'message' => ! $food ? 'The requested food no longer exists' : 'OK',
+            'status' =>  ! $food ? 'info' : 'success',
+            'response_code' => ! $food ? 404 : 200,
             'food' => $food,
         ]);
     }
@@ -71,7 +69,7 @@ class AdminFoodsController extends Controller
             'image' => 'nullable|mimes:jpg,jpeg,png',
             'description' => 'nullable|min:10|max:550',
         ], [], [
-            'food_bag_id' => 'Food Bag'
+            'food_bag_id' => 'Food Bag',
         ]);
 
         if ($validator->fails()) {
@@ -91,11 +89,10 @@ class AdminFoodsController extends Controller
         $food->image = $request->image ?? $food->image ?? '';
         $food->description = $request->description;
 
-        if ($request->hasFile('image'))
-        {
-            $food->image && Storage::delete($food->image??'');
+        if ($request->hasFile('image')) {
+            $food->image && Storage::delete($food->image ?? '');
             $food->image = $request->file('image')->storeAs(
-                'public/uploads/images', rand() . '_' . rand() . '.' . $request->file('image')->extension()
+                'public/uploads/images', rand().'_'.rand().'.'.$request->file('image')->extension()
             );
         }
         $food->save();
@@ -116,30 +113,28 @@ class AdminFoodsController extends Controller
     public function destroy(Request $request, $item = null)
     {
         \Gate::authorize('usable', 'foods');
-        if ($request->items)
-        {
-            $count = collect($request->items)->each(function($item) {
+        if ($request->items) {
+            $count = collect($request->items)->each(function ($item) {
                 $food = Food::whereId($item)->first();
                 if ($food) {
                     $food->image && Storage::delete($food->image);
+
                     return $food->delete();
                 }
+
                 return false;
-            })->filter(fn($i)=>$i!==false)->count();
+            })->filter(fn ($i) =>$i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} foods have been deleted.",
                 'status' =>  'success',
                 'response_code' => 200,
             ]);
-        }
-        else
-        {
+        } else {
             $food = Food::whereId($item)->first();
         }
 
-        if ($food)
-        {
+        if ($food) {
             $food->image && Storage::delete($food->image);
 
             $food->delete();

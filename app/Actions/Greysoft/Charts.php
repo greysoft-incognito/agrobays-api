@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Actions\Greysoft;
 
 use App\Models\Order;
@@ -18,44 +19,44 @@ class Charts
         }
 
         return [
-            "tooltip" => [
-                "trigger" => "item",
+            'tooltip' => [
+                'trigger' => 'item',
                 // "formatter" => "{a} <br/>{b}: {$currency_symbol}{c} ({d}%)",
             ],
-            "legend" => [
-                "bottom" => "10",
-                "left" => "center",
-                "data" => collect($data['legend'])->values(),
+            'legend' => [
+                'bottom' => '10',
+                'left' => 'center',
+                'data' => collect($data['legend'])->values(),
             ],
-            "series" => [
+            'series' => [
                 [
-                    "name" => "Transactions",
-                    "type" => "pie",
-                    "radius" => ["50%", "70%"],
-                    "avoidLabelOverlap" => false,
-                    "label" => [
-                        "show" => false,
-                        "position" => "center",
+                    'name' => 'Transactions',
+                    'type' => 'pie',
+                    'radius' => ['50%', '70%'],
+                    'avoidLabelOverlap' => false,
+                    'label' => [
+                        'show' => false,
+                        'position' => 'center',
                     ],
-                    "emphasis" => [
-                        "label" => [
-                            "show" => false,
-                            "fontSize" => "30",
-                            "fontWeight" => "bold",
+                    'emphasis' => [
+                        'label' => [
+                            'show' => false,
+                            'fontSize' => '30',
+                            'fontWeight' => 'bold',
                         ],
                     ],
-                    "labelLine" => [
-                        "show" => false,
+                    'labelLine' => [
+                        'show' => false,
                     ],
-                    "data" => collect($data['data'])->map(function($get) use ($data) {
+                    'data' => collect($data['data'])->map(function ($get) use ($data) {
                         return [
-                            "value" => $get['value'],
-                            "name" => $data['legend'][$get['key']],
-                            "itemStyle" => [
-                                "color" => $get['color'],
+                            'value' => $get['value'],
+                            'name' => $data['legend'][$get['key']],
+                            'itemStyle' => [
+                                'color' => $get['color'],
                             ],
                         ];
-                    })
+                    }),
                 ],
             ],
         ];
@@ -64,57 +65,58 @@ class Charts
     protected function bar(array $data)
     {
         $cs = config('settings.currency_symbol');
+
         return [
-            "tooltip" => [
-                "trigger" => "axis",
-                "valueFormatter" => "(value) => $cs + value.toFixed(2)",
-                "axisPointer" => [
-                    "type" => "shadow", // The default is a straight line, optional:'line' |'shadow'
+            'tooltip' => [
+                'trigger' => 'axis',
+                'valueFormatter' => "(value) => $cs + value.toFixed(2)",
+                'axisPointer' => [
+                    'type' => 'shadow', // The default is a straight line, optional:'line' |'shadow'
                 ],
             ],
-            "grid" => [
-                "left" => "2%",
-                "right" => "2%",
-                "top" => "4%",
-                "bottom" => "3%",
-                "containLabel" => true,
+            'grid' => [
+                'left' => '2%',
+                'right' => '2%',
+                'top' => '4%',
+                'bottom' => '3%',
+                'containLabel' => true,
             ],
-            "xAxis" => [
+            'xAxis' => [
                 [
-                    "type" => "category",
-                    "data" => [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ]
+                    'type' => 'category',
+                    'data' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                 ],
             ],
-            "yAxis" => [
+            'yAxis' => [
                 [
-                    "type" => "value",
-                    "splitLine" => [
-                        "show" => false,
+                    'type' => 'value',
+                    'splitLine' => [
+                        'show' => false,
                     ],
-                ]
+                ],
             ],
-            "series" => [
+            'series' => [
                 [
-                    "name" => "Transactions",
-                    "type" => "bar",
-                    "data" => $data['transactions'],
-                    "color" => "#2a945b",
+                    'name' => 'Transactions',
+                    'type' => 'bar',
+                    'data' => $data['transactions'],
+                    'color' => '#2a945b',
                 ], [
-                    "name" => "Subscriptions",
-                    "type" => "bar",
-                    "color" => "#f44336",
-                    "data" => $data['subscriptions'],
+                    'name' => 'Subscriptions',
+                    'type' => 'bar',
+                    'color' => '#f44336',
+                    'data' => $data['subscriptions'],
                 ], [
-                    "name" => "Food Orders",
-                    "type" => "bar",
-                    "data" => $data['fruit_orders'],
-                    "color" => "#02a9f4",
+                    'name' => 'Food Orders',
+                    'type' => 'bar',
+                    'data' => $data['fruit_orders'],
+                    'color' => '#02a9f4',
                 ], [
-                    "name" => "Savings",
-                    "type" => "bar",
-                    "data" => $data['savings'],
-                    "color" => "#f88c2b",
-                ]
+                    'name' => 'Savings',
+                    'type' => 'bar',
+                    'data' => $data['savings'],
+                    'color' => '#f88c2b',
+                ],
             ],
         ];
     }
@@ -189,76 +191,80 @@ class Charts
     /**
      * Get the bar chart
      *
-     * @param string $for
+     * @param  string  $for
      * @return App\Actions\Greysoft\Charts::getBar
      */
     public function getPie($for = 'user')
     {
         $savings = (($for === 'user') ? Auth::user()->savings() : Saving::query())
-        ->get()->map(function($value, $key) {
+        ->get()->map(function ($value, $key) {
             return $value->total ?? 0;
         })->sum();
 
         $orders = (($for === 'user') ? Auth::user()->orders() : Order::query())
-        ->get()->map(function($value, $key) {
+        ->get()->map(function ($value, $key) {
             return $value->amount;
         })->sum();
 
-        return $this->pie(array(
+        return $this->pie([
             'legend' => [
-                "savings" => "Savings",
-                "fruit_orders" => "Fruit Orders"
+                'savings' => 'Savings',
+                'fruit_orders' => 'Fruit Orders',
             ],
             'data' => [
                 [
-                    "key" => "savings",
-                    "color" => "#ffa85a",
-                    "value" => floor($savings)
+                    'key' => 'savings',
+                    'color' => '#ffa85a',
+                    'value' => floor($savings),
                 ], [
-                    "key" => "fruit_orders",
-                    "color" => "#2a945b",
-                    "value" => floor($orders)
-                ]
-            ]
-        ), true);
+                    'key' => 'fruit_orders',
+                    'color' => '#2a945b',
+                    'value' => floor($orders),
+                ],
+            ],
+        ], true);
     }
 
     /**
      * Get the bar chart
      *
-     * @param string $for
+     * @param  string  $for
      * @return App\Actions\Greysoft\Charts::getBar
      */
     public function getBar($for = 'user')
     {
         return $this->bar([
-            "transactions" =>collect(range(1,12))->map(function($get) use ($for) {
+            'transactions' =>collect(range(1, 12))->map(function ($get) use ($for) {
                 $start = Carbon::now()->month($get)->startOfMonth();
                 $end = Carbon::now()->month($get)->endOfMonth();
+
                 return (($for === 'user') ? Auth::user()->transactions() : Transaction::query())
                     ->whereBetween('created_at', [$start, $end])->sum('amount');
             })->toArray(),
-            "subscriptions" => collect(range(1,12))->map(function($get) use ($for) {
+            'subscriptions' => collect(range(1, 12))->map(function ($get) use ($for) {
                 $start = Carbon::now()->month($get)->startOfMonth();
                 $end = Carbon::now()->month($get)->endOfMonth();
+
                 return (($for === 'user') ? Auth::user()->subscriptions() : Subscription::query())
-                    ->whereBetween('created_at', [$start, $end])->get()->map(function($sub) {
+                    ->whereBetween('created_at', [$start, $end])->get()->map(function ($sub) {
                         return num_reformat($sub->total_saved);
-                })->sum();
+                    })->sum();
             })->toArray(),
-            "fruit_orders" => collect(range(1,12))->map(function($get) use ($for) {
+            'fruit_orders' => collect(range(1, 12))->map(function ($get) use ($for) {
                 $start = Carbon::now()->month($get)->startOfMonth();
                 $end = Carbon::now()->month($get)->endOfMonth();
+
                 return (($for === 'user') ? Auth::user()->orders() : Order::query())
                     ->whereBetween('created_at', [$start, $end])->sum('amount');
             })->toArray(),
-            "savings" => collect(range(1,12))->map(function($get) use ($for) {
+            'savings' => collect(range(1, 12))->map(function ($get) use ($for) {
                 $start = Carbon::now()->month($get)->startOfMonth();
                 $end = Carbon::now()->month($get)->endOfMonth();
+
                 return (($for === 'user') ? Auth::user()->savings() : Saving::query())
                     ->where('status', 'complete')
                     ->whereBetween('created_at', [$start, $end])->sum('amount');
-            })->toArray()
+            })->toArray(),
         ], true);
     }
 }

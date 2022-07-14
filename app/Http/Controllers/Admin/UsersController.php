@@ -5,19 +5,19 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Hash;
 
 class UsersController extends Controller
 {
     /**
      * Display a listing of all user.
      *
-     * @param \Illuminate\Http\Request  $request
-     * @param  String $type
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $type
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request, $limit = '15', $role = 'user')
@@ -31,7 +31,7 @@ class UsersController extends Controller
 
         // Search and filter columns
         if ($request->search) {
-            $query->where(function($query) use($request) {
+            $query->where(function ($query) use ($request) {
                 $query->where('username', 'like', "%$request->search%")
                     ->orWhere('lastname', 'like', "%$request->search%")
                     ->orWhere('firstname', 'like', "%$request->search%")
@@ -49,9 +49,9 @@ class UsersController extends Controller
         if ($request->order && is_array($request->order)) {
             foreach ($request->order as $key => $dir) {
                 if ($dir === 'desc') {
-                    $query->orderByDesc($key??'id');
+                    $query->orderByDesc($key ?? 'id');
                 } else {
-                    $query->orderBy($key??'id');
+                    $query->orderBy($key ?? 'id');
                 }
             }
         }
@@ -66,7 +66,7 @@ class UsersController extends Controller
             'message' => 'OK',
             'status' =>  $users->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'users' => $users??[],
+            'users' => $users ?? [],
         ]);
     }
 
@@ -76,10 +76,10 @@ class UsersController extends Controller
         $user && \Gate::authorize('usable', 'users.'.$user->role);
 
         return $this->buildResponse([
-            'message' => !$user ? 'The requested user no longer exists' : 'OK',
-            'status' =>  !$user ? 'info' : 'success',
-            'response_code' => !$user ? 404 : 200,
-            'user' => $user ?? (object)[],
+            'message' => ! $user ? 'The requested user no longer exists' : 'OK',
+            'status' =>  ! $user ? 'info' : 'success',
+            'response_code' => ! $user ? 404 : 200,
+            'user' => $user ?? (object) [],
         ]);
     }
 
@@ -87,7 +87,7 @@ class UsersController extends Controller
     {
         $user = User::find($id);
         $user && \Gate::authorize('usable', 'users.'.$user->role);
-        if ($id && !$user) {
+        if ($id && ! $user) {
             return $this->buildResponse([
                 'message' => 'The requested user no longer exists',
                 'status' => 'info',
@@ -98,9 +98,9 @@ class UsersController extends Controller
         $validator = Validator::make($request->all(), [
             'firstname' => ['required', 'string', 'max:255'],
             'lastname' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id??'')],
-            'phone' => ['required', 'string', 'max:255', Rule::unique('users')->ignore($user->id??'')],
-            'username' => ['nullable', 'string', 'max:255', Rule::unique('users')->ignore($user->id??'')],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id ?? '')],
+            'phone' => ['required', 'string', 'max:255', Rule::unique('users')->ignore($user->id ?? '')],
+            'username' => ['nullable', 'string', 'max:255', Rule::unique('users')->ignore($user->id ?? '')],
             'gender' => ['in:male,female,non-binary,transgender,bisexual,other'],
             'nextofkin' => ['nullable', 'string', 'max:255'],
             'nextofkin_relationship' => ['nullable', 'string', 'max:255'],
@@ -110,8 +110,8 @@ class UsersController extends Controller
             'state.*' => ['nullable', 'string', 'max:255'],
             'city.*' => ['nullable', 'string', 'max:255'],
         ], [], [
-            'address.home' => "Home Address",
-            'address.shipping' => "Shipping Address"
+            'address.home' => 'Home Address',
+            'address.shipping' => 'Shipping Address',
         ]);
 
         if ($validator->fails()) {
@@ -127,7 +127,7 @@ class UsersController extends Controller
 
         $user->firstname = $request->firstname;
         $user->lastname = $request->lastname;
-        $user->username = $request->username??$user->username;
+        $user->username = $request->username ?? $user->username;
         $user->email = $request->email;
         $user->phone = $request->phone;
         $user->gender = $request->gender ?? 'male';
@@ -145,11 +145,10 @@ class UsersController extends Controller
             $user->password = Hash::make($request->password);
         }
 
-        if ($request->hasFile('image'))
-        {
-            $user->image && Storage::delete($user->image??'');
+        if ($request->hasFile('image')) {
+            $user->image && Storage::delete($user->image ?? '');
             $user->image = $request->file('image')->storeAs(
-                'public/uploads/images', rand() . '_' . rand() . '.' . $request->file('image')->extension()
+                'public/uploads/images', rand().'_'.rand().'.'.$request->file('image')->extension()
             );
         }
 
@@ -171,13 +170,12 @@ class UsersController extends Controller
     public function destroy(Request $request, $id = '')
     {
         // Delete multiple users
-        if ($request->users)
-        {
-            $count = User::whereIn('id', $request->users)->with(['transactions', 'subscription'])->get()->map(function($user) {
+        if ($request->users) {
+            $count = User::whereIn('id', $request->users)->with(['transactions', 'subscription'])->get()->map(function ($user) {
                 $user && \Gate::authorize('usable', 'users.'.$user->role);
                 // Delete Transactions
                 if ($user->transactions) {
-                    $user->transactions->map(function($transaction) {
+                    $user->transactions->map(function ($transaction) {
                         if ($transaction->transactable) {
                             $transaction->transactable->delete();
                         }
@@ -185,35 +183,34 @@ class UsersController extends Controller
                     });
                 }
                 if ($user->subscriptions) {
-                    $user->subscriptions->map(function($subscription) {
+                    $user->subscriptions->map(function ($subscription) {
                         $subscription->delete();
                     });
                 }
                 if ($user) {
                     $user->image && Storage::delete($user->image);
+
                     return $user->delete();
                 }
+
                 return false;
-            })->filter(fn($i)=>$i!==false)->count();
+            })->filter(fn ($i) =>$i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} users have been deleted.",
                 'status' =>  'success',
                 'response_code' => 200,
             ]);
-        }
-        else
-        {
+        } else {
             $user = User::whereId($id)->first();
             $user && \Gate::authorize('usable', 'users.'.$user->role);
         }
 
         // Delete single user
-        if ($user)
-        {
+        if ($user) {
             $user->image && Storage::delete($user->image);
             if ($user->transactions) {
-                $user->transactions->map(function($transaction) {
+                $user->transactions->map(function ($transaction) {
                     if ($transaction->transactable) {
                         $transaction->transactable->delete();
                     }
@@ -221,7 +218,7 @@ class UsersController extends Controller
                 });
             }
             if ($user->subscriptions) {
-                $user->subscriptions->map(function($subscription) {
+                $user->subscriptions->map(function ($subscription) {
                     $subscription->delete();
                 });
             }

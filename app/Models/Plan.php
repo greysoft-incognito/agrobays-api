@@ -20,7 +20,7 @@ class Plan extends Model
     public static function boot()
     {
         parent::boot();
-        static::creating(function($plan) {
+        static::creating(function ($plan) {
             $slug = Str::of($plan->title)->slug();
             $plan->slug = (string) Plan::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
         });
@@ -39,7 +39,7 @@ class Plan extends Model
     public function foodBag(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->bags()->get()
+            get: fn () => $this->bags()->get()
         );
     }
 
@@ -52,7 +52,7 @@ class Plan extends Model
     {
         $image = $this->image
             ? img($this->image, 'banner', 'large')
-            : 'https://loremflickr.com/320/320/'.urlencode($this->title??'fruit');
+            : 'https://loremflickr.com/320/320/'.urlencode($this->title ?? 'fruit');
 
         return Attribute::make(
             get: fn () => $image,

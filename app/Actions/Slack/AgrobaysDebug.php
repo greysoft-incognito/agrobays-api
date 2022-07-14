@@ -2,15 +2,15 @@
 
 namespace App\Actions\Slack;
 
+use Spatie\SlashCommand\Attachment;
+use Spatie\SlashCommand\Handlers\SignatureHandler;
 use Spatie\SlashCommand\Request;
 use Spatie\SlashCommand\Response;
-use Spatie\SlashCommand\Handlers\BaseHandler;
-use Spatie\SlashCommand\Handlers\SignatureHandler;
-use Spatie\SlashCommand\Attachment;
 
 class AgrobaysDebug extends SignatureHandler
 {
-    protected $signature = "agrobays-debug {action? : This command accepts one of two arguments: on|off.}";
+    protected $signature = 'agrobays-debug {action? : This command accepts one of two arguments: on|off.}';
+
     protected $description = 'Toggle slack debug logs on or off. [Arguments: on|off]';
 
     public function canHandle(Request $request): bool

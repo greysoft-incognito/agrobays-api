@@ -10,8 +10,8 @@ class FrontContentController extends Controller
     /**
      * Display a listing of all front content based on the type.
      *
-     * @param \Illuminate\Http\Request  $request
-     * @param  String $type
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $type
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request, $limit = '15', $type = 'all')
@@ -24,7 +24,7 @@ class FrontContentController extends Controller
 
         // Search and filter columns
         if ($request->search) {
-            $query->where(function($query) use($request) {
+            $query->where(function ($query) use ($request) {
                 $query->where('title', 'like', "%$request->search%")
                     ->orWhere('type', 'like', "%$request->search%")
                     ->orWhere('content', 'like', "%$request->search%");
@@ -35,9 +35,9 @@ class FrontContentController extends Controller
         if ($request->order && is_array($request->order)) {
             foreach ($request->order as $key => $dir) {
                 if ($dir === 'desc') {
-                    $query->orderByDesc($key??'id');
+                    $query->orderByDesc($key ?? 'id');
                 } else {
-                    $query->orderBy($key??'id');
+                    $query->orderBy($key ?? 'id');
                 }
             }
         }
@@ -48,7 +48,7 @@ class FrontContentController extends Controller
             'message' => 'OK',
             'status' =>  $content->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'contents' => $content??[],
+            'contents' => $content ?? [],
         ]);
     }
 
@@ -57,10 +57,10 @@ class FrontContentController extends Controller
         $content = FrontContent::whereId($item)->orWhere('slug', $item)->first();
 
         return $this->buildResponse([
-            'message' => !$content ? 'The requested content no longer exists' : 'OK',
-            'status' =>  !$content ? 'info' : 'success',
-            'response_code' => !$content ? 404 : 200,
-            'content' => $content ?? (object)[],
+            'message' => ! $content ? 'The requested content no longer exists' : 'OK',
+            'status' =>  ! $content ? 'info' : 'success',
+            'response_code' => ! $content ? 404 : 200,
+            'content' => $content ?? (object) [],
         ]);
     }
 }

@@ -83,6 +83,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
     ->group(function() {
 
         Route::get('/charts/{type?}', [AdminController::class, 'charts'])->name('charts');
+        Route::post('/config', [AdminController::class, 'saveSettings'])->name('config');
 
         Route::controller(AdminController::class)
         ->prefix('users')

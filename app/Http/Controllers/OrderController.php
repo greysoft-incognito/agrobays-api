@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Dispatch;
 use App\Models\Order;
 use App\Models\Subscription;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Carbon\CarbonImmutable as Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
@@ -16,8 +15,8 @@ class OrderController extends Controller
     /**
      * Display a listing of all dispatches based on the status.
      *
-     * @param \Illuminate\Http\Request  $request
-     * @param  String $type
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $type
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request, $limit = '15', $status = null)
@@ -26,13 +25,11 @@ class OrderController extends Controller
 
         $query->where('payment', 'complete');
 
-        if (is_numeric($limit) && $limit > 0)
-        {
+        if (is_numeric($limit) && $limit > 0) {
             $query->limit($limit);
         }
 
-        if ($p = $request->query('period'))
-        {
+        if ($p = $request->query('period')) {
             $period = explode('-', $p);
             $from = new Carbon($period[0]);
             $to = new Carbon($period[1]);
@@ -43,43 +40,44 @@ class OrderController extends Controller
 
         $msg = $orders->isEmpty() ? 'You do not have any orders' : 'OK';
         $_period = $orders->isNotEmpty()
-            ? ($orders->last()->created_at->format('Y/m/d') . '-' . $orders->first()->created_at->format('Y/m/d'))
-            : "";
+            ? ($orders->last()->created_at->format('Y/m/d').'-'.$orders->first()->created_at->format('Y/m/d'))
+            : '';
+
         return $this->buildResponse([
             'message' => $msg,
             'status' =>  $orders->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'orders' => $orders??[],
-            'period' => $p ? urldecode($p) : $_period
+            'orders' => $orders ?? [],
+            'period' => $p ? urldecode($p) : $_period,
         ]);
     }
 
     /**
      * Get a particular order
      *
-     * @param Request $request
-     * @param string $id
+     * @param  Request  $request
+     * @param  string  $id
      * @return void
      */
     public function getOrder(Request $request, $id)
     {
         $order = Auth::user()->orders()->find($id);
 
-        $msg = !$order ? 'The order you requested no longer exists.' : 'OK';
+        $msg = ! $order ? 'The order you requested no longer exists.' : 'OK';
 
         return $this->buildResponse([
             'message' => $msg,
             'status' =>  $order ? 'success' : 'error',
             'response_code' => $order ? 200 : 404,
-            'order' => $order??[],
+            'order' => $order ?? [],
         ]);
     }
 
     /**
      * Display a listing of all dispatches for the authenticated user.
      *
-     * @param \Illuminate\Http\Request  $request
-     * @param  String $type
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $type
      * @return \Illuminate\Http\Response
      */
     public function dispatches(Request $request, $limit = '15')
@@ -87,18 +85,16 @@ class OrderController extends Controller
         $query = Dispatch::where('user_id', '!=', null)->whereHasMorph(
             'dispatchable',
             [Order::class, Subscription::class],
-            function($query) {
+            function ($query) {
                 $query->where('user_id', Auth::id());
             }
         );
 
-        if (is_numeric($limit) && $limit > 0)
-        {
+        if (is_numeric($limit) && $limit > 0) {
             $query->limit($limit);
         }
 
-        if ($p = $request->query('period'))
-        {
+        if ($p = $request->query('period')) {
             $period = explode('-', $p);
             $from = new Carbon($period[0]);
             $to = new Carbon($period[1]);
@@ -109,22 +105,23 @@ class OrderController extends Controller
 
         $msg = $items->isEmpty() ? 'You do not have any dispatched orders' : 'OK';
         $_period = $items->isNotEmpty()
-            ? ($items->last()->created_at->format('Y/m/d') . '-' . $items->first()->created_at->format('Y/m/d'))
-            : "";
+            ? ($items->last()->created_at->format('Y/m/d').'-'.$items->first()->created_at->format('Y/m/d'))
+            : '';
+
         return $this->buildResponse([
             'message' => $msg,
             'status' =>  $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'items' => $items??[],
-            'period' => $p ? urldecode($p) : $_period
+            'items' => $items ?? [],
+            'period' => $p ? urldecode($p) : $_period,
         ]);
     }
 
     /**
      * Get a particular dispatch
      *
-     * @param Request $request
-     * @param string $id
+     * @param  Request  $request
+     * @param  string  $id
      * @return void
      */
     public function getDispatch(Request $request, $id)
@@ -132,7 +129,7 @@ class OrderController extends Controller
         $query = Dispatch::where('user_id', '!=', null)->whereHasMorph(
             'dispatchable',
             [Order::class, Subscription::class],
-            function($query) {
+            function ($query) {
                 $query->where('user_id', Auth::id());
             }
         );
@@ -147,10 +144,10 @@ class OrderController extends Controller
         $item && \Gate::authorize('usable', 'dispatch.'.$item->status);
 
         return $this->buildResponse([
-            'message' => !$item ? 'The requested item no longer exists' : 'OK',
-            'status' =>  !$item ? 'info' : 'success',
-            'response_code' => !$item ? 404 : 200,
-            'item' => $item ?? (object)[],
+            'message' => ! $item ? 'The requested item no longer exists' : 'OK',
+            'status' =>  ! $item ? 'info' : 'success',
+            'response_code' => ! $item ? 404 : 200,
+            'item' => $item ?? (object) [],
         ]);
     }
 }

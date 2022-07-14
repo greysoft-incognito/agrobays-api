@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Transaction;
+use Carbon\CarbonImmutable as Carbon;
 use Illuminate\Console\Command;
 use Yabacon\Paystack;
 use Yabacon\Paystack\Exception\ApiException;
-use App\Models\Transaction;
-use Carbon\CarbonImmutable as Carbon;
 
 /**
  * Handle transactions
@@ -68,7 +68,7 @@ class HandleTransactions extends Command
 
                 // Progrmatically fetch more records
                 if ($persistent === true) {
-                    $page = $transactions->meta->page+1;
+                    $page = $transactions->meta->page + 1;
                     $_tranx = [];
                     do {
                         $_tranx[] = $this->loadPaystackTransactions($params, $page)->data;
@@ -80,8 +80,8 @@ class HandleTransactions extends Command
 
                 // Clear transactions
                 if ($action === 'clear') {
-                    $count = $tranx->filter(fn($tranx)=>Transaction::whereReference($tranx->reference)->exists())
-                    ->each(function($tranx) {
+                    $count = $tranx->filter(fn ($tranx) =>Transaction::whereReference($tranx->reference)->exists())
+                    ->each(function ($tranx) {
                         if ($transaction = Transaction::whereReference($tranx->reference)->with(['transactable'])->first()) {
                             if ($transaction->transactable) {
                                 $transaction->transactable->delete();
@@ -89,20 +89,20 @@ class HandleTransactions extends Command
                             $transaction->delete();
                         }
                     })->count();
-                    $this->info($count . " $status transactions cleared.");
+                    $this->info($count." $status transactions cleared.");
                 // List transactions
                 } elseif ($action === 'list') {
                     $this->info($transactions->message);
                     $this->table(
                         ['Status', 'Reference', 'Amount', 'Paid At', 'Created At', 'Channel', 'Currency'],
-                        $tranx->map(fn($d)=>collect($d)->only(['status', 'reference', 'amount', 'created_at', 'paid_at', 'channel', 'currency'])->all())
+                        $tranx->map(fn ($d) =>collect($d)->only(['status', 'reference', 'amount', 'created_at', 'paid_at', 'channel', 'currency'])->all())
                             ->sortKeys()
                     );
                 }
             } catch (ApiException $e) {
                 $this->error($e->getMessage());
             }
-        // Handle local request
+            // Handle local request
         } elseif ($source === 'local') {
             // Prepare transactions
             $transactions = $this->loadLocalTransactions($status, $perpage, $from, $to, $offset);
@@ -110,7 +110,7 @@ class HandleTransactions extends Command
 
             // Progrmatically fetch more records
             if ($persistent === true) {
-                $page = $transactions->currentPage()+1;
+                $page = $transactions->currentPage() + 1;
                 $_tranx = [];
                 do {
                     $_tranx[] = $this->loadLocalTransactions($status, $perpage, $from, $to, $page)->items();
@@ -121,7 +121,7 @@ class HandleTransactions extends Command
 
             // Clear transactions
             if ($action === 'clear') {
-                $count = $tranx->each(function($transaction) {
+                $count = $tranx->each(function ($transaction) {
                     if ($transaction->transactable) {
                         $transaction->transactable->delete();
                     }
@@ -130,38 +130,40 @@ class HandleTransactions extends Command
                 $this->info("All $status transactions cleared.");
             // List transactions
             } elseif ($action === 'list') {
-                $this->info("Transactions collected successfully");
+                $this->info('Transactions collected successfully');
                 $this->table(
                     ['Type', 'Reference', 'Method', 'Amount', 'Created At', 'Status'],
-                    $tranx->map(fn($d)=>$d->only(['transactable_type', 'reference', 'method', 'amount', 'created_at', 'status']))->all()
+                    $tranx->map(fn ($d) =>$d->only(['transactable_type', 'reference', 'method', 'amount', 'created_at', 'status']))->all()
                 );
             }
         }
+
         return 0;
     }
 
     /**
      * Fetch paystack transactions
      *
-     * @param array $params
-     * @param integer $page
+     * @param  array  $params
+     * @param  int  $page
      * @return Yabacon\Paystack\Contracts\RouteInterface
      */
     private function loadPaystackTransactions($params, $page = 1)
     {
-        $paystack = new Paystack(env("PAYSTACK_SECRET_KEY"));
+        $paystack = new Paystack(env('PAYSTACK_SECRET_KEY'));
+
         return $paystack->transaction->getList(array_merge($params, ['page' => $page]));
     }
 
     /**
      * Fetch local transactions
      *
-     * @param string $status
-     * @param integer $perpage
-     * @param integer $offset
-     * @param string $from
-     * @param string $to
-     * @param integer $page
+     * @param  string  $status
+     * @param  int  $perpage
+     * @param  int  $offset
+     * @param  string  $from
+     * @param  string  $to
+     * @param  int  $page
      * @return Illuminate\Database\Eloquent\Model
      */
     private function loadLocalTransactions($status, $perpage, $from, $to, $page = 1)
@@ -169,15 +171,20 @@ class HandleTransactions extends Command
         $transactions = Transaction::where('status', $status)->with(['transactable'])->paginate($perpage, ['*'], 'page', $page);
         if ($from) {
             $from = new Carbon($from);
-            if (!$to) $transactions->whereBetween('created_at', [$from, Carbon::parse('NOW')]);
+            if (! $to) {
+                $transactions->whereBetween('created_at', [$from, Carbon::parse('NOW')]);
+            }
         }
         if ($to) {
             $to = new Carbon($to);
-            if (!$from) $transactions->whereBetween('created_at', [$to, Carbon::parse('NOW')]);
+            if (! $from) {
+                $transactions->whereBetween('created_at', [$to, Carbon::parse('NOW')]);
+            }
         }
         if ($to && $from) {
             $transactions->whereBetween('created_at', [$from, $to]);
         }
+
         return $transactions;
     }
 }

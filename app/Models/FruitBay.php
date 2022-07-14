@@ -23,7 +23,7 @@ class FruitBay extends Model
     public static function boot()
     {
         parent::boot();
-        static::creating(function($item) {
+        static::creating(function ($item) {
             $slug = Str::of($item->name)->slug();
             $item->slug = (string) FruitBay::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
         });
@@ -38,7 +38,7 @@ class FruitBay extends Model
     {
         $image = $this->image
             ? img($this->image, 'banner', 'large')
-            : 'https://loremflickr.com/320/320/'.urlencode($this->name??'fruit').'?random='.rand();
+            : 'https://loremflickr.com/320/320/'.urlencode($this->name ?? 'fruit').'?random='.rand();
 
         return Attribute::make(
             get: fn () => $image,

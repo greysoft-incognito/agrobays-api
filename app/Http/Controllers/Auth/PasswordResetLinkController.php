@@ -5,11 +5,10 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\PasswordCodeResets;
 use App\Models\User;
+use App\Notifications\SendCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
-use App\Notifications\SendCode;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 class PasswordResetLinkController extends Controller
 {
@@ -26,7 +25,7 @@ class PasswordResetLinkController extends Controller
         $validator = Validator::make($request->all(), [
             'email' => ['required', 'email', 'exists:users'],
         ], [
-            'email.exists' => 'We could not find a user with this email address.'
+            'email.exists' => 'We could not find a user with this email address.',
         ]);
 
         if ($validator->fails()) {
@@ -65,8 +64,8 @@ class PasswordResetLinkController extends Controller
                 'status' => 'error',
                 'response_code' => 422,
                 'errors' => [
-                    'email' => __($status)
-                ]
+                    'email' => __($status),
+                ],
             ]);
         }
 

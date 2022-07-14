@@ -3,14 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\FruitBay;
 use App\Models\FruitBayCategory;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\File;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use Nette\Utils\Html;
+use Illuminate\Support\Str;
 
 class AdminFruitBayController extends Controller
 {
@@ -21,7 +19,7 @@ class AdminFruitBayController extends Controller
 
         // Search and filter columns
         if ($request->search) {
-            $query->where(function($query) use($request) {
+            $query->where(function ($query) use ($request) {
                 $query->where('name', 'like', "%$request->search%")
                     ->orWhere('description', 'like', "%$request->search%");
             });
@@ -31,9 +29,9 @@ class AdminFruitBayController extends Controller
         if ($request->order && is_array($request->order)) {
             foreach ($request->order as $key => $dir) {
                 if ($dir === 'desc') {
-                    $query->orderByDesc($key??'id');
+                    $query->orderByDesc($key ?? 'id');
                 } else {
-                    $query->orderBy($key??'id');
+                    $query->orderBy($key ?? 'id');
                 }
             }
         }
@@ -44,7 +42,7 @@ class AdminFruitBayController extends Controller
             'message' => 'OK',
             'status' =>  $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'items' => $items??[],
+            'items' => $items ?? [],
         ]);
     }
 
@@ -54,9 +52,9 @@ class AdminFruitBayController extends Controller
         $item = FruitBay::whereId($item)->orWhere(['slug' => $item])->first();
 
         return $this->buildResponse([
-            'message' => !$item ? 'The requested item no longer exists' : 'OK',
-            'status' =>  !$item ? 'info' : 'success',
-            'response_code' => !$item ? 404 : 200,
+            'message' => ! $item ? 'The requested item no longer exists' : 'OK',
+            'status' =>  ! $item ? 'info' : 'success',
+            'response_code' => ! $item ? 404 : 200,
             'item' => $item,
         ]);
     }
@@ -84,13 +82,12 @@ class AdminFruitBayController extends Controller
         $fruitbay->name = $request->name;
         $fruitbay->price = $request->price;
         $fruitbay->description = $request->description;
-        $fruitbay->fruit_bay_category_id = $request->category_id??FruitBayCategory::first()->id??null;
+        $fruitbay->fruit_bay_category_id = $request->category_id ?? FruitBayCategory::first()->id ?? null;
 
-        if ($request->hasFile('image'))
-        {
-            $fruitbay->image && Storage::delete($fruitbay->image??'');
+        if ($request->hasFile('image')) {
+            $fruitbay->image && Storage::delete($fruitbay->image ?? '');
             $fruitbay->image = $request->file('image')->storeAs(
-                'public/uploads/images', rand() . '_' . rand() . '.' . $request->file('image')->extension()
+                'public/uploads/images', rand().'_'.rand().'.'.$request->file('image')->extension()
             );
         }
         $fruitbay->save();
@@ -111,30 +108,28 @@ class AdminFruitBayController extends Controller
     public function destroy(Request $request, $item = null)
     {
         \Gate::authorize('usable', 'fruitbay');
-        if ($request->items)
-        {
-            $count = collect($request->items)->map(function($item) {
+        if ($request->items) {
+            $count = collect($request->items)->map(function ($item) {
                 $item = FruitBay::whereId($item)->first();
                 if ($item) {
                     $item->image && Storage::delete($item->image);
+
                     return $item->delete();
                 }
+
                 return false;
-            })->filter(fn($i)=>$i!==false)->count();
+            })->filter(fn ($i) =>$i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} items bags have been deleted.",
                 'status' =>  'success',
                 'response_code' => 200,
             ]);
-        }
-        else
-        {
+        } else {
             $item = FruitBay::whereId($item)->first();
         }
 
-        if ($item)
-        {
+        if ($item) {
             $item->image && Storage::delete($item->image);
 
             $status = $item->delete();

@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Greysoft\Charts;
 use App\Models\Saving;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use App\Actions\Greysoft\Charts;
 
 class AccountController extends Controller
 {
@@ -36,7 +36,7 @@ class AccountController extends Controller
     /**
      * Get the currently logged user.
      *
-     * @param \Illuminate\Support\Facades\Auth $auth
+     * @param  \Illuminate\Support\Facades\Auth  $auth
      * @return \Illuminate\Http\Response
      */
     public function index(Auth $auth)
@@ -47,6 +47,7 @@ class AccountController extends Controller
         if ($user->role === 'dispatch') {
             $user->load('dispatches');
         }
+
         return $this->buildResponse([
             'message' => 'OK',
             'status' => 'success',
@@ -59,25 +60,25 @@ class AccountController extends Controller
      * Display a listing of the user's transactions or return
      * a particular transaction if an id is provided.
      *
-     * @param \Illuminate\Support\Facades\Auth $auth
+     * @param  \Illuminate\Support\Facades\Auth  $auth
      * @return \Illuminate\Http\Response
      */
     public function savings(Auth $auth, $id = null, $planned = false)
     {
-        if (!$id || $planned === 'planned')
-        {
+        if (! $id || $planned === 'planned') {
             $model = Saving::where('user_id', Auth::id());
             if ($planned !== false) {
                 $model->where('subscription_id', $id);
             }
+
             return app('datatables')->eloquent($model)
-                ->editColumn('created_at', function(Saving $item) {
+                ->editColumn('created_at', function (Saving $item) {
                     return $item->created_at->format('Y-m-d H:i');
                 })
-                ->editColumn('amount', function(Saving $item) {
+                ->editColumn('amount', function (Saving $item) {
                     return money($item->amount);
                 })
-                ->editColumn('type', function(Saving $item) {
+                ->editColumn('type', function (Saving $item) {
                     return $item->subscription->plan->title;
                 })
                 ->removeColumn('updated_at')->toJson();
@@ -85,7 +86,7 @@ class AccountController extends Controller
 
         $savings = $auth::user()->savings();
 
-        if ($id && !($saving = $savings->find($id))) {
+        if ($id && ! ($saving = $savings->find($id))) {
             return $this->buildResponse([
                 'message' => 'The requested saving no longer exists.',
                 'status' => 'error',
@@ -108,7 +109,7 @@ class AccountController extends Controller
 
         $updated = [];
         $user = User::find(Auth::id());
-        if (!$user) {
+        if (! $user) {
             return $this->buildResponse([
                 'message' => 'The requested user does not exists',
                 'status' => 'error',
@@ -116,7 +117,7 @@ class AccountController extends Controller
             ]);
         }
 
-        $valid = $fields->mapWithKeys(function($field) use ($filled) {
+        $valid = $fields->mapWithKeys(function ($field) use ($filled) {
             if (Str::contains($field, ':image')) {
                 $field = current(explode(':image', $field));
             }
@@ -125,15 +126,16 @@ class AccountController extends Controller
                 $vals .= '|min:8|confirmed';
             }
             if (is_array($filled[$field])) {
-                return [$field.'.*' => "required|string"];
+                return [$field.'.*' => 'required|string'];
             }
+
             return [$field => "required|$vals"];
         })->all();
 
-        $validator = Validator::make($request->all(), $valid, [], $fields->filter(function($k) use ($filled) {
+        $validator = Validator::make($request->all(), $valid, [], $fields->filter(function ($k) use ($filled) {
             return is_array($filled[$k]);
-        })->mapWithKeys(function($field, $value) use ($filled) {
-            return collect(array_keys($filled[$field]))->mapWithKeys(fn($k)=>["$field.$k" => "$k $field"]);
+        })->mapWithKeys(function ($field, $value) use ($filled) {
+            return collect(array_keys($filled[$field]))->mapWithKeys(fn ($k) =>["$field.$k" => "$k $field"]);
         })->all());
 
         if ($validator->fails()) {
@@ -145,22 +147,19 @@ class AccountController extends Controller
             ]);
         }
 
-        $fields = $fields->filter(function($k) {
-            return !Str::contains($k, '_confirmation');
+        $fields = $fields->filter(function ($k) {
+            return ! Str::contains($k, '_confirmation');
         });
 
-        if ($request->hasFile('image'))
-        {
-            $user->image && Storage::delete($user->image??'');
+        if ($request->hasFile('image')) {
+            $user->image && Storage::delete($user->image ?? '');
             $user->image = $request->file('image')->storeAs(
-                'public/uploads/images', rand() . '_' . rand() . '.' . $request->file('image')->extension()
+                'public/uploads/images', rand().'_'.rand().'.'.$request->file('image')->extension()
             );
-        }
-        else
-        {
+        } else {
             foreach ($fields as $_field) {
                 if (Str::contains($_field, ':image')) {
-                    $_field = current(explode(':image', (string)$_field));
+                    $_field = current(explode(':image', (string) $_field));
                 }
 
                 if ($_field !== 'password') {
@@ -183,13 +182,13 @@ class AccountController extends Controller
     /**
      * Update the user data
      *
-     * @param Request $request
+     * @param  Request  $request
      * @return void
      */
     public function store(Request $request)
     {
         $user = User::find(Auth::id());
-        if (!$user) {
+        if (! $user) {
             return $this->buildResponse([
                 'message' => 'The requested user no longer exists',
                 'status' => 'error',
@@ -213,11 +212,11 @@ class AccountController extends Controller
             'state.name' => ['required', 'string', 'max:255'],
             'city.name' => ['required', 'string', 'max:255'],
         ], [], [
-            'country.name' => "Country",
-            'state.name' => "State",
-            'city.name' => "City",
-            'address.home' => "Home Address",
-            'address.shipping' => "Shipping Address"
+            'country.name' => 'Country',
+            'state.name' => 'State',
+            'city.name' => 'City',
+            'address.home' => 'Home Address',
+            'address.shipping' => 'Shipping Address',
         ]);
 
         if ($validator->fails()) {
@@ -231,7 +230,7 @@ class AccountController extends Controller
 
         $user->firstname = $request->firstname;
         $user->lastname = $request->lastname;
-        $user->username = $request->username??$user->username;
+        $user->username = $request->username ?? $user->username;
         $user->email = $request->email;
         $user->phone = $request->phone;
         $user->gender = $request->gender;
@@ -243,11 +242,10 @@ class AccountController extends Controller
         $user->state = $request->state;
         $user->city = $request->city;
 
-        if ($request->hasFile('image'))
-        {
-            $user->image && Storage::delete($user->image??'');
+        if ($request->hasFile('image')) {
+            $user->image && Storage::delete($user->image ?? '');
             $user->image = $request->file('image')->storeAs(
-                'public/uploads/images', rand() . '_' . rand() . '.' . $request->file('image')->extension()
+                'public/uploads/images', rand().'_'.rand().'.'.$request->file('image')->extension()
             );
         }
 
@@ -268,9 +266,9 @@ class AccountController extends Controller
             'status' =>  'success',
             'response_code' => 200,
             'charts' => [
-                "pie" => (new Charts)->getPie('user'),
-                "bar" => (new Charts)->getBar('user'),
-                "transactions" => (new Charts)->totalTransactions('user', 'month')
+                'pie' => (new Charts)->getPie('user'),
+                'bar' => (new Charts)->getBar('user'),
+                'transactions' => (new Charts)->totalTransactions('user', 'month'),
             ],
         ]);
     }

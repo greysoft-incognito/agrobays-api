@@ -38,15 +38,16 @@ class NewPasswordController extends Controller
         $code = PasswordCodeResets::firstWhere('code', $request->code);
 
         // check if it has not expired: the time is 30 minutes
-        if (!$code || $code->created_at->diffInMinutes(now()) >= 30) {
+        if (! $code || $code->created_at->diffInMinutes(now()) >= 30) {
             $code && $code->delete();
+
             return $this->buildResponse([
                 'message' => 'An error occured.',
                 'status' => 'error',
                 'response_code' => 422,
                 'errors' => [
-                    'code' => __('The code you provided has expired or does not exist.')
-                ]
+                    'code' => __('The code you provided has expired or does not exist.'),
+                ],
             ]);
         }
 
@@ -86,8 +87,8 @@ class NewPasswordController extends Controller
                 'status' => 'error',
                 'response_code' => 422,
                 'errors' => [
-                    'email' => __($status)
-                ]
+                    'email' => __($status),
+                ],
             ]);
         }
 
@@ -97,6 +98,7 @@ class NewPasswordController extends Controller
             'response_code' => 200,
         ]);
     }
+
     /**
      * Handle an incoming check password request.
      *
@@ -119,15 +121,16 @@ class NewPasswordController extends Controller
         $code = PasswordCodeResets::firstWhere('code', $request->code);
 
         // check if it has not expired: the time is 30 minutes
-        if (!$code || $code->created_at->diffInMinutes(now()) >= 30) {
+        if (! $code || $code->created_at->diffInMinutes(now()) >= 30) {
             $code && $code->delete();
+
             return $this->buildResponse([
                 'message' => 'An error occured.',
                 'status' => 'error',
                 'response_code' => 422,
                 'errors' => [
-                    'code' => __('The code you provided has expired or does not exist.')
-                ]
+                    'code' => __('The code you provided has expired or does not exist.'),
+                ],
             ]);
         }
 

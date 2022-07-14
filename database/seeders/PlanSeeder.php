@@ -2,11 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Plan;
 use Faker\Generator;
-
+use Illuminate\Database\Seeder;
 
 class PlanSeeder extends Seeder
 {
@@ -17,7 +15,7 @@ class PlanSeeder extends Seeder
      */
     public function run(Generator $faker)
     {
-        Plan::where('id', '!=', NULL)->delete();
+        Plan::where('id', '!=', null)->delete();
         Plan::insert([
             [
                 'slug' => $faker->slug(),
@@ -40,7 +38,7 @@ class PlanSeeder extends Seeder
                 'amount' => 30000.00,
                 'icon' => 'fas wine-bottle',
                 'created_at' => \Carbon\Carbon::now(),
-            ]
+            ],
         ]);
     }
 }

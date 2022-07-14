@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Order;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class AdminOrderController extends Controller
@@ -16,7 +16,7 @@ class AdminOrderController extends Controller
 
         // Search and filter columns
         if ($request->search) {
-            $query->where(function($query) use($request) {
+            $query->where(function ($query) use ($request) {
                 $query->where('status', 'like', "%$request->search%");
             });
         }
@@ -25,9 +25,9 @@ class AdminOrderController extends Controller
         if ($request->order && is_array($request->order)) {
             foreach ($request->order as $key => $dir) {
                 if ($dir === 'desc') {
-                    $query->orderByDesc($key??'id');
+                    $query->orderByDesc($key ?? 'id');
                 } else {
-                    $query->orderBy($key??'id');
+                    $query->orderBy($key ?? 'id');
                 }
             }
         }
@@ -38,7 +38,7 @@ class AdminOrderController extends Controller
             'message' => 'OK',
             'status' =>  $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'items' => $items??[],
+            'items' => $items ?? [],
         ]);
     }
 
@@ -48,9 +48,9 @@ class AdminOrderController extends Controller
         $order = Order::whereId($item)->first();
 
         return $this->buildResponse([
-            'message' => !$order ? 'The requested order no longer exists' : 'OK',
-            'status' =>  !$order ? 'info' : 'success',
-            'response_code' => !$order ? 404 : 200,
+            'message' => ! $order ? 'The requested order no longer exists' : 'OK',
+            'status' =>  ! $order ? 'info' : 'success',
+            'response_code' => ! $order ? 404 : 200,
             'order' => $order,
         ]);
     }
@@ -58,15 +58,15 @@ class AdminOrderController extends Controller
     /**
      * Update the order status
      *
-     * @param Request $request
-     * @param integer $item
+     * @param  Request  $request
+     * @param  int  $item
      * @return void
      */
     public function store(Request $request, $item = null)
     {
         \Gate::authorize('usable', 'orders');
         $order = Order::find($item);
-        if (!$order) {
+        if (! $order) {
             return $this->buildResponse([
                 'message' => 'The requested order no longer exists',
                 'status' => 'error',
@@ -106,33 +106,30 @@ class AdminOrderController extends Controller
     public function destroy(Request $request, $item = null)
     {
         \Gate::authorize('usable', 'orders');
-        if ($request->items)
-        {
-            $count = collect($request->items)->map(function($item) {
+        if ($request->items) {
+            $count = collect($request->items)->map(function ($item) {
                 $order = Order::whereId($item)->first();
                 if ($order) {
                     return $order->delete();
                 }
+
                 return false;
-            })->filter(fn($i)=>$i!==false)->count();
+            })->filter(fn ($i) =>$i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} orders bags have been deleted.",
                 'status' =>  'success',
                 'response_code' => 200,
             ]);
-        }
-        else
-        {
+        } else {
             $order = Order::whereId($item)->first();
         }
 
-        if ($order)
-        {
+        if ($order) {
             $food->delete();
 
             return $this->buildResponse([
-                'message' => "Order has been deleted.",
+                'message' => 'Order has been deleted.',
                 'status' =>  'success',
                 'response_code' => 200,
             ]);

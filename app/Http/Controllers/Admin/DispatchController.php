@@ -6,17 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Models\Dispatch;
 use App\Notifications\Dispatched;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class DispatchController extends Controller
 {
     /**
      * Display a listing of all dispatches based on the status.
      *
-     * @param \Illuminate\Http\Request  $request
-     * @param  String $type
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $type
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request, $limit = '15', $status = 'pending')
@@ -34,7 +34,7 @@ class DispatchController extends Controller
 
         // Search and filter columns
         if ($request->search) {
-            $query->where(function($query) use($request) {
+            $query->where(function ($query) use ($request) {
                 $query->where('dispatchable_type', 'like', "%$request->search%")
                     ->orWhere('reference', 'like', "%$request->search%")
                     ->orWhere('created_at', 'like', "%$request->search%");
@@ -45,9 +45,9 @@ class DispatchController extends Controller
         if ($request->order && is_array($request->order)) {
             foreach ($request->order as $key => $dir) {
                 if ($dir === 'desc') {
-                    $query->orderByDesc($key??'id');
+                    $query->orderByDesc($key ?? 'id');
                 } else {
-                    $query->orderBy($key??'id');
+                    $query->orderBy($key ?? 'id');
                 }
             }
         }
@@ -58,16 +58,15 @@ class DispatchController extends Controller
             'message' => 'OK',
             'status' =>  $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'items' => $items??[],
+            'items' => $items ?? [],
         ]);
     }
-
 
     /**
      * Get a particular dispatch
      *
-     * @param Request $request
-     * @param string $id
+     * @param  Request  $request
+     * @param  string  $id
      * @return void
      */
     public function getDispatch(Request $request, $id)
@@ -88,18 +87,18 @@ class DispatchController extends Controller
         $item && \Gate::authorize('usable', 'dispatch.'.$item->status);
 
         return $this->buildResponse([
-            'message' => !$item ? 'The requested item no longer exists' : 'OK',
-            'status' =>  !$item ? 'info' : 'success',
-            'response_code' => !$item ? 404 : 200,
-            'item' => $item ?? (object)[],
+            'message' => ! $item ? 'The requested item no longer exists' : 'OK',
+            'status' =>  ! $item ? 'info' : 'success',
+            'response_code' => ! $item ? 404 : 200,
+            'item' => $item ?? (object) [],
         ]);
     }
 
     /**
      * Update the status of a dispatch
      *
-     * @param Request $request
-     * @param string $id
+     * @param  Request  $request
+     * @param  string  $id
      * @return void
      */
     public function setStatus(Request $request)
@@ -113,7 +112,7 @@ class DispatchController extends Controller
 
         $item = $query->find($request->id);
         $item && \Gate::authorize('usable', 'dispatch.'.$item->status);
-        if (!$item) {
+        if (! $item) {
             return $this->buildResponse([
                 'message' => 'The requested item no longer exists',
                 'status' => 'info',
@@ -129,7 +128,7 @@ class DispatchController extends Controller
         $item->status = $request->status ?? 'pending';
 
         // Verify confirmation code
-        if ($request->status === 'delivered' && (!$request->code || $request->code !== $item->code)) {
+        if ($request->status === 'delivered' && (! $request->code || $request->code !== $item->code)) {
             return $this->buildResponse([
                 'message' => 'Your input has a few errors',
                 'status' => 'error',
@@ -148,7 +147,7 @@ class DispatchController extends Controller
         }
 
         // Notify the user of the change
-        if ((!$item_user_id && $request->status === 'pending') || $item_status !== $request->status) {
+        if ((! $item_user_id && $request->status === 'pending') || $item_status !== $request->status) {
             $item->dispatchable->user->notify(new Dispatched($item));
         }
 
@@ -163,8 +162,8 @@ class DispatchController extends Controller
     /**
      * Save or update a dispatch
      *
-     * @param Request $request
-     * @param string $id
+     * @param  Request  $request
+     * @param  string  $id
      * @return void
      */
     public function store(Request $request, $id = '')
@@ -177,7 +176,7 @@ class DispatchController extends Controller
         }
 
         $item = $query->find($id);
-        if ($id && !$item) {
+        if ($id && ! $item) {
             return $this->buildResponse([
                 'message' => 'The requested item no longer exists',
                 'status' => 'info',
@@ -210,7 +209,7 @@ class DispatchController extends Controller
         $item->status = $request->status ?? 'pending';
 
         // Verify confirmation code
-        if (Auth::user()->role !== 'admin' && $request->status === 'delivered' && (!$request->code || $request->code !== $item_code)) {
+        if (Auth::user()->role !== 'admin' && $request->status === 'delivered' && (! $request->code || $request->code !== $item_code)) {
             return $this->buildResponse([
                 'message' => 'Your input has a few errors',
                 'status' => 'error',
@@ -227,7 +226,7 @@ class DispatchController extends Controller
         }
 
         // Notify the user of the change
-        if ((!$item_user_id && $request->status === 'pending') || $item_status !== $request->status) {
+        if ((! $item_user_id && $request->status === 'pending') || $item_status !== $request->status) {
             $item->dispatchable->user->notify(new Dispatched($item));
         }
 
@@ -253,34 +252,31 @@ class DispatchController extends Controller
             $query->where('user_id', Auth::id());
         }
 
-        if ($request->items)
-        {
-            $count = collect($request->items)->map(function($id) use($query) {
+        if ($request->items) {
+            $count = collect($request->items)->map(function ($id) use ($query) {
                 $item = $query->whereId($id)->first();
                 $item && \Gate::authorize('usable', 'dispatch.'.$item->status);
                 if ($item) {
                     return $item->delete();
                 }
+
                 return false;
-            })->filter(fn($i)=>$i!==false)->count();
+            })->filter(fn ($i) =>$i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} items have been deleted.",
                 'status' =>  'success',
                 'response_code' => 200,
             ]);
-        }
-        else
-        {
+        } else {
             $item = $query->whereId($id)->first();
         }
 
-        if ($item)
-        {
+        if ($item) {
             $item->delete();
 
             return $this->buildResponse([
-                'message' => "Item has been deleted.",
+                'message' => 'Item has been deleted.',
                 'status' =>  'success',
                 'response_code' => 200,
             ]);

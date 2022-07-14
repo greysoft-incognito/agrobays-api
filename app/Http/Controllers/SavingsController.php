@@ -5,34 +5,31 @@ namespace App\Http\Controllers;
 use App\Models\FoodBag;
 use App\Models\Plan;
 use App\Models\Subscription;
-use Illuminate\Http\Request;
 use Carbon\CarbonImmutable as Carbon;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class SavingsController extends Controller
 {
-
     /**
      * Display a listing of the user's savings
      *
-     * @param \Illuminate\Http\Request  $request
-     * @param \Illuminate\Support\Facades\Auth $auth
-     * @param  Integer $sub_id
-     * @param  Integer $limit
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Support\Facades\Auth  $auth
+     * @param  int  $sub_id
+     * @param  int  $limit
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request, Auth $auth, $sub_id = null, $limit = 1, $status = null)
     {
         $save = $auth::user()->savings()->orderBy('id', 'DESC');
 
-        if (is_numeric($limit) && $limit > 0)
-        {
+        if (is_numeric($limit) && $limit > 0) {
             $save->limit($limit);
         }
 
-        if ($status !== null && in_array($status, ['rejected', 'pending', 'complete']))
-        {
+        if ($status !== null && in_array($status, ['rejected', 'pending', 'complete'])) {
             $save->where('status', $status);
         }
 
@@ -40,19 +37,17 @@ class SavingsController extends Controller
             $save->where('subscription_id', $sub_id);
         }
 
-        if ($p = $request->query('period'))
-        {
+        if ($p = $request->query('period')) {
             $period = explode('-', $p);
             $from = new Carbon($period[0]);
             $to = new Carbon($period[1]);
             $save->whereBetween('created_at', [$from, $to]);
         }
 
-
         $savings = $save->get();
 
         if ($savings->isNotEmpty()) {
-            $savings->each(function($tr) {
+            $savings->each(function ($tr) {
                 $tr->date = $tr->created_at->format('Y-m-d H:i');
                 $tr->title = $tr->subscription->plan->title;
             });
@@ -60,15 +55,15 @@ class SavingsController extends Controller
 
         $msg = $savings->isEmpty() ? 'You have not made any savings.' : 'OK';
         $_period = $savings->isNotEmpty()
-            ? ($savings->last()->created_at->format('Y/m/d') . '-' . $savings->first()->created_at->format('Y/m/d'))
-            : "";
+            ? ($savings->last()->created_at->format('Y/m/d').'-'.$savings->first()->created_at->format('Y/m/d'))
+            : '';
 
         return $this->buildResponse([
             'message' => $msg,
             'status' =>  $savings->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'savings' => $savings??[],
-            'period' => $p ? urldecode($p) : $_period
+            'savings' => $savings ?? [],
+            'period' => $p ? urldecode($p) : $_period,
         ]);
     }
 
@@ -92,25 +87,22 @@ class SavingsController extends Controller
     /**
      * Get a particular fruit bay plan by it's {id} or {slug}
      *
-     * @param Request $request
-     * @param string|integer $plan
+     * @param  Request  $request
+     * @param  string|int  $plan
      * @return \Illuminate\Http\Response|\Illuminate\Contracts\Routing\ResponseFactory
      */
     public function getPlan(Request $request, $plan = 'user')
     {
-        if ($plan === 'user')
-        {
+        if ($plan === 'user') {
             $plan = Auth::user()->subscription->plan;
-        }
-        else
-        {
+        } else {
             $plan = Plan::whereId($plan)->orWhere(['slug' => $plan])->first();
         }
 
         return $this->buildResponse([
-            'message' => !$plan ? 'The requested plan is no longer available' : 'OK',
-            'status' =>  !$plan ? 'error' : 'success',
-            'response_code' => !$plan ? 404 : 200,
+            'message' => ! $plan ? 'The requested plan is no longer available' : 'OK',
+            'status' =>  ! $plan ? 'error' : 'success',
+            'response_code' => ! $plan ? 404 : 200,
             'plan' => $plan,
         ]);
     }
@@ -119,31 +111,25 @@ class SavingsController extends Controller
      * Get the food bags for the selected plan
      * Pass the food_bag id to get a particular food bag
      *
-     * @param Request $request
-     * @param string|integer $plan
+     * @param  Request  $request
+     * @param  string|int  $plan
      * @return \Illuminate\Http\Response|\Illuminate\Contracts\Routing\ResponseFactory
      */
     public function getBags(Request $request, $plan = 'user', $id = null)
     {
-        if ($plan === 'user')
-        {
+        if ($plan === 'user') {
             $plan = Auth::user()->subscription->plan;
-        }
-        else
-        {
+        } else {
             $plan = Plan::whereId($plan)->orWhere(['slug' => $plan])->first();
         }
 
-        if (!$plan)
-        {
+        if (! $plan) {
             return $this->buildResponse([
                 'message' => 'The requested plan no longer exists.',
                 'status' => 'error',
                 'response_code' => 404,
             ]);
-        }
-        elseif ($id && !($bag = $plan->bags()->find($id)))
-        {
+        } elseif ($id && ! ($bag = $plan->bags()->find($id))) {
             return $this->buildResponse([
                 'message' => 'The requested food bag no longer exists.',
                 'status' => 'info',
@@ -173,8 +159,7 @@ class SavingsController extends Controller
             $query->where('status', 'complete');
         })->exists();
 
-        if (!$plan)
-        {
+        if (! $plan) {
             return $this->buildResponse([
                 'message' => 'The requested plan no longer exists.',
                 'status' => 'error',
@@ -189,16 +174,13 @@ class SavingsController extends Controller
         //         'response_code' => 406,
         // }
         //     ]);
-        elseif ($planActiveNoSavings)
-        {
+        elseif ($planActiveNoSavings) {
             return $this->buildResponse([
                 'message' => 'You need to make at least one savings on all your existing subscriptions before you can subscribe to another plan.',
                 'status' => 'info',
                 'response_code' => 406,
             ]);
-        }
-        elseif (Auth::user()->subscriptions()->where([['plan_id', '=', $id], ['status', '=', 'active']])->exists())
-        {
+        } elseif (Auth::user()->subscriptions()->where([['plan_id', '=', $id], ['status', '=', 'active']])->exists()) {
             return $this->buildResponse([
                 'message' => 'You are already active on this plan, but you can subscribe to another plan.',
                 'status' => 'info',

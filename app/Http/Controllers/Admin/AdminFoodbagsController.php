@@ -5,9 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\FoodBag;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
-use Nette\Utils\Html;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class AdminFoodbagsController extends Controller
@@ -19,7 +18,7 @@ class AdminFoodbagsController extends Controller
 
         // Search and filter columns
         if ($request->search) {
-            $query->where(function($query) use($request) {
+            $query->where(function ($query) use ($request) {
                 $query->where('title', 'like', "%$request->search%")
                     ->orWhere('description', 'like', "%$request->search%");
             });
@@ -29,9 +28,9 @@ class AdminFoodbagsController extends Controller
         if ($request->order && is_array($request->order)) {
             foreach ($request->order as $key => $dir) {
                 if ($dir === 'desc') {
-                    $query->orderByDesc($key??'id');
+                    $query->orderByDesc($key ?? 'id');
                 } else {
-                    $query->orderBy($key??'id');
+                    $query->orderBy($key ?? 'id');
                 }
             }
         }
@@ -42,7 +41,7 @@ class AdminFoodbagsController extends Controller
             'message' => 'OK',
             'status' =>  $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'items' => $items??[],
+            'items' => $items ?? [],
         ]);
     }
 
@@ -52,10 +51,10 @@ class AdminFoodbagsController extends Controller
         $bag = FoodBag::find($item);
 
         return $this->buildResponse([
-            'message' => !$bag ? 'The requested foodbag no longer exists' : 'OK',
-            'status' =>  !$bag ? 'info' : 'success',
-            'response_code' => !$bag ? 404 : 200,
-            'bag' => $bag ?? (object)[],
+            'message' => ! $bag ? 'The requested foodbag no longer exists' : 'OK',
+            'status' =>  ! $bag ? 'info' : 'success',
+            'response_code' => ! $bag ? 404 : 200,
+            'bag' => $bag ?? (object) [],
         ]);
     }
 
@@ -67,7 +66,7 @@ class AdminFoodbagsController extends Controller
             'plan_id' => 'required|numeric',
             'description' => 'nullable|min:10|max:550',
         ], [], [
-            'plan_id' => 'Plan'
+            'plan_id' => 'Plan',
         ]);
 
         if ($validator->fails()) {
@@ -102,30 +101,28 @@ class AdminFoodbagsController extends Controller
     public function destroy(Request $request, $item = null)
     {
         \Gate::authorize('usable', 'foodbags');
-        if ($request->items)
-        {
-            $count = collect($request->items)->map(function($item) {
+        if ($request->items) {
+            $count = collect($request->items)->map(function ($item) {
                 $bag = FoodBag::whereId($item)->first();
                 if ($bag) {
                     $bag->image && Storage::delete($bag->image);
+
                     return $bag->delete();
                 }
+
                 return false;
-            })->filter(fn($i)=>$i!==false)->count();
+            })->filter(fn ($i) =>$i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} foods bags have been deleted.",
                 'status' =>  'success',
                 'response_code' => 200,
             ]);
-        }
-        else
-        {
+        } else {
             $bag = FoodBag::whereId($item)->first();
         }
 
-        if ($bag)
-        {
+        if ($bag) {
             $bag->delete();
 
             return $this->buildResponse([

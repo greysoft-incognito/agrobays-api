@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Actions\Greysoft;
 
 use App\Models\User;
@@ -63,12 +64,12 @@ class Permissions
         ],
         'user' => [
             //
-        ]
+        ],
     ];
 
     public function check(User $user, $permission)
     {
-        if (in_array($permission, $this->allowed[$user->role??'user'], true)) {
+        if (in_array($permission, $this->allowed[$user->role ?? 'user'], true)) {
             return true;
         }
 
@@ -77,6 +78,6 @@ class Permissions
 
     public function getPermissions(User $user)
     {
-        return $this->allowed[$user->role??'user'];
+        return $this->allowed[$user->role ?? 'user'];
     }
 }

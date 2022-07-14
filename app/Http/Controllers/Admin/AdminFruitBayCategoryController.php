@@ -3,15 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\FruitBayCategory;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\File;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use Yajra\DataTables\DataTables;
-use Nette\Utils\Html;
+use Illuminate\Support\Str;
 
 class AdminFruitBayCategoryController extends Controller
 {
@@ -21,7 +17,7 @@ class AdminFruitBayCategoryController extends Controller
 
         // Search and filter columns
         if ($request->search) {
-            $query->where(function($query) use($request) {
+            $query->where(function ($query) use ($request) {
                 $query->where('title', 'like', "%$request->search%")
                     ->orWhere('description', 'like', "%$request->search%");
             });
@@ -31,9 +27,9 @@ class AdminFruitBayCategoryController extends Controller
         if ($request->order && is_array($request->order)) {
             foreach ($request->order as $key => $dir) {
                 if ($dir === 'desc') {
-                    $query->orderByDesc($key??'id');
+                    $query->orderByDesc($key ?? 'id');
                 } else {
-                    $query->orderBy($key??'id');
+                    $query->orderBy($key ?? 'id');
                 }
             }
         }
@@ -44,7 +40,7 @@ class AdminFruitBayCategoryController extends Controller
             'message' => 'OK',
             'status' =>  $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'items' => $items??[],
+            'items' => $items ?? [],
         ]);
     }
 
@@ -53,10 +49,10 @@ class AdminFruitBayCategoryController extends Controller
         $item = FruitBayCategory::whereId($item)->orWhere(['slug' => $item])->first();
 
         return $this->buildResponse([
-            'message' => !$item ? 'The requested category no longer exists.' : 'OK',
-            'status' =>  !$item ? 'info' : 'success',
-            'response_code' => !$item ? 404 : 200,
-            'item' => $item ?? (object)[],
+            'message' => ! $item ? 'The requested category no longer exists.' : 'OK',
+            'status' =>  ! $item ? 'info' : 'success',
+            'response_code' => ! $item ? 404 : 200,
+            'item' => $item ?? (object) [],
         ]);
     }
 
@@ -80,11 +76,10 @@ class AdminFruitBayCategoryController extends Controller
         $category->title = $request->title;
         $category->description = $request->description;
 
-        if ($request->hasFile('image'))
-        {
-            $category->image && Storage::delete($category->image??'');
+        if ($request->hasFile('image')) {
+            $category->image && Storage::delete($category->image ?? '');
             $category->image = $request->file('image')->storeAs(
-                'public/uploads/images', rand() . '_' . rand() . '.' . $request->file('image')->extension()
+                'public/uploads/images', rand().'_'.rand().'.'.$request->file('image')->extension()
             );
         }
         $category->save();
@@ -105,30 +100,28 @@ class AdminFruitBayCategoryController extends Controller
      */
     public function destroy(Request $request, $item = null)
     {
-        if ($request->items)
-        {
-            $count = collect($request->items)->map(function($item) {
+        if ($request->items) {
+            $count = collect($request->items)->map(function ($item) {
                 $item = FruitBayCategory::whereId($item)->first();
                 if ($item) {
                     $item->image && Storage::delete($item->image);
+
                     return $item->delete();
                 }
+
                 return false;
-            })->filter(fn($i)=>$i!==false)->count();
+            })->filter(fn ($i) =>$i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} fruit bay categories have been deleted.",
                 'status' =>  'success',
                 'response_code' => 200,
             ]);
-        }
-        else
-        {
+        } else {
             $item = FruitBayCategory::whereId($item)->first();
         }
 
-        if ($item)
-        {
+        if ($item) {
             $item->image && Storage::delete($item->image);
 
             $status = $item->delete();

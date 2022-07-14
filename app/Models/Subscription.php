@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Subscription extends Model
@@ -19,7 +18,7 @@ class Subscription extends Model
         'days_left',
         'total_saved',
         'total_left',
-        'items'
+        'items',
     ];
 
     /**
@@ -88,43 +87,43 @@ class Subscription extends Model
     public function items(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->bag->foods
+            get: fn () => $this->bag->foods
         );
     }
 
     public function paidDays(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->savings()->sum('days')
+            get: fn () => $this->savings()->sum('days')
         );
     }
 
     public function daysLeft(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->plan->duration - $this->savings()->sum('days')
+            get: fn () => $this->plan->duration - $this->savings()->sum('days')
         );
     }
 
     public function totalSaved(): Attribute
     {
-        $total = $this->savings()->get()->map(function($value) {
+        $total = $this->savings()->get()->map(function ($value) {
             return $value->total ?? 0;
         })->sum();
 
         return Attribute::make(
-            get: fn() => number_format($total)
+            get: fn () => number_format($total)
         );
     }
 
     public function totalLeft(): Attribute
     {
-        $total = $this->savings()->get()->map(function($value) {
+        $total = $this->savings()->get()->map(function ($value) {
             return $value->total;
         })->sum();
 
         return Attribute::make(
-            get: fn() => number_format($this->plan->amount - $total, 2)
+            get: fn () => number_format($this->plan->amount - $total, 2)
         );
     }
 }

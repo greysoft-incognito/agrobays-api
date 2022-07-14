@@ -23,7 +23,7 @@ class FrontContent extends Model
     public static function boot()
     {
         parent::boot();
-        static::creating(function($front_content) {
+        static::creating(function ($front_content) {
             $slug = Str::of($front_content->title)->slug();
             $front_content->slug = (string) FrontContent::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
         });
