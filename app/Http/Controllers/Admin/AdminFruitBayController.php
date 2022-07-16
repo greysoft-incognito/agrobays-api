@@ -65,6 +65,7 @@ class AdminFruitBayController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|min:3|max:25',
             'price' => 'required|numeric|min:1',
+            'bag' => 'nullable|array|max:10',
             'description' => 'nullable|min:10|max:550',
         ]);
 
@@ -82,6 +83,7 @@ class AdminFruitBayController extends Controller
         $fruitbay->name = $request->name;
         $fruitbay->price = $request->price;
         $fruitbay->description = $request->description;
+        $fruitbay->bag = $request->bag;
         $fruitbay->fruit_bay_category_id = $request->category_id ?? FruitBayCategory::first()->id ?? null;
 
         if ($request->hasFile('image')) {
