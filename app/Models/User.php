@@ -198,7 +198,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
         return Attribute::make(
                 get: function ($value) use ($cIso2) {
-                    return $value;
+                    // return $value;
                     try {
                         if (! empty($this->country->iso2 ?? $this->country['iso2']) && $value) {
                             return (string) PhoneNumber::make($value, $this->country->iso2 ?? $this->country['iso2'])->formatE164();
