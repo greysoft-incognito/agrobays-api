@@ -6,6 +6,7 @@ use App\Actions\Greysoft\Charts;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Validator;
 
 class AdminController extends Controller
 {
