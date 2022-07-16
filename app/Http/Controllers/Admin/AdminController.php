@@ -45,8 +45,30 @@ class AdminController extends Controller
             ]);
         }
 
-        collect($request->config)->map(function($config) {
-            Config::write("settings.{$config->key}", $config->value);
+        collect($request->config)->map(function($config, $key) {
+            if (!in_array($config, [
+                "contact_address",
+                "currency",
+                "currency_symbol",
+                "default_banner",
+                "frontend_link",
+                "prefered_notification_channels",
+                "site_name",
+                "slack_debug",
+                "slack_logger",
+                "token_lifespan",
+                "trx_prefix",
+                "use_queue",
+                "verify_email",
+                "verify_phone",
+            ])) {
+                return $this->buildResponse([
+                    'message' => "You are not allowed to configure " . $config,
+                    'status' => 'error',
+                    'response_code' => 422,
+                ]);
+            }
+            Config::write("settings.{$key}", $config);
         });
 
         return $this->buildResponse([
