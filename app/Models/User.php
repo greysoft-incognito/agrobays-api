@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use libphonenumber\NumberParseException as LibphonenumberNumberParseException;
 use Propaganistas\LaravelPhone\Exceptions\NumberParseException;
 use Propaganistas\LaravelPhone\PhoneNumber;
 
@@ -205,7 +206,7 @@ class User extends Authenticatable implements MustVerifyEmail
                         }
 
                         return $value ? (string) PhoneNumber::make($value, $cIso2)->formatE164() : $value;
-                    } catch (NumberParseException $th) {
+                    } catch (NumberParseException | LibphonenumberNumberParseException $th) {
                         return $value;
                     }
                 },
