@@ -27,7 +27,7 @@ class SubscriptionController extends Controller
             $subs->limit($limit);
         }
 
-        if ($status !== null && in_array($status, ['active', 'pending', 'complete'])) {
+        if ($status !== null && in_array($status, ['active', 'pending', 'complete', 'withdraw', 'closed'])) {
             $subs->where('status', $status);
         }
 

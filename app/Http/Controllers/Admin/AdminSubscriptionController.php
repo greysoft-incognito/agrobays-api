@@ -32,6 +32,12 @@ class AdminSubscriptionController extends Controller
             }
         }
 
+        if ($request->status && in_array($request->status, [
+            'active', 'pending', 'complete', 'withdraw', 'closed'
+        ])) {
+            $query->where('status', $request->status);
+        }
+
         $items = ($limit <= 0 || $limit === 'all') ? $query->get() : $query->paginate($limit);
 
         return $this->buildResponse([
