@@ -31,6 +31,7 @@ class AccountController extends Controller
         'address',
         'image',
         'type',
+        'bank',
     ];
 
     /**

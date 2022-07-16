@@ -56,6 +56,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'country' => 'array',
         'state' => 'array',
         'city' => 'array',
+        'bank' => 'array',
     ];
 
     /**
@@ -83,6 +84,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'country' => '{"name": "", "iso2": "", "emoji": ""}',
         'state' => '{"name": "", "iso2": ""}',
         'city' => '{"name": ""}',
+        'bank' => '{"bank": "", "nuban":"", "account_name":""}',
     ];
 
     /**
