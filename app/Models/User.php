@@ -199,7 +199,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return Attribute::make(
                 get: function ($value) use ($cIso2) {
                     try {
-                        if (! empty($this->country->iso2 ?? $this->country['iso2'])) {
+                        if (! empty($this->country->iso2 ?? $this->country['iso2']) && $value) {
                             return (string) PhoneNumber::make($value, $this->country->iso2 ?? $this->country['iso2'])->formatE164();
                         }
 
@@ -210,7 +210,7 @@ class User extends Authenticatable implements MustVerifyEmail
                 },
                 set: function ($value) use ($cIso2) {
                     $value = str_ireplace('-', '', $value);
-                    if (! empty($this->country->iso2 ?? $this->country['iso2'])) {
+                    if (! empty($this->country->iso2 ?? $this->country['iso2']) && $value) {
                         return ['phone' => (string) PhoneNumber::make($value, $this->country->iso2 ?? $this->country['iso2'])->formatE164()];
                     }
 
