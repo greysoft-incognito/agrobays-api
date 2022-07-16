@@ -46,7 +46,7 @@ class AdminController extends Controller
         }
 
         collect($request->config)->map(function($config, $key) {
-            if (!in_array($config, [
+            if (in_array($key, [
                 "contact_address",
                 "currency",
                 "currency_symbol",
@@ -62,18 +62,8 @@ class AdminController extends Controller
                 "verify_email",
                 "verify_phone",
             ])) {
-                return $this->buildResponse([
-                    'message' => "You are not allowed to configure " . $key,
-                    'status' => 'error',
-                    'response_code' => 422,
-                ]);
+                Config::write("settings.{$key}", $config);
             }
-            return $this->buildResponse([
-                'message' => "settings.{$key}" . $key,
-                'status' => 'error',
-                'response_code' => 422,
-            ]);
-            Config::write("settings.{$key}", $config);
         });
 
         return $this->buildResponse([
