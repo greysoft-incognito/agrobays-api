@@ -221,8 +221,14 @@ class SavingsController extends Controller
                 'message' => 'You do not have an active subscription.',
                 'status' => 'error',
                 'response_code' => 404,
-                'data' => $userPlan
             ]);
         }
+
+        return $this->buildResponse([
+            'message' => "You have successfully terminated your saving for the {$userPlan->plan->title} plan, your withdrawal request has been logged and will be proccess with the next withdrwal batch.",
+            'status' => 'success',
+            'response_code' => 201,
+            'data' => $userPlan
+        ]);
     }
 }
