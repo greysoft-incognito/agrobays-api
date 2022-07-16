@@ -59,16 +59,12 @@ class FrontContentController extends Controller
             $query->where('type', $type);
         }
 
-        if ($request->silent) {
-            $content = $query->first();
-        } else {
-            $content = $query->firstOrFail();
-        }
+        $content = $query->first();
 
         return $this->buildResponse([
-            'message' => ! $content ? 'The requested content no longer exists' : 'OK',
-            'status' =>  ! $content ? 'info' : 'success',
-            'response_code' => ! $content ? 404 : 200,
+            'message' => ! $content && ! $request->silent ? 'The requested content no longer exists' : 'OK',
+            'status' =>  ! $content && ! $request->silent ? 'info' : 'success',
+            'response_code' => ! $content && ! $request->silent ? 404 : 200,
             'content' => $content ?? (object) [],
         ]);
     }
