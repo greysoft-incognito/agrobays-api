@@ -63,7 +63,7 @@ class AdminController extends Controller
                 "verify_phone",
             ])) {
                 return $this->buildResponse([
-                    'message' => "You are not allowed to configure " . $config,
+                    'message' => "You are not allowed to configure " . $key,
                     'status' => 'error',
                     'response_code' => 422,
                 ]);
