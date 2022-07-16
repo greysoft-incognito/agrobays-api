@@ -38,7 +38,7 @@ class AdminController extends Controller
 
         if ($validator->fails()) {
             return $this->buildResponse([
-                'message' => 'Your input has a few errors',
+                'message' => $validator->errors()->first(),
                 'status' => 'error',
                 'response_code' => 422,
                 'errors' => $validator->errors(),
