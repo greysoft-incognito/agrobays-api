@@ -81,7 +81,7 @@ Route::controller(FrontContentController::class)
     Route::get('/list/{limit?}/{type?}', 'index');
     Route::get('/type/{type?}', 'index');
     Route::get('/type/{type?}/limit/{limit?}', 'index');
-    Route::get('/{item}', 'getContent');
+    Route::get('/{item}/{type?}', 'getContent');
 });
 
 Route::middleware(['auth:sanctum'])->group(function() {

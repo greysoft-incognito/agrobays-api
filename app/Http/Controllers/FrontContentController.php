@@ -52,9 +52,18 @@ class FrontContentController extends Controller
         ]);
     }
 
-    public function getContent(Request $request, $item)
+    public function getContent(Request $request, $item, $type = null)
     {
-        $content = FrontContent::whereId($item)->orWhere('slug', $item)->first();
+        $query = FrontContent::whereId($item)->orWhere('slug', $item);
+        if ($type) {
+            $query->where('type', $type);
+        }
+
+        if ($request->silent) {
+            $content = $query->first();
+        } else {
+            $content = $query->firstOrFail();
+        }
 
         return $this->buildResponse([
             'message' => ! $content ? 'The requested content no longer exists' : 'OK',
