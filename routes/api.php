@@ -217,8 +217,8 @@ Route::middleware(['auth:sanctum'])->group(function() {
         ->prefix('subscriptions')
         ->name('subscriptions.')
         ->group(function() {
-            Route::get('/{status?}', 'index');
-            Route::get('/limit/{limit?}{status?}', 'index');
+            Route::get('/', 'index');
+            Route::get('/limit/{limit?}', 'index');
             Route::get('/{item}', 'getItem');
             Route::post('/{item?}', 'store');
             Route::delete('/{item?}', 'destroy');

@@ -81,7 +81,7 @@ class AdminSubscriptionController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'status' => 'required|in:pending,active,complete',
+            'status' => 'required|in:pending,active,complete,withraw,closed',
         ]);
 
         if ($validator->fails()) {
@@ -97,7 +97,7 @@ class AdminSubscriptionController extends Controller
         $subscription->save();
 
         return $this->buildResponse([
-            'message' => 'Subscription status updated.',
+            'message' => $validator->errors()->first(),
             'status' =>  'success',
             'response_code' => 200,
             'plan' => $subscription,
