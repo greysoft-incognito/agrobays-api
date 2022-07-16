@@ -207,36 +207,22 @@ class SavingsController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Plan  $plan
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Plan $plan)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
+     * Subscribe to a new saving's plan.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Plan  $plan
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Plan $plan)
+    public function terminate(Request $request, $id = null)
     {
-        //
-    }
+        $userPlan = Subscription::find($request->plan_id);
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Plan  $plan
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Plan $plan)
-    {
-        //
+        if (! $userPlan) {
+            return $this->buildResponse([
+                'message' => 'You do not have an active subscription.',
+                'status' => 'error',
+                'response_code' => 404,
+                'data' => $userPlan
+            ]);
+        }
     }
 }
