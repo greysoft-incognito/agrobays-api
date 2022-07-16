@@ -224,8 +224,11 @@ class SavingsController extends Controller
             ]);
         }
 
+        $userPlan->status = 'withdraw';
+        $userPlan->save();
+
         return $this->buildResponse([
-            'message' => "You have successfully terminated your saving for the {$userPlan->plan->title}, your withdrawal request has been logged and will be proccess with the next withdrwal batch.",
+            'message' => "You have successfully terminated your saving for the {$userPlan->plan->title}, your withdrawal request has been logged and will be proccessed along with the next batch.",
             'status' => 'success',
             'response_code' => 201,
             'data' => $userPlan
