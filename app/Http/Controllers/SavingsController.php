@@ -199,7 +199,7 @@ class SavingsController extends Controller
         $userPlan->save();
 
         return $this->buildResponse([
-            'message' => "You have successfully activated the {$plan->title} plan",
+            'message' => "You have successfully activated the {$plan->title}",
             'status' => 'success',
             'response_code' => 201,
             'data' => $userPlan,
@@ -225,7 +225,7 @@ class SavingsController extends Controller
         }
 
         return $this->buildResponse([
-            'message' => "You have successfully terminated your saving for the {$userPlan->plan->title} plan, your withdrawal request has been logged and will be proccess with the next withdrwal batch.",
+            'message' => "You have successfully terminated your saving for the {$userPlan->plan->title}, your withdrawal request has been logged and will be proccess with the next withdrwal batch.",
             'status' => 'success',
             'response_code' => 201,
             'data' => $userPlan
