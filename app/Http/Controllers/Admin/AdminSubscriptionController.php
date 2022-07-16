@@ -86,7 +86,7 @@ class AdminSubscriptionController extends Controller
 
         if ($validator->fails()) {
             return $this->buildResponse([
-                'message' => 'Your input has a few errors',
+                'message' => $validator->errors()->first(),
                 'status' => 'error',
                 'response_code' => 422,
                 'errors' => $validator->errors(),
@@ -97,7 +97,7 @@ class AdminSubscriptionController extends Controller
         $subscription->save();
 
         return $this->buildResponse([
-            'message' => $validator->errors()->first(),
+            'message' => 'Subscription status updated.',
             'status' =>  'success',
             'response_code' => 200,
             'plan' => $subscription,
