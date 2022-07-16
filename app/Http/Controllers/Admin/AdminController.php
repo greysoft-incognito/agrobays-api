@@ -68,6 +68,11 @@ class AdminController extends Controller
                     'response_code' => 422,
                 ]);
             }
+            return $this->buildResponse([
+                'message' => "settings.{$key}" . $key,
+                'status' => 'error',
+                'response_code' => 422,
+            ]);
             Config::write("settings.{$key}", $config);
         });
 
