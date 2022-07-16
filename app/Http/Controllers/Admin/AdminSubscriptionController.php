@@ -81,7 +81,7 @@ class AdminSubscriptionController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'status' => 'required|in:pending,active,complete,withraw,closed',
+            'status' => 'required|in:pending,active,complete,withdraw,closed',
         ]);
 
         if ($validator->fails()) {
