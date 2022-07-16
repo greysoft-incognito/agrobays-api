@@ -52,6 +52,16 @@ Route::get('/get/settings', function(Request $request) {
     ]);
 });
 
+
+Route::get('/get/config', function(Request $request) {
+    return (new Controller)->buildResponse([
+        "message" => "OK",
+        "status" =>  "success",
+        "response_code" => 200,
+        "config" => collect(config("settings"))->except(['permissions', 'messages']),
+    ]);
+});
+
 Route::get('/track/order/{reference?}', function($reference = null) {
     $order = Dispatch::whereReference($reference)->where('status', '!=', 'delivered')->first();
     return (new Controller)->buildResponse([
