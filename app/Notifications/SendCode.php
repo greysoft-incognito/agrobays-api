@@ -35,11 +35,11 @@ class SendCode extends Notification //implements ShouldQueue
     {
         $pref = config('settings.prefered_notification_channels', ['mail', 'sms']);
         $channels = in_array('sms', $pref) && in_array('mail', $pref)
-            ? ['mail', TwilioChannel::class]
+            ? ['database', 'mail', TwilioChannel::class]
             : (in_array('sms', $pref)
-                ? [TwilioChannel::class]
+                ? ['database', TwilioChannel::class]
                 : (in_array('mail', $pref)
-                    ? ['mail']
+                    ? ['database', 'mail']
                     : ['database']
                 )
             );

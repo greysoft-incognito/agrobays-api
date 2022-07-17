@@ -22,7 +22,8 @@ class SubStatus extends Notification //implements ShouldQueue
         $this->item = $item;
         $this->afterCommit();
         $this->action = [
-            'closed' => 'has been closed and your savings have been sent to your provided bank account details.'
+            'closed' => 'has been closed and your savings have been sent to your provided bank account details.',
+            'withdraw' => 'has been changed to withdrawn.',
         ][$this->item->status]??'has been changed to ' . str($this->item->status)->replace('_', ' ');
     }
 
@@ -35,17 +36,15 @@ class SubStatus extends Notification //implements ShouldQueue
     public function via($notifiable)
     {
         $pref = config('settings.prefered_notification_channels', ['mail', 'sms']);
-        $channels = in_array('sms', $pref) && in_array('mail', $pref)
-            ? ['mail', TwilioChannel::class]
+        return in_array('sms', $pref) && in_array('mail', $pref)
+            ? ['database', 'mail', TwilioChannel::class]
             : (in_array('sms', $pref)
-                ? [TwilioChannel::class]
+                ? ['database', TwilioChannel::class]
                 : (in_array('mail', $pref)
-                    ? ['mail']
+                    ? ['database', 'mail']
                     : ['database']
                 )
             );
-
-        return collect(['database'])->merge($channels)->toArray();
     }
 
     /**
@@ -58,14 +57,14 @@ class SubStatus extends Notification //implements ShouldQueue
     {
         $message = [
             'name' => $notifiable->firstname,
-            'message_line1' => __("Your subscription for {$this->item->plan->title}" . $this->action),
+            'message_line1' => __("Your subscription for {$this->item->plan->title} " . $this->action),
             'close_greeting' => 'Regards, <br/>'.config('settings.site_name'),
         ];
 
         return (new MailMessage)->view(
             ['email', 'email-plain'], $message
         )
-        ->subject('Welcome to the '.config('settings.site_name').' community.');
+        ->subject(__('0: Subscription Updated', [config('settings.site_name')]));
     }
 
     /**
@@ -76,7 +75,7 @@ class SubStatus extends Notification //implements ShouldQueue
      */
     public function toTwilio($n)
     {
-        $message = __("Your :0 subscription for {$this->item->plan->title}" . $this->action, [config('settings.site_name')]);
+        $message = __("Your :0 subscription for {$this->item->plan->title} " . $this->action, [config('settings.site_name')]);
 
         $message = __('Hi :0, ', [$n->firstname]).$message;
 
@@ -97,7 +96,7 @@ class SubStatus extends Notification //implements ShouldQueue
         return [
             'type' => 'Subscription',
             'title' => 'Subscription Updated',
-            'message' => __("Your subscription for {$this->item->plan->title}" . $this->action),
+            'message' => __("Your subscription for {$this->item->plan->title} " . $this->action),
         ];
     }
 }
