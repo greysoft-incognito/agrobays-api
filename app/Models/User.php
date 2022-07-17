@@ -383,7 +383,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function subscription(): Attribute
     {
         return new Attribute(
-            get: fn ($value) => $this->subscriptions()->where('status', '!=', 'complete')->latest(),
+            get: fn () => $this->subscriptions()->where('status', '!=', 'complete')->latest()->get(),
         );
     }
 
