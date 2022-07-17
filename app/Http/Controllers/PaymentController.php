@@ -385,7 +385,7 @@ class PaymentController extends Controller
             ['status', '!=', 'completed'],
             ['status', '!=', 'withdraw'],
             ['status', '!=', 'closed'],
-        ])->latest();
+        ])->latest()->first();
 
         $key = 'subscription';
         $validator = Validator::make($request->all(), [
@@ -427,7 +427,7 @@ class PaymentController extends Controller
                 ['status', '!=', 'completed'],
                 ['status', '!=', 'withdraw'],
                 ['status', '!=', 'closed'],
-            ])->latest();
+            ])->latest()->first();
 
             $key = 'deposit';
             $_amount = money($savings->amount * $request->days);

@@ -137,7 +137,7 @@ class SubscriptionController extends Controller
                 ['status', '!=', 'completed'],
                 ['status', '!=', 'withdraw'],
                 ['status', '!=', 'closed'],
-            ])->latest();
+            ])->latest()->first();
             $ids = $sub ? $sub->plan->bags()->get('id')->values()->toArray() : [];
         }
 
