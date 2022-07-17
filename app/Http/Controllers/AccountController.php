@@ -43,7 +43,6 @@ class AccountController extends Controller
     public function index(Auth $auth)
     {
         $user = $auth::user();
-        $user->load('subscription');
 
         if ($user->role === 'dispatch') {
             $user->load('dispatches');
