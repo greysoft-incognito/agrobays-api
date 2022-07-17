@@ -381,7 +381,11 @@ class PaymentController extends Controller
      */
     public function makeSaving(Request $request)
     {
-        $subscription = Auth::user()->subscription;
+        $subscription = Auth::user()->subscriptions()->where([
+            ['status', '!=', 'completed'],
+            ['status', '!=', 'withdraw'],
+            ['status', '!=', 'closed'],
+        ])->latest();
 
         $key = 'subscription';
         $validator = Validator::make($request->all(), [
@@ -419,7 +423,11 @@ class PaymentController extends Controller
 
             $subscription->status = $subscription->days_left >= 1 ? 'active' : 'complete';
             $subscription->save();
-            $subscription = Auth::user()->subscription;
+            $subscription = Auth::user()->subscriptions()->where([
+                ['status', '!=', 'completed'],
+                ['status', '!=', 'withdraw'],
+                ['status', '!=', 'closed'],
+            ])->latest();
 
             $key = 'deposit';
             $_amount = money($savings->amount * $request->days);

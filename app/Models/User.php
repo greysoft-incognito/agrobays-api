@@ -65,6 +65,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array
      */
     protected $appends = [
+        'subscription',
         'permissions',
         'image_url',
         'fullname',
@@ -369,22 +370,22 @@ class User extends Authenticatable implements MustVerifyEmail
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
-    public function subscription(): HasOne
-    {
-        return $this->hasOne(Subscription::class)->where('status', '!=', 'complete');
-    }
+    // public function subscription(): HasOne
+    // {
+    //     return $this->hasOne(Subscription::class)->where('status', '!=', 'complete');
+    // }
 
     /**
      * Get the user's most recent subscription
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
-    // public function subscription(): Attribute
-    // {
-    //     return new Attribute(
-    //         get: fn ($value) => Subscription::where('status', '!=', 'complete')->latest(),
-    //     );
-    // }
+    public function subscription(): Attribute
+    {
+        return new Attribute(
+            get: fn ($value) => $this->subscriptions()->where('status', '!=', 'complete')->latest(),
+        );
+    }
 
     /**
      * Get all of the subscriptions for the User

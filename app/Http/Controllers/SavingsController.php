@@ -49,7 +49,11 @@ class SavingsController extends Controller
         if ($savings->isNotEmpty()) {
             $savings->each(function ($tr) {
                 $tr->date = $tr->created_at->format('Y-m-d H:i');
-                $tr->title = $tr->subscription->plan->title;
+                $tr->title = $tr->subscriptions()->where([
+                    ['status', '!=', 'completed'],
+                    ['status', '!=', 'withdraw'],
+                    ['status', '!=', 'closed'],
+                ])->latest()->plan->title;
             });
         }
 
@@ -94,7 +98,11 @@ class SavingsController extends Controller
     public function getPlan(Request $request, $plan = 'user')
     {
         if ($plan === 'user') {
-            $plan = Auth::user()->subscriptions()->latest()->plan;
+            $plan = Auth::user()->subscriptions()->where([
+                ['status', '!=', 'completed'],
+                ['status', '!=', 'withdraw'],
+                ['status', '!=', 'closed'],
+            ])->latest()->plan;
         } else {
             $plan = Plan::whereId($plan)->orWhere(['slug' => $plan])->first();
         }
@@ -118,7 +126,11 @@ class SavingsController extends Controller
     public function getBags(Request $request, $plan = 'user', $id = null)
     {
         if ($plan === 'user') {
-            $plan = Auth::user()->subscriptions()->latest()->plan;
+            $plan = Auth::user()->subscriptions()->where([
+                ['status', '!=', 'completed'],
+                ['status', '!=', 'withdraw'],
+                ['status', '!=', 'closed'],
+            ])->latest()->plan;
         } else {
             $plan = Plan::whereId($plan)->orWhere(['slug' => $plan])->first();
         }
@@ -166,7 +178,11 @@ class SavingsController extends Controller
                 'response_code' => 404,
             ]);
         }
-        // elseif (($usub = Auth::user()->subscriptions()->latest()->days_left??0) < $plan->duration && $usub !== $plan->duration && $usub !== 0)
+        // elseif (($usub = Auth::user()->subscriptions()->where([
+            // ['status', '!=', 'completed'],
+            // ['status', '!=', 'withdraw'],
+            // ['status', '!=', 'closed'],
+        //])->latest()->days_left??0) < $plan->duration && $usub !== $plan->duration && $usub !== 0)
         // {
         //     return $this->buildResponse([
         //         'message' => "You have a savings pattern on your current plan, you can only switch after you complete the {$plan->duration} day savings for the plan.",
