@@ -41,7 +41,11 @@ class Dispatched extends Notification
             ? ['mail', TwilioChannel::class]
             : (in_array('sms', $pref)
                 ? [TwilioChannel::class]
-                : ['mail']);
+                : (in_array('mail', $pref)
+                    ? ['mail']
+                    : ['database']
+                )
+            );
 
         return collect($channels)->merge(['database'])->toArray();
     }
