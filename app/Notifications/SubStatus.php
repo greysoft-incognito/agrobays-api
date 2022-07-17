@@ -39,10 +39,13 @@ class SubStatus extends Notification //implements ShouldQueue
             ? ['mail', TwilioChannel::class]
             : (in_array('sms', $pref)
                 ? [TwilioChannel::class]
-                : ['mail']
+                : (in_array('mail', $pref)
+                    ? ['mail']
+                    : ['database']
+                )
             );
 
-        return collect($channels)->merge(['database'])->toArray();
+        return collect(['database'])->merge($channels)->toArray();
     }
 
     /**
