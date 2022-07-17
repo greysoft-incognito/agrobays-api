@@ -17,14 +17,14 @@ class SubStatus extends Notification //implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($item)
+    public function __construct($item, $status = 'pending')
     {
         $this->item = $item;
         $this->afterCommit();
         $this->action = [
             'closed' => 'has been closed and your savings have been sent to your provided bank account details.',
             'withdraw' => 'has been changed to withdrawn.',
-        ][$this->item->status]??'has been changed to ' . str($this->item->status)->replace('_', ' ');
+        ][$status]??'has been changed to ' . str($status)->replace('_', ' ');
     }
 
     /**

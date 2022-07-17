@@ -88,7 +88,7 @@ class AdminSubscriptionController extends Controller
         ]);
 
         if ($request->status === 'closed') {
-            $subscription->user->notify(new SubStatus($subscription));
+            $subscription->user->notify(new SubStatus($subscription, $request->status));
         }
 
         if ($validator->fails()) {
