@@ -375,6 +375,18 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Get the user's most recent subscription
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    // public function subscription(): Attribute
+    // {
+    //     return new Attribute(
+    //         get: fn ($value) => Subscription::where('status', '!=', 'complete')->latest(),
+    //     );
+    // }
+
+    /**
      * Get all of the subscriptions for the User
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
