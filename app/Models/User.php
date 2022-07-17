@@ -371,11 +371,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function subscription(): HasOne
     {
-        return $this->hasOne(Subscription::class)->where([
-            ['status', '!=', 'complete'],
-            ['status', '!=', 'closed',
-            ['status', '!=', 'withdraw']]
-        ]);
+        return $this->hasOne(Subscription::class)->where('status', '!=', 'complete');
     }
 
     /**
