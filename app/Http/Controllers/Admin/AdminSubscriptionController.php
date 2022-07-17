@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Subscription;
+use App\Notifications\SubStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -85,6 +86,10 @@ class AdminSubscriptionController extends Controller
         $validator = Validator::make($request->all(), [
             'status' => 'required|in:pending,active,complete,withdraw,closed',
         ]);
+
+        if ($request->status === 'closed') {
+            $subscription->user->notify(new SubStatus($subscription));
+        }
 
         if ($validator->fails()) {
             return $this->buildResponse([

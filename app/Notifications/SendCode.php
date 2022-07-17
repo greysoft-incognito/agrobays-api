@@ -38,7 +38,8 @@ class SendCode extends Notification //implements ShouldQueue
             ? ['mail', TwilioChannel::class]
             : (in_array('sms', $pref)
                 ? [TwilioChannel::class]
-                : ['mail']);
+                : ['mail']
+            );
 
         return collect($channels)->filter(fn ($ch) =>$this->type !== 'verify-phone' || $ch !== 'mail')->filter(fn ($ch) =>$this->type !== 'verify' || $ch !== TwilioChannel::class)->toArray();
     }
