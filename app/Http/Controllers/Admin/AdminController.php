@@ -25,6 +25,14 @@ class AdminController extends Controller
                 'customers' => (new Charts)->customers('admin', 'month'),
                 'income' => (new Charts)->income('admin', 'month'),
                 'sales' => (new Charts)->sales('admin', 'week'),
+                'subscriptions' => [
+                    'all' => Subscription::count(),
+                    'pending' => Subscription::whereStatus('pending')->count(),
+                    'active' => Subscription::whereStatus('active')->count(),
+                    'completed' => Subscription::whereStatus('completed')->count(),
+                    'withdraw' => Subscription::whereStatus('withdraw')->count(),
+                    'closed' => Subscription::whereStatus('closed')->count(),
+                ],
             ],
         ]);
     }
