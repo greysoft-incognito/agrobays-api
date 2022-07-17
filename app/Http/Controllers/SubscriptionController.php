@@ -133,7 +133,7 @@ class SubscriptionController extends Controller
             $status = 'error';
             $code = 404;
         } else {
-            $sub = Auth::user()->subscription()->latest();
+            $sub = Auth::user()->subscriptions()->latest();
             $ids = $sub ? $sub->plan->bags()->get('id')->values()->toArray() : [];
         }
 

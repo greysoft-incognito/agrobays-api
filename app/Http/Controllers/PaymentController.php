@@ -32,7 +32,7 @@ class PaymentController extends Controller
             return $this->validatorFails($validator, 'subscription_id');
         }
 
-        $subscription = Auth::user()->subscription()->find($request->subscription_id);
+        $subscription = Auth::user()->subscriptions()->find($request->subscription_id);
 
         $real_due = 0;
         $code = 403;
@@ -295,7 +295,7 @@ class PaymentController extends Controller
         $subscription = [];
         // $saving = Saving::where('payment_ref', $request->reference)->where('status', 'pending')->first();
         if ($saving && $saving->status === 'pending') {
-            $subscription = User::find($saving->user_id)->subscription()->where('id', $saving->subscription_id)->first();
+            $subscription = User::find($saving->user_id)->subscriptions()->where('id', $saving->subscription_id)->first();
             $_amount = money($tranx->data->amount / 100);
             $_left = $subscription->days_left - $saving->days;
 

@@ -34,7 +34,7 @@ class AuthenticatedSessionController extends Controller
         $device = $dev->getBrandName() ? ($dev->getBrandName().$dev->getDeviceName()) : $request->userAgent();
 
         $user = $request->user();
-        $user->subscriptions()->latest();
+        $user->subscription = $user->subscriptions()->latest();
 
         if (! $request->ajax()) {
             return response()->redirectToRoute('web.user');
