@@ -65,7 +65,7 @@ class SubStatus extends Notification //implements ShouldQueue
         return (new MailMessage)->view(
             ['email', 'email-plain'], $message
         )
-        ->subject(__('0: Subscription Updated', [config('settings.site_name')]));
+        ->subject(__(':0 Subscription Updated', [config('settings.site_name')]));
     }
 
     /**

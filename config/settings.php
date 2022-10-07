@@ -18,7 +18,7 @@ return [
     'keep_successful_queue_logs' => true,
     'slack_debug' => false,
     'slack_logger' => true,
-    'verify_email' => false,
+    'verify_email' => true,
     'verify_phone' => false,
     'token_lifespan' => 10,
     'withdraw_to' => 'wallet',
