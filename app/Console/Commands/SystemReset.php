@@ -56,8 +56,8 @@ class SystemReset extends Command
             return $this->backup();
         } elseif ($action === 'restore') {
             $signatures = collect(Storage::allFiles('backup'))
-                ->filter(fn ($f) =>Str::contains($f, '.sql'))
-                ->map(fn ($f) =>Str::of($f)->substr(0, -4)->replace(['backup', '/-'], ''))->sortDesc()->values()->all();
+                ->filter(fn ($f) => Str::contains($f, '.sql'))
+                ->map(fn ($f) => Str::of($f)->substr(0, -4)->replace(['backup', '/-'], ''))->sortDesc()->values()->all();
             $signature = $this->choice('Backup Signature (Latest shown first):', $signatures, 0, 3);
             $delete = $this->choice('Delete Signature after restoration?', ['No', 'Yes'], 1, 2);
 
@@ -76,8 +76,8 @@ class SystemReset extends Command
                 return $this->backup();
             } elseif ($action === 'restore') {
                 $signatures = collect(Storage::allFiles('backup'))
-                    ->filter(fn ($f) =>Str::contains($f, '.sql'))
-                    ->map(fn ($f) =>Str::of($f)->substr(0, -4)->replace(['backup', '/-'], ''))->sortDesc()->values()->all();
+                    ->filter(fn ($f) => Str::contains($f, '.sql'))
+                    ->map(fn ($f) => Str::of($f)->substr(0, -4)->replace(['backup', '/-'], ''))->sortDesc()->values()->all();
                 $signature = $this->choice('Backup Signature (Latest shown first):', $signatures, 0, 3);
                 $delete = $this->choice('Delete Signature after restoration?', ['No', 'Yes'], 1, 2);
 
@@ -148,7 +148,7 @@ class SystemReset extends Command
                 if ($mail === 'Yes, mail me' && $zip->getFilePath()) {
                     $address = $this->ask('Email Address:');
                     Mail::send('email', [
-                        'name'=> ($name = collect(explode('@', $address)))->last(),
+                        'name' => ($name = collect(explode('@', $address)))->last(),
                         'message_line1' => 'You requested that we mail you a link to download your system backup.',
                         'cta' => ['link' => $link_url, 'title' => 'Download'],
                     ], function ($message) use ($address, $name) {
@@ -214,11 +214,11 @@ class SystemReset extends Command
             $database = 'backup-'.$signature.'.sql';
             $package = 'backup-'.$signature.'.zip';
         } else {
-            $database = collect(Storage::allFiles('backup'))->filter(fn ($f) =>Str::contains($f, '.sql'))->map(fn ($f) =>Str::replace('backup/', '', $f))->last();
-            $package = collect(Storage::allFiles('backup'))->filter(fn ($f) =>Str::contains($f, '.zip'))->map(fn ($f) =>Str::replace('backup/', '', $f))->last();
+            $database = collect(Storage::allFiles('backup'))->filter(fn ($f) => Str::contains($f, '.sql'))->map(fn ($f) => Str::replace('backup/', '', $f))->last();
+            $package = collect(Storage::allFiles('backup'))->filter(fn ($f) => Str::contains($f, '.zip'))->map(fn ($f) => Str::replace('backup/', '', $f))->last();
         }
 
-        $signature = $signature ?? collect(Storage::allFiles('backup'))->map(fn ($f) =>Str::of($f)->substr(0, -4)->replace(['backup', '/-'], ''))->last();
+        $signature = $signature ?? collect(Storage::allFiles('backup'))->map(fn ($f) => Str::of($f)->substr(0, -4)->replace(['backup', '/-'], ''))->last();
 
         $this->info(Str::of(env('APP_URL'))->trim('/http://https://').' Is being restored.');
         SlackAlert::message(Str::of(env('APP_URL'))->trim('/http://https://').' Is being restored.');

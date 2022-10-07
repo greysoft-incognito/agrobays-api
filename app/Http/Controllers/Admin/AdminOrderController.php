@@ -36,7 +36,7 @@ class AdminOrderController extends Controller
 
         return $this->buildResponse([
             'message' => 'OK',
-            'status' =>  $items->isEmpty() ? 'info' : 'success',
+            'status' => $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
             'items' => $items ?? [],
         ]);
@@ -49,7 +49,7 @@ class AdminOrderController extends Controller
 
         return $this->buildResponse([
             'message' => ! $order ? 'The requested order no longer exists' : 'OK',
-            'status' =>  ! $order ? 'info' : 'success',
+            'status' => ! $order ? 'info' : 'success',
             'response_code' => ! $order ? 404 : 200,
             'order' => $order,
         ]);
@@ -92,7 +92,7 @@ class AdminOrderController extends Controller
 
         return $this->buildResponse([
             'message' => 'Order status updated.',
-            'status' =>  'success',
+            'status' => 'success',
             'response_code' => 200,
             'plan' => $order,
         ]);
@@ -114,11 +114,11 @@ class AdminOrderController extends Controller
                 }
 
                 return false;
-            })->filter(fn ($i) =>$i !== false)->count();
+            })->filter(fn ($i) => $i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} orders bags have been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'response_code' => 200,
             ]);
         } else {
@@ -130,7 +130,7 @@ class AdminOrderController extends Controller
 
             return $this->buildResponse([
                 'message' => 'Order has been deleted.',
-                'status' =>  'success',
+                'status' => 'success',
                 'response_code' => 200,
             ]);
         }

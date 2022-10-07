@@ -47,7 +47,7 @@ class SubscriptionController extends Controller
 
         return $this->buildResponse([
             'message' => $msg,
-            'status' =>  $subscriptions->isEmpty() ? 'info' : 'success',
+            'status' => $subscriptions->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
             'subscriptions' => $subscriptions ?? [],
             'period' => $p ? urldecode($p) : $_period,
@@ -83,7 +83,7 @@ class SubscriptionController extends Controller
             })
             ->addColumn('action', function (Subscription $item) {
                 return implode([
-                    Html::el('a', ['onclick'=>"hotLink('/savings/plan/".$item->id."')", 'href'=>'javascript:void(0)'])->title(__('View Savings'))->setHtml(Html::el('i')->class('ri-eye-fill ri-2x text-primary')),
+                    Html::el('a', ['onclick' => "hotLink('/savings/plan/".$item->id."')", 'href' => 'javascript:void(0)'])->title(__('View Savings'))->setHtml(Html::el('i')->class('ri-eye-fill ri-2x text-primary')),
                 ]);
             })
             ->removeColumn('updated_at')->toJson();
@@ -111,7 +111,7 @@ class SubscriptionController extends Controller
 
         return $this->buildResponse([
             'message' => $msg,
-            'status' =>  $subscription ? 'success' : 'error',
+            'status' => $subscription ? 'success' : 'error',
             'response_code' => $subscription ? 200 : 404,
             'subscription' => $subscription ?? [],
         ]);
@@ -141,7 +141,7 @@ class SubscriptionController extends Controller
             $ids = $sub ? $sub->plan->bags()->get('id')->values()->toArray() : [];
         }
 
-        if ($sub && (! $bag || ! in_array($bag->id, Collect($ids[0] ?? [])->filter(fn ($k) =>! empty($k))->values()->toArray()))) {
+        if ($sub && (! $bag || ! in_array($bag->id, Collect($ids[0] ?? [])->filter(fn ($k) => ! empty($k))->values()->toArray()))) {
             $msg = 'The requested food bag no longer exists.';
             $status = 'error';
             $code = 404;

@@ -13,12 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('subscriptions', function (Blueprint $table) {
+        Schema::create('wallets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
-            $table->foreignId('plan_id')->constrained('plans')->onUpdate('cascade')->onDelete('cascade');
-            $table->foreignId('food_bag_id')->constrained('food_bags')->onUpdate('cascade')->onDelete('cascade');
-            $table->enum('status', ['pending', 'active', 'complete', 'withdraw', 'closed'])->default('pending');
+            $table->decimal('amount', 19, 4)->default(0.00);
+            $table->string('source')->nullable();
+            $table->string('detail')->nullable();
+            $table->enum('type', ['debit', 'credit']);
+            $table->string('reference')->nullable();
             $table->timestamps();
         });
     }
@@ -30,7 +32,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::disableForeignKeyConstraints();
-        Schema::dropIfExists('subscriptions');
+        Schema::dropIfExists('wallets');
     }
 };

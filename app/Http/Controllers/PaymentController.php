@@ -24,7 +24,7 @@ class PaymentController extends Controller
      * @param  string  $action
      * @return \Illuminate\Http\Response
      */
-    public function initializeSaving(Request $request)
+    public function initializeSaving(Request $request, $method = 'paystack')
     {
         if (($validator = Validator::make($request->all(), [
             'subscription_id' => ['required', 'numeric'],
@@ -49,27 +49,53 @@ class PaymentController extends Controller
                 return $this->validatorFails($validator, 'email');
             }
 
+            $method = $request->get('method', $method);
             $due = round(($subscription->plan->amount / $subscription->plan->duration) * $request->days, 2);
             try {
-                $paystack = new Paystack(env('PAYSTACK_SECRET_KEY'));
                 $reference = config('settings.trx_prefix', 'AGB-').Str::random(12);
+                if ($request->get('method', $method) === 'wallet') {
+                    if ($request->user()->wallet_balance >= $due) {
+                        $tranx = [
+                            'reference' => $reference,
+                            'method' => 'wallet'
+                        ];
 
-                $real_due = $due * 100;
-
-                // Dont initialize paystack for inline transaction
-                if ($request->inline) {
-                    $tranx = [
-                        'data' => ['reference' => $reference],
-                    ];
-                    $real_due = $due;
+                        $request->user()->wallet()->create([
+                            'reference' => $reference,
+                            'amount' => $due,
+                            'type' => 'debit',
+                            'source' => 'Savings',
+                            'detail' => __('Payment for :0 subscription', [$subscription->plan->title]),
+                        ]);
+                    } else {
+                        return $this->buildResponse([
+                            'message' => 'You do not have enough funds in your wallet',
+                            'status' => 'error',
+                            'status_code' => HttpStatus::BAD_REQUEST,
+                        ], HttpStatus::BAD_REQUEST);
+                    }
                 } else {
-                    $tranx = $paystack->transaction->initialize([
-                        'amount' => $real_due,       // in kobo
-                        'email' => Auth::user()->email,         // unique to customers
-                        'reference' => $reference,         // unique to transactions
-                        'callback_url' => config('settings.payment_verify_url', route('payment.paystack.verify')),
-                    ]);
-                    $real_due = $due;
+                    $paystack = new Paystack(env('PAYSTACK_SECRET_KEY'));
+
+                    $real_due = $due * 100;
+
+                    // Dont initialize paystack for inline transaction
+                    if ($request->inline) {
+                        $tranx = [
+                            'data' => ['reference' => $reference],
+                        ];
+                        $real_due = $due;
+                    } else {
+                        $tranx = $paystack->transaction->initialize([
+                            'amount' => $real_due,       // in kobo
+                            'email' => Auth::user()->email,         // unique to customers
+                            'reference' => $reference,         // unique to transactions
+                            'callback_url' => config('settings.frontend_link')
+                                ? config('settings.frontend_link').'/payment/verify'
+                                : config('settings.payment_verify_url', route('payment.paystack.verify')),
+                        ]);
+                        $real_due = $due;
+                    }
                 }
 
                 $code = 200;
@@ -88,7 +114,7 @@ class PaymentController extends Controller
                 $transaction->create([
                     'user_id' => Auth::id(),
                     'reference' => $reference,
-                    'method' => 'Paystack',
+                    'method' => ucfirst($method),
                     'status' => 'pending',
                     'amount' => $due,
                     'due' => $due,
@@ -106,7 +132,7 @@ class PaymentController extends Controller
 
         return $this->buildResponse([
             'message' => $msg ?? 'OK',
-            'status' =>  ! $subscription ? 'info' : 'success',
+            'status' => ! $subscription ? 'info' : 'success',
             'response_code' => $code ?? 200, //202
             'payload' => $tranx ?? [],
             'transaction' => $transaction ?? [],
@@ -120,7 +146,7 @@ class PaymentController extends Controller
      * @param  \Illuminate\Http\Client\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function initializeFruitBay(Request $request)
+    public function initializeFruitBay(Request $request, $method = 'paystack')
     {
         if (($validator = Validator::make($request->all(), [
             'cart' => ['required', 'array'],
@@ -128,7 +154,7 @@ class PaymentController extends Controller
             return $this->validatorFails($validator, 'cart');
         }
 
-        $items = collect($request->cart)->map(fn ($k) =>collect($k)->except('qty'))->flatten()->all();
+        $items = collect($request->cart)->map(fn ($k) => collect($k)->except('qty'))->flatten()->all();
         if (($available = FruitBay::whereIn('id', $items)->get('id'))) {
             $cart = collect($request->cart)->map(function ($value) {
                 $item = FruitBay::find($value['item_id']);
@@ -158,23 +184,47 @@ class PaymentController extends Controller
                     return [$key => $value->total];
                 })->sum();
                 $real_due = $due;
+                $method = $request->get('method', $method);
 
                 try {
-                    $paystack = new Paystack(env('PAYSTACK_SECRET_KEY'));
                     $reference = config('settings.trx_prefix', 'AGB-').Str::random(15);
+                    if ($request->get('method', $method) === 'wallet') {
+                        if ($request->user()->wallet_balance >= $due) {
+                            $tranx = [
+                                'reference' => $reference,
+                                'method' => 'wallet'
+                            ];
 
-                    // Dont initialize paystack for inline transaction
-                    if ($request->inline) {
-                        $tranx = [
-                            'data' => ['reference' => $reference],
-                        ];
+                            $request->user()->wallet()->create([
+                                'reference' => $reference,
+                                'amount' => $due,
+                                'type' => 'debit',
+                                'source' => 'Cart Checkout',
+                                'detail' => trans_choice('Payment for order of :0 items', $cart->count(), [$cart->count()]),
+                            ]);
+                        } else {
+                            return $this->buildResponse([
+                                'message' => 'You do not have enough funds in your wallet',
+                                'status' => 'error',
+                                'status_code' => HttpStatus::BAD_REQUEST,
+                            ], HttpStatus::BAD_REQUEST);
+                        }
                     } else {
-                        $tranx = $paystack->transaction->initialize([
-                            'amount' => $due * 100,       // in kobo
-                            'email' => Auth::user()->email,         // unique to customers
-                            'reference' => $reference,         // unique to transactions
-                            'callback_url' => config('settings.payment_verify_url', route('payment.paystack.verify')),
-                        ]);
+                        $paystack = new Paystack(env('PAYSTACK_SECRET_KEY'));
+
+                        // Dont initialize paystack for inline transaction
+                        if ($request->inline) {
+                            $tranx = [
+                                'data' => ['reference' => $reference],
+                            ];
+                        } else {
+                            $tranx = $paystack->transaction->initialize([
+                                'amount' => $due * 100,       // in kobo
+                                'email' => Auth::user()->email,         // unique to customers
+                                'reference' => $reference,         // unique to transactions
+                                'callback_url' => config('settings.payment_verify_url', route('payment.paystack.verify')),
+                            ]);
+                        }
                     }
 
                     $code = 200;
@@ -194,7 +244,7 @@ class PaymentController extends Controller
                     $transaction->create([
                         'user_id' => Auth::id(),
                         'reference' => $reference,
-                        'method' => 'Paystack',
+                        'method' => ucfirst($method??'paystack'),
                         'status' => 'pending',
                         'amount' => $due,
                         'due' => $due,
@@ -216,7 +266,7 @@ class PaymentController extends Controller
 
         return $this->buildResponse([
             'message' => $msg ?? 'OK',
-            'status' =>  $code !== 200 ? 'error' : 'success',
+            'status' => $code !== 200 ? 'error' : 'success',
             'response_code' => $code ?? 200, //202
             'payload' => $tranx ?? [],
             'items' => $cart ?? [$subscription ?? null],
@@ -232,7 +282,7 @@ class PaymentController extends Controller
      * @param  string  $action
      * @return \Illuminate\Http\Response
      */
-    public function paystackVerify(Request $request)
+    public function paystackVerify(Request $request, $method = 'paystack')
     {
         $msg = 'Invalid Transaction.';
         $status = 'error';
@@ -243,24 +293,37 @@ class PaymentController extends Controller
         }
 
         try {
-            $paystack = new Paystack(env('PAYSTACK_SECRET_KEY'));
-            $tranx = $paystack->transaction->verify([
-                'reference' => $request->reference,   // unique to transactions
-            ]);
-
-            $transaction = Transaction::where('reference', $request->reference)->where('status', 'pending')->first();
-            throw_if(! $transaction, \ErrorException::class, 'Transaction not found.');
-
-            if (($transactable = $transaction->transactable) instanceof Saving) {
-                $processSaving = $this->processSaving($request, $tranx, $transactable);
-            } elseif (($transactable = $transaction->transactable) instanceof Order) {
-                $processSaving = $this->processOrder($request, $tranx, $transactable);
-                $set_type = 'order';
+            if ($request->get('method', $method) === 'wallet') {
+                $tranx = new \stdClass();
+                $tranx->data = new \stdClass();
+                $tranx->data->status = 'failed';
+                if ($request->user()->wallet()->where('reference', $request->reference)->exists()) {
+                    $tranx->data->status = 'success';
+                }
+            } else {
+                $paystack = new Paystack(env('PAYSTACK_SECRET_KEY'));
+                $tranx = $paystack->transaction->verify([
+                    'reference' => $request->reference,   // unique to transactions
+                ]);
             }
-            extract($processSaving);
+
+            if ('success' === $tranx->data->status) {
+                $transaction = Transaction::where('reference', $request->reference)->where('status', 'pending')->first();
+                if ($request->get('method', $method) === 'wallet') {
+                    $tranx->data->amount = $transaction->amount * 100;
+                }
+                throw_if(! $transaction, \ErrorException::class, 'Transaction not found.');
+                if (($transactable = $transaction->transactable) instanceof Saving) {
+                    $processSaving = $this->processSaving($request, $tranx, $transactable);
+                } elseif (($transactable = $transaction->transactable) instanceof Order) {
+                    $processSaving = $this->processOrder($request, $tranx, $transactable);
+                    $set_type = 'order';
+                }
+                extract($processSaving);
+            }
         } catch (ApiException | \InvalidArgumentException | \ErrorException $e) {
             $payload = $e instanceof ApiException ? $e->getResponseObject() : [];
-            Log::error($e->getMessage(), ['url'=>url()->full(), 'request' => $request->all()]);
+            Log::error($e->getMessage(), ['url' => url()->full(), 'request' => $request->all()]);
 
             return $this->buildResponse([
                 'message' => $e->getMessage(),
@@ -439,7 +502,7 @@ class PaymentController extends Controller
 
         return $this->buildResponse([
             'message' => $msg,
-            'status' =>  $status ?? (! $subscription ? 'info' : 'success'),
+            'status' => $status ?? (! $subscription ? 'info' : 'success'),
             'response_code' => 200,
             $key => $subscription ?? [],
         ]);

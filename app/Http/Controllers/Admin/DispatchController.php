@@ -56,7 +56,7 @@ class DispatchController extends Controller
 
         return $this->buildResponse([
             'message' => 'OK',
-            'status' =>  $items->isEmpty() ? 'info' : 'success',
+            'status' => $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
             'items' => $items ?? [],
         ]);
@@ -88,7 +88,7 @@ class DispatchController extends Controller
 
         return $this->buildResponse([
             'message' => ! $item ? 'The requested item no longer exists' : 'OK',
-            'status' =>  ! $item ? 'info' : 'success',
+            'status' => ! $item ? 'info' : 'success',
             'response_code' => ! $item ? 404 : 200,
             'item' => $item ?? (object) [],
         ]);
@@ -153,7 +153,7 @@ class DispatchController extends Controller
 
         return $this->buildResponse([
             'message' => 'Item status has been updated.',
-            'status' =>  'success',
+            'status' => 'success',
             'response_code' => 200,
             'item' => $item,
         ]);
@@ -232,7 +232,7 @@ class DispatchController extends Controller
 
         return $this->buildResponse([
             'message' => $id ? 'Item has been updated' : 'New item created.',
-            'status' =>  'success',
+            'status' => 'success',
             'response_code' => 200,
             'item' => $item,
         ]);
@@ -261,11 +261,11 @@ class DispatchController extends Controller
                 }
 
                 return false;
-            })->filter(fn ($i) =>$i !== false)->count();
+            })->filter(fn ($i) => $i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} items have been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'response_code' => 200,
             ]);
         } else {
@@ -277,7 +277,7 @@ class DispatchController extends Controller
 
             return $this->buildResponse([
                 'message' => 'Item has been deleted.',
-                'status' =>  'success',
+                'status' => 'success',
                 'response_code' => 200,
             ]);
         }

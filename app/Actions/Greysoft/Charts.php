@@ -234,7 +234,7 @@ class Charts
     public function getBar($for = 'user')
     {
         return $this->bar([
-            'transactions' =>collect(range(1, 12))->map(function ($get) use ($for) {
+            'transactions' => collect(range(1, 12))->map(function ($get) use ($for) {
                 $start = Carbon::now()->month($get)->startOfMonth();
                 $end = Carbon::now()->month($get)->endOfMonth();
 

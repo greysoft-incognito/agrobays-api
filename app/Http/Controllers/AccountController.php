@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Actions\Greysoft\Charts;
+use App\Http\Resources\WalletCollection;
 use App\Models\Saving;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -121,12 +123,19 @@ class AccountController extends Controller
             if (Str::contains($field, ':image')) {
                 $field = current(explode(':image', $field));
             }
-            $vals = $field == 'image' ? 'mimes:png,jpg' : (is_array($filled[$field]) ? 'array' : 'string');
+
+            $vals = $field == 'image' ? 'mimes:png,jpg' : (is_array($filled[$field])
+                ? 'array'
+                : (is_int($filled[$field])
+                    ? 'numeric'
+                    : 'string'
+                )
+            );
             if ($field === 'password') {
                 $vals .= '|min:8|confirmed';
             }
             if (is_array($filled[$field])) {
-                return [$field.'.*' => 'required|string'];
+                return [$field.'.*' => 'required'];
             }
 
             return [$field => "required|$vals"];
@@ -135,7 +144,7 @@ class AccountController extends Controller
         $validator = Validator::make($request->all(), $valid, [], $fields->filter(function ($k) use ($filled) {
             return is_array($filled[$k]);
         })->mapWithKeys(function ($field, $value) use ($filled) {
-            return collect(array_keys($filled[$field]))->mapWithKeys(fn ($k) =>["$field.$k" => "$k $field"]);
+            return collect(array_keys((array)$filled[$field]))->mapWithKeys(fn ($k) => ["$field.$k" => "$field $k"]);
         })->all());
 
         if ($validator->fails()) {
@@ -173,7 +182,7 @@ class AccountController extends Controller
 
         return $this->buildResponse(collect($updated)->merge([
             'message' => "Your profile $identifier has been successfully updated.",
-            'status' =>  'success',
+            'status' => 'success',
             'response_code' => 200,
             'user' => $user,
         ])->all(), $identifier == 'image' ? ['image' => $user->image_url] : null);
@@ -253,17 +262,41 @@ class AccountController extends Controller
 
         return $this->buildResponse([
             'message' => 'Your profile has been successfully updated.',
-            'status' =>  'success',
+            'status' => 'success',
             'response_code' => 200,
             'user' => $user,
         ]);
+    }
+
+    /**
+     * Display a listing of the wallet resource.
+     *
+     * @param  Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function wallet(Request $request)
+    {
+        $query = Auth::user()->wallet()->orderByDesc('id');
+
+        if ($p = $request->get('period')) {
+            $period = explode('-', $p);
+            $from = new Carbon($period[0]);
+            $to = new Carbon($period[1]);
+            $query->whereBetween('created_at', [$from, $to]);
+        }
+
+        return (new WalletCollection($query->paginate()))->additional([
+            'message' => 'OK',
+            'status' => 'success',
+            'response_code' => 200,
+        ])->response()->setStatusCode(200);
     }
 
     public function charts($type = 'pie')
     {
         return $this->buildResponse([
             'message' => 'OK',
-            'status' =>  'success',
+            'status' => 'success',
             'response_code' => 200,
             'charts' => [
                 'pie' => (new Charts)->getPie('user'),

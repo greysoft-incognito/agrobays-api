@@ -40,7 +40,7 @@ class AdminPlansController extends Controller
 
         return $this->buildResponse([
             'message' => 'OK',
-            'status' =>  $items->isEmpty() ? 'info' : 'success',
+            'status' => $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
             'items' => $items ?? [],
         ]);
@@ -53,7 +53,7 @@ class AdminPlansController extends Controller
 
         return $this->buildResponse([
             'message' => ! $plan ? 'The requested plan no longer exists' : 'OK',
-            'status' =>  ! $plan ? 'info' : 'success',
+            'status' => ! $plan ? 'info' : 'success',
             'response_code' => ! $plan ? 404 : 200,
             'plan' => $plan,
         ]);
@@ -98,7 +98,7 @@ class AdminPlansController extends Controller
 
         return $this->buildResponse([
             'message' => $item ? Str::of($plan->title)->append(' Has been updated!') : 'New plan has been created.',
-            'status' =>  'success',
+            'status' => 'success',
             'response_code' => 200,
             'plan' => $plan,
         ]);
@@ -122,11 +122,11 @@ class AdminPlansController extends Controller
                 }
 
                 return false;
-            })->filter(fn ($i) =>$i !== false)->count();
+            })->filter(fn ($i) => $i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} plans have been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'response_code' => 200,
             ]);
         } else {
@@ -139,7 +139,7 @@ class AdminPlansController extends Controller
 
             return $this->buildResponse([
                 'message' => "{$plan->title} has been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'response_code' => 200,
             ]);
         }

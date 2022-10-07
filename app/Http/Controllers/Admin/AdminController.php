@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Actions\Greysoft\Charts;
 use App\Http\Controllers\Controller;
 use App\Models\Subscription;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Validator;
 
 class AdminController extends Controller
@@ -17,7 +17,7 @@ class AdminController extends Controller
 
         return $this->buildResponse([
             'message' => 'OK',
-            'status' =>  'success',
+            'status' => 'success',
             'response_code' => 200,
             'charts' => [
                 'pie' => (new Charts)->getPie('admin'),
@@ -54,21 +54,23 @@ class AdminController extends Controller
             ]);
         }
 
-        collect($request->config)->map(function($config, $key) {
+        collect($request->config)->map(function ($config, $key) {
             if (in_array($key, [
-                "contact_address",
-                "currency",
-                "currency_symbol",
+                'contact_address',
+                'office_address',
+                'currency',
+                'currency_symbol',
                 // "default_banner",
-                "frontend_link",
-                "prefered_notification_channels",
-                "site_name",
-                "slack_debug",
-                "slack_logger",
-                "token_lifespan",
+                'frontend_link',
+                'prefered_notification_channels',
+                'site_name',
+                'withdraw_to',
+                'slack_debug',
+                'slack_logger',
+                'token_lifespan',
                 // "trx_prefix",
-                "verify_email",
-                "verify_phone",
+                'verify_email',
+                'verify_phone',
             ])) {
                 Config::write("settings.{$key}", $config);
             }
@@ -76,7 +78,7 @@ class AdminController extends Controller
 
         return $this->buildResponse([
             'message' => 'Configuration Saved.',
-            'status' =>  'success',
+            'status' => 'success',
             'response_code' => 200,
         ]);
     }

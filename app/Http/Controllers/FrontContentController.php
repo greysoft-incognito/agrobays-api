@@ -46,7 +46,7 @@ class FrontContentController extends Controller
 
         return $this->buildResponse([
             'message' => 'OK',
-            'status' =>  $content->isEmpty() ? 'info' : 'success',
+            'status' => $content->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
             'contents' => $content ?? [],
         ]);
@@ -63,7 +63,7 @@ class FrontContentController extends Controller
 
         return $this->buildResponse([
             'message' => ! $content && ! $request->silent ? 'The requested content no longer exists' : 'OK',
-            'status' =>  ! $content && ! $request->silent ? 'info' : 'success',
+            'status' => ! $content && ! $request->silent ? 'info' : 'success',
             'response_code' => ! $content && ! $request->silent ? 404 : 200,
             'content' => $content ?? (object) [],
         ]);

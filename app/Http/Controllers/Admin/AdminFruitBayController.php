@@ -40,7 +40,7 @@ class AdminFruitBayController extends Controller
 
         return $this->buildResponse([
             'message' => 'OK',
-            'status' =>  $items->isEmpty() ? 'info' : 'success',
+            'status' => $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
             'items' => $items ?? [],
         ]);
@@ -53,7 +53,7 @@ class AdminFruitBayController extends Controller
 
         return $this->buildResponse([
             'message' => ! $item ? 'The requested item no longer exists' : 'OK',
-            'status' =>  ! $item ? 'info' : 'success',
+            'status' => ! $item ? 'info' : 'success',
             'response_code' => ! $item ? 404 : 200,
             'item' => $item,
         ]);
@@ -96,7 +96,7 @@ class AdminFruitBayController extends Controller
 
         return $this->buildResponse([
             'message' => $item ? Str::of($fruitbay->name)->append(' Has been updated!') : 'New fruit bay item added.',
-            'status' =>  'success',
+            'status' => 'success',
             'response_code' => 200,
             'item' => $fruitbay,
         ]);
@@ -120,11 +120,11 @@ class AdminFruitBayController extends Controller
                 }
 
                 return false;
-            })->filter(fn ($i) =>$i !== false)->count();
+            })->filter(fn ($i) => $i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} items bags have been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'response_code' => 200,
             ]);
         } else {
@@ -138,7 +138,7 @@ class AdminFruitBayController extends Controller
 
             return $this->buildResponse([
                 'message' => "{$item->name} has been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'response_code' => 200,
             ]);
         }

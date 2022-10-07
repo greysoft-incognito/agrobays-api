@@ -86,7 +86,7 @@ class FruitBayController extends Controller
 
         return $this->buildResponse([
             'message' => ! $item ? 'The requested item no longer exists' : 'OK',
-            'status' =>  ! $item ? 'error' : 'success',
+            'status' => ! $item ? 'error' : 'success',
             'response_code' => ! $item ? 404 : 200,
             'item' => $item,
         ]);
@@ -143,7 +143,7 @@ class FruitBayController extends Controller
 
             return $this->buildResponse([
                 'message' => ! $item ? 'The requested category no longer exists.' : 'OK',
-                'status' =>  ! $item ? 'info' : 'success',
+                'status' => ! $item ? 'info' : 'success',
                 'response_code' => ! $item ? 404 : 200,
                 'item' => $item,
             ]);

@@ -38,7 +38,7 @@ class AdminSavingController extends Controller
 
         return $this->buildResponse([
             'message' => 'OK',
-            'status' =>  $items->isEmpty() ? 'info' : 'success',
+            'status' => $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
             'items' => $items ?? [],
         ]);
@@ -51,7 +51,7 @@ class AdminSavingController extends Controller
 
         return $this->buildResponse([
             'message' => ! $saving ? 'The requested saving no longer exists' : 'OK',
-            'status' =>  ! $saving ? 'info' : 'success',
+            'status' => ! $saving ? 'info' : 'success',
             'response_code' => ! $saving ? 404 : 200,
             'saving' => $saving,
         ]);
@@ -94,7 +94,7 @@ class AdminSavingController extends Controller
 
         return $this->buildResponse([
             'message' => 'Saving status updated.',
-            'status' =>  'success',
+            'status' => 'success',
             'response_code' => 200,
             'plan' => $saving,
         ]);
@@ -116,11 +116,11 @@ class AdminSavingController extends Controller
                 }
 
                 return false;
-            })->filter(fn ($i) =>$i !== false)->count();
+            })->filter(fn ($i) => $i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} savings bags have been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'response_code' => 200,
             ]);
         } else {
@@ -130,7 +130,7 @@ class AdminSavingController extends Controller
         if ($saving) {
             return $this->buildResponse([
                 'message' => 'Saving has been deleted.',
-                'status' =>  'success',
+                'status' => 'success',
                 'response_code' => 200,
             ]);
         }

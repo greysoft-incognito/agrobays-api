@@ -39,7 +39,7 @@ class AdminFoodbagsController extends Controller
 
         return $this->buildResponse([
             'message' => 'OK',
-            'status' =>  $items->isEmpty() ? 'info' : 'success',
+            'status' => $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
             'items' => $items ?? [],
         ]);
@@ -52,7 +52,7 @@ class AdminFoodbagsController extends Controller
 
         return $this->buildResponse([
             'message' => ! $bag ? 'The requested foodbag no longer exists' : 'OK',
-            'status' =>  ! $bag ? 'info' : 'success',
+            'status' => ! $bag ? 'info' : 'success',
             'response_code' => ! $bag ? 404 : 200,
             'bag' => $bag ?? (object) [],
         ]);
@@ -87,7 +87,7 @@ class AdminFoodbagsController extends Controller
 
         return $this->buildResponse([
             'message' => $item ? Str::of($bag->title)->append(' Has been updated!') : 'New foodbag has been created.',
-            'status' =>  'success',
+            'status' => 'success',
             'response_code' => 200,
             'bag' => $bag,
         ]);
@@ -111,11 +111,11 @@ class AdminFoodbagsController extends Controller
                 }
 
                 return false;
-            })->filter(fn ($i) =>$i !== false)->count();
+            })->filter(fn ($i) => $i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} foods bags have been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'response_code' => 200,
             ]);
         } else {
@@ -127,7 +127,7 @@ class AdminFoodbagsController extends Controller
 
             return $this->buildResponse([
                 'message' => "{$bag->title} has been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'response_code' => 200,
             ]);
         }

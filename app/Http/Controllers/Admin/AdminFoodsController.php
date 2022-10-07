@@ -40,7 +40,7 @@ class AdminFoodsController extends Controller
 
         return $this->buildResponse([
             'message' => 'OK',
-            'status' =>  $items->isEmpty() ? 'info' : 'success',
+            'status' => $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
             'items' => $items ?? [],
         ]);
@@ -53,7 +53,7 @@ class AdminFoodsController extends Controller
 
         return $this->buildResponse([
             'message' => ! $food ? 'The requested food no longer exists' : 'OK',
-            'status' =>  ! $food ? 'info' : 'success',
+            'status' => ! $food ? 'info' : 'success',
             'response_code' => ! $food ? 404 : 200,
             'food' => $food,
         ]);
@@ -99,7 +99,7 @@ class AdminFoodsController extends Controller
 
         return $this->buildResponse([
             'message' => $item ? Str::of($food->name)->append(' Has been updated!') : 'New food has been added.',
-            'status' =>  'success',
+            'status' => 'success',
             'response_code' => 200,
             'food' => $food,
         ]);
@@ -123,11 +123,11 @@ class AdminFoodsController extends Controller
                 }
 
                 return false;
-            })->filter(fn ($i) =>$i !== false)->count();
+            })->filter(fn ($i) => $i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} foods have been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'response_code' => 200,
             ]);
         } else {
@@ -141,7 +141,7 @@ class AdminFoodsController extends Controller
 
             return $this->buildResponse([
                 'message' => "{$food->name} has been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'response_code' => 200,
             ]);
         }

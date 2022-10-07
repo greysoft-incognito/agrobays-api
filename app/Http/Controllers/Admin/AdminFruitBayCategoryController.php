@@ -38,7 +38,7 @@ class AdminFruitBayCategoryController extends Controller
 
         return $this->buildResponse([
             'message' => 'OK',
-            'status' =>  $items->isEmpty() ? 'info' : 'success',
+            'status' => $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
             'items' => $items ?? [],
         ]);
@@ -50,7 +50,7 @@ class AdminFruitBayCategoryController extends Controller
 
         return $this->buildResponse([
             'message' => ! $item ? 'The requested category no longer exists.' : 'OK',
-            'status' =>  ! $item ? 'info' : 'success',
+            'status' => ! $item ? 'info' : 'success',
             'response_code' => ! $item ? 404 : 200,
             'item' => $item ?? (object) [],
         ]);
@@ -86,7 +86,7 @@ class AdminFruitBayCategoryController extends Controller
 
         return $this->buildResponse([
             'message' => $item ? Str::of($category->title)->append(' Has been updated!') : 'New category item created.',
-            'status' =>  'success',
+            'status' => 'success',
             'response_code' => 200,
             'item' => $category,
         ]);
@@ -110,11 +110,11 @@ class AdminFruitBayCategoryController extends Controller
                 }
 
                 return false;
-            })->filter(fn ($i) =>$i !== false)->count();
+            })->filter(fn ($i) => $i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} fruit bay categories have been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'response_code' => 200,
             ]);
         } else {
@@ -128,7 +128,7 @@ class AdminFruitBayCategoryController extends Controller
 
             return $this->buildResponse([
                 'message' => "{$item->title} has been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'response_code' => 200,
             ]);
         }

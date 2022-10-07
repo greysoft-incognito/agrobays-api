@@ -18,6 +18,8 @@ class Subscription extends Model
         'days_left',
         'total_saved',
         'total_left',
+        'saved_amount',
+        'left_amount',
         'items',
     ];
 
@@ -102,6 +104,28 @@ class Subscription extends Model
     {
         return Attribute::make(
             get: fn () => $this->plan->duration - $this->savings()->sum('days')
+        );
+    }
+
+    public function leftAmount(): Attribute
+    {
+        $total = $this->savings()->get()->map(function ($value) {
+            return $value->total;
+        })->sum();
+
+        return Attribute::make(
+            get: fn () => ($this->plan->amount - $total)
+        );
+    }
+
+    public function savedAmount(): Attribute
+    {
+        $total = $this->savings()->get()->map(function ($value) {
+            return $value->total ?? 0;
+        })->sum();
+
+        return Attribute::make(
+            get: fn () => $total
         );
     }
 

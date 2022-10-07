@@ -51,7 +51,7 @@ class AdminFrontContentController extends Controller
 
         return $this->buildResponse([
             'message' => 'OK',
-            'status' =>  $content->isEmpty() ? 'info' : 'success',
+            'status' => $content->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
             'contents' => $content ?? [],
         ]);
@@ -64,7 +64,7 @@ class AdminFrontContentController extends Controller
 
         return $this->buildResponse([
             'message' => ! $content ? 'The requested content no longer exists' : 'OK',
-            'status' =>  ! $content ? 'info' : 'success',
+            'status' => ! $content ? 'info' : 'success',
             'response_code' => ! $content ? 404 : 200,
             'content' => $content ?? (object) [],
         ]);
@@ -114,7 +114,7 @@ class AdminFrontContentController extends Controller
 
         return $this->buildResponse([
             'message' => $item ? Str::of($content->title)->append(' Has been updated!') : 'New content has been created.',
-            'status' =>  'success',
+            'status' => 'success',
             'response_code' => 200,
             'content' => $content,
         ]);
@@ -138,11 +138,11 @@ class AdminFrontContentController extends Controller
                 }
 
                 return false;
-            })->filter(fn ($i) =>$i !== false)->count();
+            })->filter(fn ($i) => $i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} contents have been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'response_code' => 200,
             ]);
         } else {
@@ -154,7 +154,7 @@ class AdminFrontContentController extends Controller
 
             return $this->buildResponse([
                 'message' => "{$content->title} has been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'response_code' => 200,
             ]);
         }

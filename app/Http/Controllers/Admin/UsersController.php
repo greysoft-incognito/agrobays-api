@@ -64,7 +64,7 @@ class UsersController extends Controller
 
         return $this->buildResponse([
             'message' => 'OK',
-            'status' =>  $users->isEmpty() ? 'info' : 'success',
+            'status' => $users->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
             'users' => $users ?? [],
         ]);
@@ -77,7 +77,7 @@ class UsersController extends Controller
 
         return $this->buildResponse([
             'message' => ! $user ? 'The requested user no longer exists' : 'OK',
-            'status' =>  ! $user ? 'info' : 'success',
+            'status' => ! $user ? 'info' : 'success',
             'response_code' => ! $user ? 404 : 200,
             'user' => $user ?? (object) [],
         ]);
@@ -156,7 +156,7 @@ class UsersController extends Controller
 
         return $this->buildResponse([
             'message' => $id ? Str::of($user->fullname)->append(' Has been updated!') : 'New user has been created.',
-            'status' =>  'success',
+            'status' => 'success',
             'response_code' => 200,
             'content' => $user,
         ]);
@@ -194,11 +194,11 @@ class UsersController extends Controller
                 }
 
                 return false;
-            })->filter(fn ($i) =>$i !== false)->count();
+            })->filter(fn ($i) => $i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} users have been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'response_code' => 200,
             ]);
         } else {
@@ -226,7 +226,7 @@ class UsersController extends Controller
 
             return $this->buildResponse([
                 'message' => "{$user->username} has been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'response_code' => 200,
             ]);
         }

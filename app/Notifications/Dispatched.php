@@ -37,6 +37,7 @@ class Dispatched extends Notification
     public function via()
     {
         $pref = config('settings.prefered_notification_channels', ['mail', 'sms']);
+
         return in_array('sms', $pref) && in_array('mail', $pref)
             ? ['database', 'mail', TwilioChannel::class]
             : (in_array('sms', $pref)

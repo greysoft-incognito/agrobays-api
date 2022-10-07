@@ -34,7 +34,7 @@ class AdminSubscriptionController extends Controller
         }
 
         if ($request->status && in_array($request->status, [
-            'active', 'pending', 'complete', 'withdraw', 'closed'
+            'active', 'pending', 'complete', 'withdraw', 'closed',
         ])) {
             $query->where('status', $request->status);
         } else {
@@ -45,7 +45,7 @@ class AdminSubscriptionController extends Controller
 
         return $this->buildResponse([
             'message' => 'OK',
-            'status' =>  $items->isEmpty() ? 'info' : 'success',
+            'status' => $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
             'items' => $items ?? [],
         ]);
@@ -58,7 +58,7 @@ class AdminSubscriptionController extends Controller
 
         return $this->buildResponse([
             'message' => ! $subscription ? 'The requested subscription no longer exists' : 'OK',
-            'status' =>  ! $subscription ? 'info' : 'success',
+            'status' => ! $subscription ? 'info' : 'success',
             'response_code' => ! $subscription ? 404 : 200,
             'subscription' => $subscription,
         ]);
@@ -105,7 +105,7 @@ class AdminSubscriptionController extends Controller
 
         return $this->buildResponse([
             'message' => 'Subscription status updated.',
-            'status' =>  'success',
+            'status' => 'success',
             'response_code' => 200,
             'plan' => $subscription,
         ]);
@@ -127,11 +127,11 @@ class AdminSubscriptionController extends Controller
                 }
 
                 return false;
-            })->filter(fn ($i) =>$i !== false)->count();
+            })->filter(fn ($i) => $i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} subscriptions bags have been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'response_code' => 200,
             ]);
         } else {
@@ -143,7 +143,7 @@ class AdminSubscriptionController extends Controller
 
             return $this->buildResponse([
                 'message' => 'Subscription has been deleted.',
-                'status' =>  'success',
+                'status' => 'success',
                 'response_code' => 200,
             ]);
         }

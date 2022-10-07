@@ -3,10 +3,10 @@
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
-use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,23 +30,23 @@ Route::get('/', function () {
     ];
 });
 
-Route::middleware(['auth:sanctum', 'admin'])->group(function() {
-    Route::get('downloads/secure/{filename?}', function($filename='') {
+Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+    Route::get('downloads/secure/{filename?}', function ($filename = '') {
         if (file_exists(storage_path('app/backup/'.$filename))) {
             return response()->download(storage_path('app/secure/'.$filename));
         }
+
         return abort(404, 'File not found');
     })->name('secure.download');
 
-    Route::get('/artisan/backup/action/{action?}', function ($action = 'choose')
-    {
+    Route::get('/artisan/backup/action/{action?}', function ($action = 'choose') {
         $errors = $code = $messages = null;
         $user = Auth::user();
+
         return view('web-user', compact('user', 'errors', 'code', 'action'));
     });
 
-    Route::get('/artisan/{command}/{params?}', function (Response $response, $command, $params = null)
-    {
+    Route::get('/artisan/{command}/{params?}', function (Response $response, $command, $params = null) {
         $errors = $code = $messages = $action = null;
         $user = Auth::user();
         try {

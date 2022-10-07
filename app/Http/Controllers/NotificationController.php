@@ -26,20 +26,20 @@ class NotificationController extends Controller
 
         return (new Controller)->buildResponse([
             'message' => $items ? 'OK' : 'No notifications available!',
-            'status' =>  $items ? 'success' : 'info',
+            'status' => $items ? 'success' : 'info',
             'response_code' => 200,
             'data' => $items,
             'navigation' => [
-                'cursorName'  => $list->getCursorName(),
+                'cursorName' => $list->getCursorName(),
                 'prev_cursor' => $prev_cursor[1] ?? null,
                 'next_cursor' => $next_cursor[1] ?? null,
                 'prev_page' => $list->previousPageUrl(),
                 'next_page' => $list->nextPageUrl(),
                 'has_pages' => $list->hasPages(),
-                'has_more'  => $list->hasMorePages(),
-                'per_page'  => $list->perPage(),
-                'count'  => $list->count(),
-                'unread'  => \Auth::user()->unreadNotifications()->count(),
+                'has_more' => $list->hasMorePages(),
+                'per_page' => $list->perPage(),
+                'count' => $list->count(),
+                'unread' => \Auth::user()->unreadNotifications()->count(),
             ],
         ]);
     }
@@ -64,7 +64,7 @@ class NotificationController extends Controller
 
         return (new Controller)->buildResponse([
             'message' => $list ? $list->count().' Marked as read.' : 'No notifications available!',
-            'status' =>  $list ? 'success' : 'info',
+            'status' => $list ? 'success' : 'info',
             'response_code' => 200,
             'data' => [
                 'unread' => \Auth::user()->unreadNotifications()->count(),

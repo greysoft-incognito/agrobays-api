@@ -34,7 +34,7 @@ class TransactionController extends Controller
             })
             ->addColumn('action', function (Transaction $item) {
                 return implode([
-                    Html::el('a', ['onclick'=>"hotLink('/transactions/invoice/".$item->id."')", 'href'=>'javascript:void(0)'])->title(__('View Invoice'))->setHtml(Html::el('i')->class('ri-file-list-2-fill ri-2x text-primary')),
+                    Html::el('a', ['onclick' => "hotLink('/transactions/invoice/".$item->id."')", 'href' => 'javascript:void(0)'])->title(__('View Invoice'))->setHtml(Html::el('i')->class('ri-file-list-2-fill ri-2x text-primary')),
                 ]);
             })
             ->removeColumn('updated_at')->toJson();
@@ -90,7 +90,7 @@ class TransactionController extends Controller
 
         return $this->buildResponse([
             'message' => $msg,
-            'status' =>  $transactions->isEmpty() ? 'info' : 'success',
+            'status' => $transactions->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
             'transactions' => $transactions ?? [],
             'period' => $p ? urldecode($p) : $_period,
@@ -111,7 +111,7 @@ class TransactionController extends Controller
 
         return $this->buildResponse([
             'message' => $msg,
-            'status' =>  $transaction ? 'success' : 'info',
+            'status' => $transaction ? 'success' : 'info',
             'response_code' => $transaction ? 200 : 404,
             'transaction' => $transaction ?? [],
             'items' => $transaction->transactable->items ?? [($transaction->transactable ?? null)],

@@ -61,14 +61,14 @@ class Handler extends ExceptionHandler
         });
     }
 
-    protected function renderException($msg, $code = 404)
+    protected function renderException(string $msg, $code = 404, array $misc = [])
     {
         if (request()->is('api/*')) {
-            return (new Controller)->buildResponse([
+            return (new Controller)->buildResponse(array_merge([
                 'message' => $msg,
                 'status' => 'error',
                 'response_code' => $code,
-            ]);
+            ], $misc));
         }
     }
 }

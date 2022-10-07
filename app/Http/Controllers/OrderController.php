@@ -45,7 +45,7 @@ class OrderController extends Controller
 
         return $this->buildResponse([
             'message' => $msg,
-            'status' =>  $orders->isEmpty() ? 'info' : 'success',
+            'status' => $orders->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
             'orders' => $orders ?? [],
             'period' => $p ? urldecode($p) : $_period,
@@ -67,7 +67,7 @@ class OrderController extends Controller
 
         return $this->buildResponse([
             'message' => $msg,
-            'status' =>  $order ? 'success' : 'error',
+            'status' => $order ? 'success' : 'error',
             'response_code' => $order ? 200 : 404,
             'order' => $order ?? [],
         ]);
@@ -110,7 +110,7 @@ class OrderController extends Controller
 
         return $this->buildResponse([
             'message' => $msg,
-            'status' =>  $items->isEmpty() ? 'info' : 'success',
+            'status' => $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
             'items' => $items ?? [],
             'period' => $p ? urldecode($p) : $_period,
@@ -145,7 +145,7 @@ class OrderController extends Controller
 
         return $this->buildResponse([
             'message' => ! $item ? 'The requested item no longer exists' : 'OK',
-            'status' =>  ! $item ? 'info' : 'success',
+            'status' => ! $item ? 'info' : 'success',
             'response_code' => ! $item ? 404 : 200,
             'item' => $item ?? (object) [],
         ]);

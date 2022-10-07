@@ -80,7 +80,7 @@ class HandleTransactions extends Command
 
                 // Clear transactions
                 if ($action === 'clear') {
-                    $count = $tranx->filter(fn ($tranx) =>Transaction::whereReference($tranx->reference)->exists())
+                    $count = $tranx->filter(fn ($tranx) => Transaction::whereReference($tranx->reference)->exists())
                     ->each(function ($tranx) {
                         if ($transaction = Transaction::whereReference($tranx->reference)->with(['transactable'])->first()) {
                             if ($transaction->transactable) {
@@ -95,7 +95,7 @@ class HandleTransactions extends Command
                     $this->info($transactions->message);
                     $this->table(
                         ['Status', 'Reference', 'Amount', 'Paid At', 'Created At', 'Channel', 'Currency'],
-                        $tranx->map(fn ($d) =>collect($d)->only(['status', 'reference', 'amount', 'created_at', 'paid_at', 'channel', 'currency'])->all())
+                        $tranx->map(fn ($d) => collect($d)->only(['status', 'reference', 'amount', 'created_at', 'paid_at', 'channel', 'currency'])->all())
                             ->sortKeys()
                     );
                 }
@@ -133,7 +133,7 @@ class HandleTransactions extends Command
                 $this->info('Transactions collected successfully');
                 $this->table(
                     ['Type', 'Reference', 'Method', 'Amount', 'Created At', 'Status'],
-                    $tranx->map(fn ($d) =>$d->only(['transactable_type', 'reference', 'method', 'amount', 'created_at', 'status']))->all()
+                    $tranx->map(fn ($d) => $d->only(['transactable_type', 'reference', 'method', 'amount', 'created_at', 'status']))->all()
                 );
             }
         }

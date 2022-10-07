@@ -39,7 +39,7 @@ class AdminTransactionController extends Controller
 
         return $this->buildResponse([
             'message' => 'OK',
-            'status' =>  $items->isEmpty() ? 'info' : 'success',
+            'status' => $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
             'items' => $items ?? [],
         ]);
@@ -52,7 +52,7 @@ class AdminTransactionController extends Controller
 
         return $this->buildResponse([
             'message' => ! $transaction ? 'The requested transaction no longer exists' : 'OK',
-            'status' =>  ! $transaction ? 'info' : 'success',
+            'status' => ! $transaction ? 'info' : 'success',
             'response_code' => ! $transaction ? 404 : 200,
             'transaction' => $transaction,
         ]);
@@ -95,7 +95,7 @@ class AdminTransactionController extends Controller
 
         return $this->buildResponse([
             'message' => 'Transaction status updated.',
-            'status' =>  'success',
+            'status' => 'success',
             'response_code' => 200,
             'plan' => $transaction,
         ]);
@@ -117,11 +117,11 @@ class AdminTransactionController extends Controller
                 }
 
                 return false;
-            })->filter(fn ($i) =>$i !== false)->count();
+            })->filter(fn ($i) => $i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} transactions bags have been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'response_code' => 200,
             ]);
         } else {
@@ -133,7 +133,7 @@ class AdminTransactionController extends Controller
 
             return $this->buildResponse([
                 'message' => 'Transaction has been deleted.',
-                'status' =>  'success',
+                'status' => 'success',
                 'response_code' => 200,
             ]);
         }

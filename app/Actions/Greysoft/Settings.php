@@ -167,7 +167,7 @@ class Settings
             ->mapWithKeys(function ($value, $key) use ($file) {
                 return [
                     $key => [
-                        'key'  => $key,
+                        'key' => $key,
                         'title' => ucwords(($file === 'app' ? $file.' ' : '').\Str::of($key)->replace('_', ' ')->replace('-', ' ')),
                         'value' => $value,
                     ],

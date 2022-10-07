@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\FoodBag;
 use App\Models\Plan;
 use App\Models\Subscription;
+use App\Notifications\SubStatus;
 use Carbon\CarbonImmutable as Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -60,7 +61,7 @@ class SavingsController extends Controller
 
         return $this->buildResponse([
             'message' => $msg,
-            'status' =>  $savings->isEmpty() ? 'info' : 'success',
+            'status' => $savings->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
             'savings' => $savings ?? [],
             'period' => $p ? urldecode($p) : $_period,
@@ -105,7 +106,7 @@ class SavingsController extends Controller
 
         return $this->buildResponse([
             'message' => ! $plan ? 'The requested plan is no longer available' : 'OK',
-            'status' =>  ! $plan ? 'error' : 'success',
+            'status' => ! $plan ? 'error' : 'success',
             'response_code' => ! $plan ? 404 : 200,
             'plan' => $plan,
         ]);
@@ -175,9 +176,9 @@ class SavingsController extends Controller
             ]);
         }
         // elseif (($usub = Auth::user()->subscriptions()->where([
-            // ['status', '!=', 'completed'],
-            // ['status', '!=', 'withdraw'],
-            // ['status', '!=', 'closed'],
+        // ['status', '!=', 'completed'],
+        // ['status', '!=', 'withdraw'],
+        // ['status', '!=', 'closed'],
         //])->latest()->first()->days_left??0) < $plan->duration && $usub !== $plan->duration && $usub !== 0)
         // {
         //     return $this->buildResponse([
@@ -236,14 +237,23 @@ class SavingsController extends Controller
             ]);
         }
 
-        $userPlan->status = 'withdraw';
-        $userPlan->save();
+        if (config('settings.withdraw_to') === 'wallet') {
+            $userPlan->status = 'closed';
+            $userPlan->save();
+            $userPlan->user->wallet()->firstOrNew()->topup('Refunds', $userPlan->saved_amount, __("Refunds for :0.", [$userPlan->plan->title]));
+            $userPlan->user->notify(new SubStatus($userPlan, 'closed'));
+            $message = __('Your subscription for the :0 has been terminated, your savings will be withdrawn to your wallet.', [$userPlan->plan->title]);
+        } else {
+            $userPlan->status = 'withdraw';
+            $userPlan->save();
+            $message = __("You have successfully terminated your saving for the :0, your withdrawal request has been logged and will be proccessed along with the next batch.", [$userPlan->plan->title]);
+        }
 
         return $this->buildResponse([
-            'message' => "You have successfully terminated your saving for the {$userPlan->plan->title}, your withdrawal request has been logged and will be proccessed along with the next batch.",
+            'message' => $message,
             'status' => 'success',
             'response_code' => 201,
-            'data' => $userPlan
+            'data' => $userPlan,
         ]);
     }
 }

@@ -7,7 +7,6 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -65,6 +64,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array
      */
     protected $appends = [
+        'wallet_balance',
         'subscription',
         'permissions',
         'image_url',
@@ -201,27 +201,27 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         return Attribute::make(
-                get: function ($value) use ($cIso2) {
-                    // return $value;
-                    try {
-                        if (! empty($this->country->iso2 ?? $this->country['iso2']) && $value) {
-                            return (string) PhoneNumber::make($value, $this->country->iso2 ?? $this->country['iso2'])->formatE164();
-                        }
-
-                        return $value ? (string) PhoneNumber::make($value, $cIso2)->formatE164() : $value;
-                    } catch (NumberParseException | LibphonenumberNumberParseException $th) {
-                        return $value;
-                    }
-                },
-                set: function ($value) use ($cIso2) {
-                    $value = str_ireplace('-', '', $value);
+            get: function ($value) use ($cIso2) {
+                // return $value;
+                try {
                     if (! empty($this->country->iso2 ?? $this->country['iso2']) && $value) {
-                        return ['phone' => (string) PhoneNumber::make($value, $this->country->iso2 ?? $this->country['iso2'])->formatE164()];
+                        return (string) PhoneNumber::make($value, $this->country->iso2 ?? $this->country['iso2'])->formatE164();
                     }
 
-                    return ['phone' => $value ? (string) PhoneNumber::make($value, $cIso2)->formatE164() : $value];
+                    return $value ? (string) PhoneNumber::make($value, $cIso2)->formatE164() : $value;
+                } catch (NumberParseException | LibphonenumberNumberParseException $th) {
+                    return $value;
                 }
-            );
+            },
+            set: function ($value) use ($cIso2) {
+                $value = str_ireplace('-', '', $value);
+                if (! empty($this->country->iso2 ?? $this->country['iso2']) && $value) {
+                    return ['phone' => (string) PhoneNumber::make($value, $this->country->iso2 ?? $this->country['iso2'])->formatE164()];
+                }
+
+                return ['phone' => $value ? (string) PhoneNumber::make($value, $cIso2)->formatE164() : $value];
+            }
+        );
     }
 
     /**
@@ -405,5 +405,25 @@ class User extends Authenticatable implements MustVerifyEmail
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    /**
+     * Get all of the wallet transactions for the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function wallet(): HasMany
+    {
+        return $this->hasMany(Wallet::class);
+    }
+
+    public function walletBalance(): Attribute
+    {
+        $credit = Wallet::where([['type', 'credit'], ['user_id', auth()->id()]]);
+        $debit = Wallet::where([['type', 'debit'], ['user_id', auth()->id()]]);
+
+        return new Attribute(
+            get: fn () => $credit->sum('amount') - $debit->sum('amount'),
+        );
     }
 }

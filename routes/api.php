@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Controller;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AdminFoodbagsController;
@@ -15,6 +14,7 @@ use App\Http\Controllers\Admin\AdminSubscriptionController;
 use App\Http\Controllers\Admin\AdminTransactionController;
 use App\Http\Controllers\Admin\DispatchController;
 use App\Http\Controllers\Admin\UsersController;
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\FrontContentController;
 use App\Http\Controllers\FruitBayController;
 use App\Http\Controllers\NotificationController;
@@ -26,7 +26,6 @@ use App\Http\Controllers\TransactionController;
 use App\Models\Dispatch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Gate;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,36 +38,36 @@ use Illuminate\Support\Facades\Gate;
 |
 */
 
-Route::get('/get/settings', function(Request $request) {
+Route::get('/get/settings', function (Request $request) {
     return (new Controller)->buildResponse([
-        "message" => "OK",
-        "status" =>  "success",
-        "response_code" => 200,
-        "settings" => collect(config("settings"))->except(['permissions', 'messages']),
-        "fruitbay_categories" => \App\Models\FruitBayCategory::all(),
-        "foodbags" => \App\Models\FoodBag::all(),
-        "plans" => \App\Models\Plan::all(),
-        "csrf_token" => csrf_token()
+        'message' => 'OK',
+        'status' => 'success',
+        'response_code' => 200,
+        'settings' => collect(config('settings'))->except(['permissions', 'messages']),
+        'fruitbay_categories' => \App\Models\FruitBayCategory::all(),
+        'foodbags' => \App\Models\FoodBag::all(),
+        'plans' => \App\Models\Plan::all(),
+        'csrf_token' => csrf_token(),
     ]);
 });
 
-
-Route::get('/get/config', function(Request $request) {
+Route::get('/get/config', function (Request $request) {
     return (new Controller)->buildResponse([
-        "message" => "OK",
-        "status" =>  "success",
-        "response_code" => 200,
-        "config" => collect(config("settings"))->except(['permissions', 'messages']),
+        'message' => 'OK',
+        'status' => 'success',
+        'response_code' => 200,
+        'config' => collect(config('settings'))->except(['permissions', 'messages']),
     ]);
 });
 
-Route::get('/track/order/{reference?}', function($reference = null) {
+Route::get('/track/order/{reference?}', function ($reference = null) {
     $order = Dispatch::whereReference($reference)->where('status', '!=', 'delivered')->first();
+
     return (new Controller)->buildResponse([
-        "message" => $order ? "OK" : "Invalid tracking code",
-        "status" =>  $order ? "success" : "info",
-        "response_code" => $order ? 200 : 404,
-        "order" => $order ? $order->only(['id', 'last_location', 'status']) : []
+        'message' => $order ? 'OK' : 'Invalid tracking code',
+        'status' => $order ? 'success' : 'info',
+        'response_code' => $order ? 200 : 404,
+        'order' => $order ? $order->only(['id', 'last_location', 'status']) : [],
     ]);
 });
 
@@ -76,7 +75,7 @@ Route::get('/track/order/{reference?}', function($reference = null) {
 Route::controller(FrontContentController::class)
 ->prefix('front/content')
 ->name('front.content.')
-->group(function() {
+->group(function () {
     Route::get('/', 'index');
     Route::get('/list/{limit?}/{type?}', 'index');
     Route::get('/type/{type?}', 'index');
@@ -84,21 +83,20 @@ Route::controller(FrontContentController::class)
     Route::get('/{item}/{type?}', 'getContent');
 });
 
-Route::middleware(['auth:sanctum'])->group(function() {
+Route::middleware(['auth:sanctum'])->group(function () {
     /**
      * Admin Routes
      */
     Route::middleware(['admin'])
     ->prefix('admin')->name('admin.')
-    ->group(function() {
-
+    ->group(function () {
         Route::get('/charts/{type?}', [AdminController::class, 'charts'])->name('charts');
         Route::post('/config', [AdminController::class, 'saveSettings'])->name('config');
 
         Route::controller(AdminController::class)
         ->prefix('users')
         ->name('users.')
-        ->group(function() {
+        ->group(function () {
             Route::get('/', 'index');
             Route::get('/user/{id}', 'getItem');
         });
@@ -107,7 +105,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
         Route::controller(AdminFrontContentController::class)
         ->prefix('front/content')
         ->name('front.content.')
-        ->group(function() {
+        ->group(function () {
             Route::get('/', 'index');
             Route::get('/list/{limit?}/{type?}', 'index');
             Route::get('/{item}', 'getContent');
@@ -119,7 +117,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
         Route::controller(UsersController::class)
         ->prefix('users')
         ->name('users.')
-        ->group(function() {
+        ->group(function () {
             Route::get('/', 'index');
             Route::get('/list/{limit?}/{role?}', 'index');
             Route::get('/{id}', 'getUser');
@@ -131,7 +129,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
         Route::controller(DispatchController::class)
         ->prefix('dispatch')
         ->name('dispatch.')
-        ->group(function() {
+        ->group(function () {
             Route::get('/', 'index');
             Route::get('/list/{limit?}/{role?}', 'index');
             Route::get('/{id}', 'getDispatch');
@@ -144,7 +142,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
         Route::controller(AdminFruitBayController::class)
         ->prefix('fruitbay')
         ->name('fruitbay.')
-        ->group(function() {
+        ->group(function () {
             Route::get('/', 'index');
             Route::get('/limit/{limit?}', 'index');
             Route::get('/{item}', 'getItem');
@@ -156,7 +154,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
         Route::controller(AdminFruitBayCategoryController::class)
         ->prefix('categories/fruitbay')
         ->name('categories.fruitbay.')
-        ->group(function() {
+        ->group(function () {
             Route::get('/', 'index');
             Route::get('/limit/{limit?}', 'index');
             Route::get('/{item}', 'getItem');
@@ -168,7 +166,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
         Route::controller(AdminPlansController::class)
         ->prefix('savings/plans')
         ->name('savings.plan.')
-        ->group(function() {
+        ->group(function () {
             Route::get('/', 'index');
             Route::get('/limit/{limit?}', 'index');
             Route::get('/{item}', 'getItem');
@@ -180,7 +178,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
         Route::controller(AdminFoodsController::class)
         ->prefix('foodbags/foods')
         ->name('foodbags.foods')
-        ->group(function() {
+        ->group(function () {
             Route::get('/', 'index');
             Route::get('/limit/{limit?}', 'index');
             Route::get('/{item}', 'getItem');
@@ -192,7 +190,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
         Route::controller(AdminFoodbagsController::class)
         ->prefix('foodbags')
         ->name('foodbags.')
-        ->group(function() {
+        ->group(function () {
             Route::get('/', 'index');
             Route::get('/limit/{limit?}', 'index');
             Route::get('/{item}', 'getItem');
@@ -204,7 +202,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
         Route::controller(AdminTransactionController::class)
         ->prefix('transactions')
         ->name('transactions.')
-        ->group(function() {
+        ->group(function () {
             Route::get('/', 'index');
             Route::get('/limit/{limit?}', 'index');
             Route::get('/{item}', 'getItem');
@@ -216,7 +214,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
         Route::controller(AdminSubscriptionController::class)
         ->prefix('subscriptions')
         ->name('subscriptions.')
-        ->group(function() {
+        ->group(function () {
             Route::get('/', 'index');
             Route::get('/limit/{limit?}', 'index');
             Route::get('/{item}', 'getItem');
@@ -228,7 +226,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
         Route::controller(AdminOrderController::class)
         ->prefix('orders')
         ->name('orders.')
-        ->group(function() {
+        ->group(function () {
             Route::get('/', 'index');
             Route::get('/limit/{limit?}', 'index');
             Route::get('/{item}', 'getItem');
@@ -240,7 +238,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
         Route::controller(AdminSavingController::class)
         ->prefix('savings')
         ->name('savings.')
-        ->group(function() {
+        ->group(function () {
             Route::get('/', 'index');
             Route::get('/limit/{limit?}', 'index');
             Route::get('/{item}', 'getItem');
@@ -254,7 +252,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
      */
     Route::controller(FruitBayController::class)
     ->prefix('fruitbay')->name('fruitbay.')
-    ->group(function() {
+    ->group(function () {
         Route::get('/', 'index');
         Route::get('/search', 'search');
         Route::get('/category/{category?}', 'index');
@@ -268,17 +266,18 @@ Route::middleware(['auth:sanctum'])->group(function() {
      */
     Route::controller(AccountController::class)
     ->prefix('account')->name('account.')
-    ->group(function() {
+    ->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('/update', 'store')->name('update');
         Route::post('/update/field/{identifier}', 'updateField')->name('update.field');
         Route::get('/savings/get/{id?}/{planned?}', 'savings')->name('savings');
+        Route::get('/wallet', 'wallet')->name('wallet');
         Route::get('/charts/{type?}', 'charts')->name('charts');
 
         // Transactions Controller Routes
         Route::prefix('transactions')->name('transactions.')
         ->controller(TransactionController::class)
-        ->group(function() {
+        ->group(function () {
             Route::get('/{transaction_id?}', 'index')->name('index');
             Route::get('/invoice/{transaction_id?}', 'invoice')->name('invoice');
             Route::get('/limit/{limit?}/{status?}', 'transactions')->name('limited');
@@ -287,7 +286,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
         // Notifications Controller Routes
         Route::prefix('notifications')->name('notifications.')
         ->controller(NotificationController::class)
-        ->group(function() {
+        ->group(function () {
             Route::get('/{type?}', 'index')->name('index');
             Route::post('/mark/read', 'markAsRead')->name('mark.read');
         });
@@ -295,7 +294,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
         // Orders Controller Routes
         Route::prefix('orders')->name('orders.')
         ->controller(OrderController::class)
-        ->group(function() {
+        ->group(function () {
             Route::get('/dispatch/limit/{limit?}', 'dispatches');
             Route::get('/dispatch/{id?}', 'getDispatch');
             Route::get('/dispatch', 'dispatches');
@@ -305,10 +304,10 @@ Route::middleware(['auth:sanctum'])->group(function() {
         });
 
         // Savings Routes
-        Route::prefix('savings')->name('savings.')->group(function() {
+        Route::prefix('savings')->name('savings.')->group(function () {
             // Savings Controller Routes
             Route::controller(SavingsController::class)
-            ->group(function() {
+            ->group(function () {
                 Route::get('/list/{sub_id?}/{limit?}/{status?}', 'index')->name('all');
                 Route::get('/get-plans', 'plans');
                 Route::get('/get-plans/{plan}', 'getPlan');
@@ -319,7 +318,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
 
             // Savings Controller Routes
             Route::controller(SubscriptionController::class)
-            ->group(function() {
+            ->group(function () {
                 Route::get('/subscriptions/data/{plan_id?}', 'dataTable')->name('data');
                 Route::get('/subscriptions/{limit?}/{status?}', 'index');
                 Route::post('/subscriptions/{limit?}/{status?}', 'index');
@@ -334,12 +333,13 @@ Route::middleware(['auth:sanctum'])->group(function() {
      */
     Route::controller(PaymentController::class)
     ->prefix('payment')->name('payment.')
-    ->group(function() {
-        Route::post('/initialize/fruit-bay', 'initializeFruitBay')->name('initialize.fruit.bay');
-        Route::post('/initialize/savings', 'initializeSaving')->name('initialize.savings');
+    ->group(function () {
+        Route::post('/initialize/fruit-bay/{method?}', 'initializeFruitBay')->name('initialize.fruit.bay');
+        Route::post('/initialize/savings/{method?}', 'initializeSaving')->name('initialize.savings');
         Route::post('/paystack/webhook', 'paystackWebhook')->name('paystack.webhook');
         Route::delete('/terminate/transaction', 'terminateTransaction')->name('terminate.transaction');
     });
+    Route::get('/payment/verify/{type?}', [PaymentController::class, 'paystackVerify'])->name('payment.verify');
 });
 
 Route::get('/payment/paystack/verify/{type?}', [PaymentController::class, 'paystackVerify'])->name('payment.paystack.verify');
