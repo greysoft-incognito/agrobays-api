@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\FoodBagCollection;
+use App\Http\Resources\FoodBagResource;
+use App\Http\Resources\PlanCollection;
 use App\Models\FoodBag;
 use App\Models\Plan;
 use App\Models\Subscription;
@@ -77,12 +80,11 @@ class SavingsController extends Controller
     {
         $plans = Plan::all();
 
-        return $this->buildResponse([
+        return (new PlanCollection($plans))->additional([
             'message' => $plans->isEmpty() ? 'There are no saving plans for now.' : 'OK',
             'status' => $plans->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'plans' => $plans,
-        ]);
+        ])->response()->setStatusCode(200);
     }
 
     /**
@@ -146,12 +148,19 @@ class SavingsController extends Controller
             ]);
         }
 
-        return $this->buildResponse([
-            'message' => 'OK',
-            'status' => 'success',
-            'response_code' => 200,
-            $id ? 'bag' : 'bags' => $id ? $bag : $plan->bags,
-        ]);
+        if ($id) {
+            return (new FoodBagResource($bag))->additional([
+                'message' => 'OK',
+                'status' => 'success',
+                'response_code' => 200,
+            ])->response()->setStatusCode(200);
+        } else {
+            return (new FoodBagCollection($plan->bags))->additional([
+                'message' => 'OK',
+                'status' => 'success',
+                'response_code' => 200,
+            ])->response()->setStatusCode(200);
+        }
     }
 
     /**
@@ -175,18 +184,7 @@ class SavingsController extends Controller
                 'response_code' => 404,
             ]);
         }
-        // elseif (($usub = Auth::user()->subscriptions()->where([
-        // ['status', '!=', 'completed'],
-        // ['status', '!=', 'withdraw'],
-        // ['status', '!=', 'closed'],
-        //])->latest()->first()->days_left??0) < $plan->duration && $usub !== $plan->duration && $usub !== 0)
-        // {
-        //     return $this->buildResponse([
-        //         'message' => "You have a savings pattern on your current plan, you can only switch after you complete the {$plan->duration} day savings for the plan.",
-        //         'status' => 'info',
-        //         'response_code' => 406,
-        // }
-        //     ]);
+        
         elseif ($planActiveNoSavings) {
             return $this->buildResponse([
                 'message' => 'You need to make at least one savings on all your existing subscriptions before you can subscribe to another plan.',

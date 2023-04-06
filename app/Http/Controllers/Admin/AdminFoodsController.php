@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\FoodCollection;
 use App\Models\Food;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -15,7 +16,7 @@ class AdminFoodsController extends Controller
     public function index(Request $request, $limit = '15')
     {
         \Gate::authorize('usable', 'foods');
-        $query = Food::query()->with('foodbag');
+        $query = Food::query();
 
         // Search and filter columns
         if ($request->search) {
@@ -38,12 +39,11 @@ class AdminFoodsController extends Controller
 
         $items = ($limit <= 0 || $limit === 'all') ? $query->get() : $query->paginate($limit);
 
-        return $this->buildResponse([
+        return (new FoodCollection($items))->additional([
             'message' => 'OK',
             'status' => $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'items' => $items ?? [],
-        ]);
+        ])->response()->setStatusCode(200);
     }
 
     public function getItem(Request $request, $item)
@@ -64,8 +64,9 @@ class AdminFoodsController extends Controller
         \Gate::authorize('usable', 'foods');
         $validator = Validator::make($request->all(), [
             'name' => 'required|min:3|max:25', Rule::unique('foods')->ignore($item),
-            'food_bag_id' => 'required|numeric|min:1',
-            'weight' => 'required|string|min:1',
+            'weight' => 'required|integer|min:1',
+            'price' => 'required|numeric|min:1',
+            'unit' => 'required|in:kg,g,lb,oz,ml,l',
             'image' => 'nullable|mimes:jpg,jpeg,png',
             'description' => 'nullable|min:10|max:550',
         ], [], [
@@ -84,8 +85,9 @@ class AdminFoodsController extends Controller
         $food = Food::whereId($item)->first() ?? new Food;
 
         $food->name = $request->name;
-        $food->food_bag_id = $request->food_bag_id;
-        $food->weight = $request->weight ?? $food->weight ?? '';
+        $food->weight = $request->weight ?? $food->weight ?? 1;
+        $food->unit = $request->unit ?? $food->unit ?? 'kg';
+        $food->price = $request->price ?? $food->price ?? 1;
         $food->image = $request->image ?? $food->image ?? '';
         $food->description = $request->description;
 

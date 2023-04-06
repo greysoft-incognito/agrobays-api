@@ -194,6 +194,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('/', 'index');
             Route::get('/limit/{limit?}', 'index');
             Route::get('/{item}', 'getItem');
+            Route::put('/{item}/foods', 'putFood');
+            Route::delete('/{item}/foods/{food}', 'removeFood');
             Route::post('/{item?}', 'store');
             Route::delete('/{item?}', 'destroy');
         });

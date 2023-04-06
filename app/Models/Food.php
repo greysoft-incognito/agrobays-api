@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Food extends Model
 {
@@ -28,7 +29,7 @@ class Food extends Model
     protected function imageUrl(): Attribute
     {
         $image = $this->image
-            ? img($this->image, 'banner', 'medium')
+            ? img($this->image, 'banner', 'medium-square')
             : 'https://loremflickr.com/320/320/'.urlencode($this->name ?? 'fruit').'?random='.rand();
 
         return Attribute::make(
@@ -37,12 +38,12 @@ class Food extends Model
     }
 
     /**
-     * Get the foodbag that owns the food
+     * Get the foodbags containing the food
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function foodbag(): BelongsTo
+    public function foodbags(): BelongsToMany
     {
-        return $this->belongsTo(FoodBag::class, 'food_bag_id');
+        return $this->belongsToMany(FoodBag::class, 'food_bag_items', 'food_id', 'food_bag_id');
     }
 }

@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class WalletResource extends JsonResource
+class PlanResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,12 +16,17 @@ class WalletResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'slug' => $this->slug,
+            'title' => $this->title,
+            'description' => $this->description,
+            'duration' => $this->duration,
+            'icon' => $this->icon,
             'amount' => $this->amount,
-            'source' => $this->source,
-            'detail' => $this->detail,
-            'type' => $this->type,
-            'reference' => $this->reference,
-            'created_at' => $this->created_at ? $this->created_at->format('Y-m-d H:i A') : null,
+            'status' => $this->status,
+            'image_url' => $this->image_url,
+            'food_bags' => new FoodBagCollection($this->food_bag),
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
     }
 

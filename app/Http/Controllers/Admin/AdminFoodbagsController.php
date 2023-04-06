@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\FoodBagCollection;
+use App\Http\Resources\FoodBagResource;
+use App\Http\Resources\FoodResource;
+use App\Models\Food;
 use App\Models\FoodBag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -35,27 +39,102 @@ class AdminFoodbagsController extends Controller
             }
         }
 
+        if ($request->with_foods) {
+            $query->with('foods');
+        }
+
         $items = ($limit <= 0 || $limit === 'all') ? $query->get() : $query->paginate($limit);
 
-        return $this->buildResponse([
+        return (new FoodBagCollection($items))->additional([
             'message' => 'OK',
             'status' => $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'items' => $items ?? [],
-        ]);
+        ])->response()->setStatusCode(200);
     }
 
     public function getItem(Request $request, $item)
     {
         \Gate::authorize('usable', 'foodbags');
+
         $bag = FoodBag::find($item);
 
-        return $this->buildResponse([
-            'message' => ! $bag ? 'The requested foodbag no longer exists' : 'OK',
-            'status' => ! $bag ? 'info' : 'success',
-            'response_code' => ! $bag ? 404 : 200,
-            'bag' => $bag ?? (object) [],
+        if ($request->with_foods && $bag) {
+            $bag->load('foods');
+        }
+
+        return (new FoodBagResource($bag))->additional([
+            'message' => !$bag ? 'The requested foodbag no longer exists' : 'OK',
+            'status' => !$bag ? 'info' : 'success',
+            'response_code' => !$bag ? 404 : 200,
+        ])->response()->setStatusCode(!$bag ? 404 : 200);
+    }
+
+    /**
+     * Put food into a foodbag
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function putFood(Request $request, $item)
+    {
+        \Gate::authorize('usable', 'foodbags');
+        $validator = Validator::make($request->all(), [
+            'food_id' => 'required|numeric|exists:food,id|unique:food_bag_items,food_id,NULL,id,food_bag_id,' . $item,
+            'quantity' => 'nullable|numeric|min:1|max:100',
+            'is_active' => 'nullable|boolean',
+        ], [
+            'food_id.exists' => 'The selected food is invalid',
+            'food_id.unique' => 'The selected food is already in the foodbag',
+        ], [
+            'food_id' => 'Food',
         ]);
+
+        if ($validator->fails()) {
+            return $this->buildResponse([
+                'message' => $validator->errors()->first(),
+                'status' => 'error',
+                'response_code' => 422,
+                'errors' => $validator->errors(),
+            ]);
+        }
+
+        $food = Food::find($request->food_id);
+        $bag = FoodBag::find($item);
+        $bag->foods()->attach($food->id, [
+            'quantity' => $request->quantity ?? 1,
+            'is_active' => $request->is_active ?? true,
+        ]);
+
+        return (new FoodBagResource($bag))->additional([
+            'food' => new FoodResource($food),
+            'message' => __(':0 has been added to ":1"', [$food->name, $bag->title]),
+            'status' => 'success',
+            'response_code' => 202,
+        ])->response()->setStatusCode(202);
+    }
+
+    public function removeFood(Request $request, $item, Food $food)
+    {
+        \Gate::authorize('usable', 'foodbags');
+        $bag = FoodBag::findOrfail($item);
+
+        // Check if the food is still in the bag
+        $bag->load('foods');
+        if (!$bag->foods->contains($food->id)) {
+            return $this->buildResponse([
+                'message' => __(':0 is no longer in ":1"', [$food->name, $bag->title]),
+                'status' => 'info',
+                'response_code' => 422,
+                'bag' => $bag,
+            ]);
+        }
+        $bag->foods()->detach($food);
+
+
+        return (new FoodBagResource($bag))->additional([
+            'message' => __(':0 has been removed from ":1"', [$food->name, $bag->title]),
+            'status' => 'success',
+            'response_code' => 202,
+        ])->response()->setStatusCode(202);
     }
 
     public function store(Request $request, $item = null)
@@ -85,12 +164,11 @@ class AdminFoodbagsController extends Controller
         $bag->description = $request->description;
         $bag->save();
 
-        return $this->buildResponse([
+        return (new FoodBagResource($bag))->additional([
             'message' => $item ? Str::of($bag->title)->append(' Has been updated!') : 'New foodbag has been created.',
             'status' => 'success',
-            'response_code' => 200,
-            'bag' => $bag,
-        ]);
+            'response_code' => $item ? 202 : 201,
+        ])->response()->setStatusCode($item ? 202 : 201);
     }
 
     /**
