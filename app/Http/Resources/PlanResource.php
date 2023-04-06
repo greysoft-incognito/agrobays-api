@@ -34,7 +34,7 @@ class PlanResource extends JsonResource
     {
         return ['api' => [
             'name' => env('APP_NAME', 'Agrobays API'),
-            'version' => env('APP_VERSION', '1.0.6-beta'),
+            'version' => env('API_VERSION', '1.0.6-beta'),
             'author' => 'Greysoft Limited',
             'updated' => now(),
         ]];

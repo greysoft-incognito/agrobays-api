@@ -23,7 +23,7 @@ Route::get('/', function () {
     return [
         'Welcome to Agrobays API v1' => [
             'name' => 'Agrobays',
-            'version' => env('APP_VERSION', '1.0.6-beta'),
+            'version' => env('API_VERSION', '1.0.6-beta'),
             'author' => 'Greysoft Limited',
             'updated' => now(),
         ],

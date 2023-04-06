@@ -35,7 +35,7 @@ class Controller extends BaseController
         $response = [
             'api' => [
                 'name' => 'Agrobays',
-                'version' => env('APP_VERSION', '1.0.6-beta'),
+                'version' => env('API_VERSION', '1.0.6-beta'),
                 'author' => 'Greysoft Limited',
                 'updated' => now(),
             ],
