@@ -103,6 +103,8 @@ class AdminFoodbagsController extends Controller
             'quantity' => $request->quantity ?? 1,
             'is_active' => $request->is_active ?? true,
         ]);
+        // Get a new instance of the foodbag
+        $bag = FoodBag::find($item);
 
         return (new FoodBagResource($bag))->additional([
             'food' => new FoodResource($food),
