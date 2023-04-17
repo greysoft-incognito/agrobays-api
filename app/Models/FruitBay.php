@@ -70,4 +70,12 @@ class FruitBay extends Model
     {
         return $this->morphOne(Transaction::class, 'transactable');
     }
+
+    /**
+     * Get the fruit bay item's category.
+     */
+    public function category(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(FruitBayCategory::class, 'fruit_bay_category_id');
+    }
 }
