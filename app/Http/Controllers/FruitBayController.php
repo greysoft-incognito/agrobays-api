@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\FruitbayCategoryCollection;
+use App\Http\Resources\FruitbayCategoryResource;
 use App\Http\Resources\FruitbayCollection;
 use App\Http\Resources\FruitbayResource;
 use App\Models\FruitBay;
@@ -42,7 +44,7 @@ class FruitBayController extends Controller
             'message' => $items->isEmpty() ? 'The fruit bay is empty for now' : 'OK',
             'status' => $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'category' => $get_cat ? $getCategory : null,
+            'category' => $get_cat ? new FruitbayCategoryResource($getCategory) : null,
         ])->response()->setStatusCode(200);
     }
 
@@ -92,8 +94,7 @@ class FruitBayController extends Controller
             'message' => ! $item ? 'The requested item no longer exists' : 'OK',
             'status' => ! $item ? 'error' : 'success',
             'response_code' => ! $item ? 404 : 200,
-            'item' => $item,
-            ])->response()->setStatusCode($item ? 404 : 200);
+            ])->response()->setStatusCode(!$item ? 404 : 200);
     }
 
     /**
@@ -155,11 +156,10 @@ class FruitBayController extends Controller
 
         $items = FruitBayCategory::get();
 
-        return $this->buildResponse([
+        return (new FruitbayCategoryCollection($items))->additional([
             'message' => $items->isEmpty() ? 'There are no categories for now.' : 'OK',
             'status' => $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'items' => $items,
-        ]);
+        ])->response()->setStatusCode(200);
     }
 }
