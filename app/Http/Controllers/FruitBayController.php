@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\FruitbayCollection;
+use App\Http\Resources\FruitbayResource;
 use App\Models\FruitBay;
 use App\Models\FruitBayCategory;
 use Illuminate\Http\Request;
@@ -36,12 +38,12 @@ class FruitBayController extends Controller
             $items = FruitBay::paginate(12);
         }
 
-        return $this->buildResponse([
+        return (new FruitbayCollection($items))->additional([
             'message' => $items->isEmpty() ? 'The fruit bay is empty for now' : 'OK',
             'status' => $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'items' => $items,
-        ]);
+            'category' => $get_cat ? $getCategory : null,
+        ])->response()->setStatusCode(200);
     }
 
     /**
@@ -63,14 +65,14 @@ class FruitBayController extends Controller
             $search = $query->get();
         }
 
-        return $this->buildResponse([
+
+        return (new FruitbayCollection($search))->additional([
             'message' => $search->isEmpty() ? "\"{$request->q}\" not found." : 'OK',
             'status' => $search->isEmpty() ? 'info' : 'success',
-            'response_code' => $search->count() ? 200 : 404,
+            'response_code' => 200,
             'ignore' => [404],
             'found' => $search->count(),
-            'items' => $search->count() ? $search : [],
-        ]);
+        ])->response()->setStatusCode(200);
     }
 
     /**
@@ -84,12 +86,12 @@ class FruitBayController extends Controller
     {
         $item = FruitBay::whereId($item)->orWhere(['slug' => $item])->first();
 
-        return $this->buildResponse([
+        return (new FruitbayResource($item))->additional([
             'message' => ! $item ? 'The requested item no longer exists' : 'OK',
             'status' => ! $item ? 'error' : 'success',
             'response_code' => ! $item ? 404 : 200,
             'item' => $item,
-        ]);
+            ])->response()->setStatusCode($item ? 404 : 200);
     }
 
     /**
