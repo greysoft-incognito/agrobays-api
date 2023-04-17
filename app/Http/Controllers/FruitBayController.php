@@ -56,6 +56,8 @@ class FruitBayController extends Controller
     public function search(Request $request)
     {
         $query = FruitBay::where('name', 'like', "%{$request->q}%");
+        $query->with('category');
+
         if (in_array($request->paginate, [true, 'true'], true)) {
             $search = $query->paginate($request->limit ?? 15);
         } else {
@@ -84,6 +86,7 @@ class FruitBayController extends Controller
     public function getItem(Request $request, $item)
     {
         $item = FruitBay::whereId($item)->orWhere(['slug' => $item])->first();
+        $item->load('category');
 
         return (new FruitbayResource($item))->additional([
             'message' => ! $item ? 'The requested item no longer exists' : 'OK',
