@@ -33,9 +33,9 @@ class FruitBayController extends Controller
                     'response_code' => 404,
                 ]);
             }
-            $items = FruitBay::where(['fruit_bay_category_id' => $getCategory->id])->paginate(12);
+            $items = FruitBay::with('category')->where(['fruit_bay_category_id' => $getCategory->id])->paginate(12);
         } else {
-            $items = FruitBay::paginate(12);
+            $items = FruitBay::with('category')->paginate(12);
         }
 
         return (new FruitbayCollection($items))->additional([
@@ -64,7 +64,6 @@ class FruitBayController extends Controller
             }
             $search = $query->get();
         }
-
 
         return (new FruitbayCollection($search))->additional([
             'message' => $search->isEmpty() ? "\"{$request->q}\" not found." : 'OK',
