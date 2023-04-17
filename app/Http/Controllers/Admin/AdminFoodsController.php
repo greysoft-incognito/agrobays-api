@@ -64,7 +64,7 @@ class AdminFoodsController extends Controller
         \Gate::authorize('usable', 'foods');
         $validator = Validator::make($request->all(), [
             'name' => 'required|min:3|max:25', Rule::unique('foods')->ignore($item),
-            'weight' => 'required|min:1',
+            'weight' => 'numeric|required|min:1',
             'price' => 'required|numeric|min:1',
             'unit' => 'required|in:kg,g,lb,oz,ml,l',
             'image' => 'nullable|mimes:jpg,jpeg,png',
