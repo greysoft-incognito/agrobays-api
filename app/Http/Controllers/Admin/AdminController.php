@@ -30,7 +30,7 @@ class AdminController extends Controller
                     'all' => Subscription::count(),
                     'pending' => Subscription::whereStatus('pending')->count(),
                     'active' => Subscription::whereStatus('active')->count(),
-                    'completed' => Subscription::whereStatus('completed')->count(),
+                    'completed' => Subscription::whereStatus('complete')->count(),
                     'withdraw' => Subscription::whereStatus('withdraw')->count(),
                     'closed' => Subscription::whereStatus('closed')->count(),
                 ],

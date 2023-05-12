@@ -196,9 +196,6 @@ class User extends Authenticatable implements MustVerifyEmail
     public function phone(): Attribute
     {
         $cIso2 = 'NG';
-        if (($ipInpfo = \Illuminate\Support\Facades\Http::get('ipinfo.io/'.request()->ip().'?token='.config('settings.ipinfo_access_token')))->status() === 200) {
-            $cIso2 = $ipInpfo->json('country') ?? $cIso2;
-        }
 
         return Attribute::make(
             get: function ($value) use ($cIso2) {
@@ -214,6 +211,9 @@ class User extends Authenticatable implements MustVerifyEmail
                 }
             },
             set: function ($value) use ($cIso2) {
+                if (($ipInpfo = \Illuminate\Support\Facades\Http::get('ipinfo.io/'.request()->ip().'?token='.config('settings.ipinfo_access_token')))->status() === 200) {
+                    $cIso2 = $ipInpfo->json('country') ?? $cIso2;
+                }
                 $value = str_ireplace('-', '', $value);
                 if (! empty($this->country->iso2 ?? $this->country['iso2']) && $value) {
                     return ['phone' => (string) PhoneNumber::make($value, $this->country->iso2 ?? $this->country['iso2'])->formatE164()];

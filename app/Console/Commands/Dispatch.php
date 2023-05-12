@@ -32,36 +32,32 @@ class Dispatch extends Command
      */
     public function handle()
     {
-        $orders = Order::whereRelation('transaction', 'status', 'complete')->doesntHave('dispatch')->get();
         $savings = Subscription::where([
             ['status', '!=', 'closed'],
         ])->whereRelation('allSavings', 'status', 'complete')->with(['user', 'bag'])
-          ->doesntHave('dispatch')->get()->filter(fn ($s) => $s->days_left <= 0);
-
+            ->doesntHave('dispatch')->get()->filter(fn ($s) => $s->days_left <= 0);
         if ($savings->isNotEmpty()) {
-            $savings->chunk(300, function ($items) {
-                $items->each(function ($saving) {
-                    $dispatch = new ModelsDispatch;
-                    $dispatch->code = mt_rand(100000, 999999);
-                    $dispatch->reference = config('settings.trx_prefix', 'AGB-').Str::random(12);
-                    $saving->dispatch()->save($dispatch);
-                    $saving->user->notify(new Dispatched($saving->dispatch));
-                    $this->info("Saving with ID of {$saving->id} has been dispatced for proccessing.");
-                });
+            $savings->each(function ($saving) {
+                $dispatch = new ModelsDispatch;
+                $dispatch->code = mt_rand(100000, 999999);
+                $dispatch->reference = config('settings.trx_prefix', 'AGB-') . Str::random(12);
+                $saving->dispatch()->save($dispatch);
+                $saving->user->notify(new Dispatched($saving->dispatch));
+                $this->info("Saving with ID of {$saving->id} has been dispatced for proccessing.");
             });
         } else {
             $this->error('No savings to dispatch.');
         }
+
+        $orders = Order::whereRelation('transaction', 'status', 'complete')->doesntHave('dispatch')->get();
         if ($orders->isNotEmpty()) {
-            $orders->chunk(300, function ($items) {
-                $items->each(function ($order) {
-                    $dispatch = new ModelsDispatch;
-                    $dispatch->code = mt_rand(100000, 999999);
-                    $dispatch->reference = config('settings.trx_prefix', 'AGB-').Str::random(12);
-                    $order->dispatch()->save($dispatch);
-                    $order->user->notify(new Dispatched($order->dispatch));
-                    $this->info("Order with ID of {$order->id} has been dispatced for proccessing.");
-                });
+            $orders->each(function ($order) {
+                $dispatch = new ModelsDispatch;
+                $dispatch->code = mt_rand(100000, 999999);
+                $dispatch->reference = config('settings.trx_prefix', 'AGB-') . Str::random(12);
+                $order->dispatch()->save($dispatch);
+                $order->user->notify(new Dispatched($order->dispatch));
+                $this->info("Order with ID of {$order->id} has been dispatced for proccessing.");
             });
         } else {
             $this->error('No orders to dispatch.');

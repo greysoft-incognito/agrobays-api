@@ -98,7 +98,7 @@ class SavingsController extends Controller
     {
         if ($plan === 'user') {
             $plan = Auth::user()->subscriptions()->where([
-                ['status', '!=', 'completed'],
+                ['status', '!=', 'complete'],
                 ['status', '!=', 'withdraw'],
                 ['status', '!=', 'closed'],
             ])->latest()->first()->plan;
@@ -126,7 +126,7 @@ class SavingsController extends Controller
     {
         if ($plan === 'user') {
             $plan = Auth::user()->subscriptions()->where([
-                ['status', '!=', 'completed'],
+                ['status', '!=', 'complete'],
                 ['status', '!=', 'withdraw'],
                 ['status', '!=', 'closed'],
             ])->latest()->first()->plan;
@@ -184,7 +184,7 @@ class SavingsController extends Controller
                 'response_code' => 404,
             ]);
         }
-        
+
         elseif ($planActiveNoSavings) {
             return $this->buildResponse([
                 'message' => 'You need to make at least one savings on all your existing subscriptions before you can subscribe to another plan.',

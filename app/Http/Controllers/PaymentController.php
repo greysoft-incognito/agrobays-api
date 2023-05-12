@@ -445,7 +445,7 @@ class PaymentController extends Controller
     public function makeSaving(Request $request)
     {
         $subscription = Auth::user()->subscriptions()->where([
-            ['status', '!=', 'completed'],
+            ['status', '!=', 'complete'],
             ['status', '!=', 'withdraw'],
             ['status', '!=', 'closed'],
         ])->latest()->first();
@@ -487,7 +487,7 @@ class PaymentController extends Controller
             $subscription->status = $subscription->days_left >= 1 ? 'active' : 'complete';
             $subscription->save();
             $subscription = Auth::user()->subscriptions()->where([
-                ['status', '!=', 'completed'],
+                ['status', '!=', 'complete'],
                 ['status', '!=', 'withdraw'],
                 ['status', '!=', 'closed'],
             ])->latest()->first();

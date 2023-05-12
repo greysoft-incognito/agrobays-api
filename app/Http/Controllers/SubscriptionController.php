@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\SubscriptionCollection;
+use App\Http\Resources\SubscriptionResource;
 use App\Models\FoodBag;
 use App\Models\Subscription;
 use Carbon\CarbonImmutable as Carbon;
@@ -42,14 +44,13 @@ class SubscriptionController extends Controller
 
         $msg = $subscriptions->isEmpty() ? 'You do not have an active subscription' : 'OK';
         $_period = $subscriptions->isNotEmpty()
-            ? ($subscriptions->last()->created_at->format('Y/m/d').'-'.$subscriptions->first()->created_at->format('Y/m/d'))
+            ? ($subscriptions->last()->created_at->format('Y/m/d') . '-' . $subscriptions->first()->created_at->format('Y/m/d'))
             : '';
 
-        return $this->buildResponse([
+        return (new SubscriptionCollection($subscriptions))->additional([
             'message' => $msg,
             'status' => $subscriptions->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'subscriptions' => $subscriptions ?? [],
             'period' => $p ? urldecode($p) : $_period,
         ]);
     }
@@ -83,7 +84,7 @@ class SubscriptionController extends Controller
             })
             ->addColumn('action', function (Subscription $item) {
                 return implode([
-                    Html::el('a', ['onclick' => "hotLink('/savings/plan/".$item->id."')", 'href' => 'javascript:void(0)'])->title(__('View Savings'))->setHtml(Html::el('i')->class('ri-eye-fill ri-2x text-primary')),
+                    Html::el('a', ['onclick' => "hotLink('/savings/plan/" . $item->id . "')", 'href' => 'javascript:void(0)'])->title(__('View Savings'))->setHtml(Html::el('i')->class('ri-eye-fill ri-2x text-primary')),
                 ]);
             })
             ->removeColumn('updated_at')->toJson();
@@ -107,14 +108,14 @@ class SubscriptionController extends Controller
     {
         $subscription = Auth::user()->subscriptions()->find($subscription_id);
 
-        $msg = ! $subscription ? 'The subscription you requested no longer exists.' : 'OK';
+        $msg = !$subscription ? 'The subscription you requested no longer exists.' : 'OK';
 
-        return $this->buildResponse([
-            'message' => $msg,
-            'status' => $subscription ? 'success' : 'error',
-            'response_code' => $subscription ? 200 : 404,
-            'subscription' => $subscription ?? [],
-        ]);
+        return (new SubscriptionResource($subscription))
+            ->additional([
+                'message' => $msg,
+                'status' => $subscription ? 'success' : 'error',
+                'response_code' => $subscription ? 200 : 404,
+            ]);
     }
 
     /**
@@ -134,14 +135,14 @@ class SubscriptionController extends Controller
             $code = 404;
         } else {
             $sub = Auth::user()->subscriptions()->where([
-                ['status', '!=', 'completed'],
+                ['status', '!=', 'complete'],
                 ['status', '!=', 'withdraw'],
                 ['status', '!=', 'closed'],
             ])->latest()->first();
             $ids = $sub ? $sub->plan->bags()->get('id')->values()->toArray() : [];
         }
 
-        if ($sub && (! $bag || ! in_array($bag->id, Collect($ids[0] ?? [])->filter(fn ($k) => ! empty($k))->values()->toArray()))) {
+        if ($sub && (!$bag || !in_array($bag->id, Collect($ids[0] ?? [])->filter(fn ($k) => !empty($k))->values()->toArray()))) {
             $msg = 'The requested food bag no longer exists.';
             $status = 'error';
             $code = 404;
@@ -155,11 +156,12 @@ class SubscriptionController extends Controller
             $plan->save();
         }
 
-        return $this->buildResponse([
-            'message' => $msg ?? "You have successfully activated the {$bag->title} food bag",
-            'status' => $status ?? 'success',
-            'response_code' => $code ?? 202,
-            'data' => $bag ?? null,
-        ]);
+        return (new SubscriptionResource($sub))
+            ->additional([
+                'message' => $msg ?? "You have successfully activated the {$bag->title} food bag",
+                'status' => $status ?? 'success',
+                'response_code' => $code ?? 202,
+                'bag' => $bag ?? null,
+            ]);
     }
 }

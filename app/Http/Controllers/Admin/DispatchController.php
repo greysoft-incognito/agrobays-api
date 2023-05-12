@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\DispatchCollection;
+use App\Http\Resources\DispatchResource;
 use App\Models\Dispatch;
 use App\Notifications\Dispatched;
 use Illuminate\Http\Request;
@@ -54,12 +56,11 @@ class DispatchController extends Controller
 
         $items = ($limit <= 0 || $limit === 'all') ? $query->get() : $query->paginate($limit);
 
-        return $this->buildResponse([
+        return (new DispatchCollection($items))->additional([
             'message' => 'OK',
             'status' => $items->isEmpty() ? 'info' : 'success',
             'response_code' => 200,
-            'items' => $items ?? [],
-        ]);
+        ])->response()->setStatusCode(200);
     }
 
     /**
