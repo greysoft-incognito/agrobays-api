@@ -51,6 +51,9 @@ class PaymentController extends Controller
 
             $method = $request->get('method', $method);
             $due = round(($subscription->plan->amount / $subscription->plan->duration) * $request->days, 2);
+
+            $fees = ($subscription->bag->fees / $subscription->plan->duration) * $request->days;
+
             try {
                 $reference = config('settings.trx_prefix', 'AGB-').Str::random(12);
                 if ($request->get('method', $method) === 'wallet') {
@@ -62,7 +65,7 @@ class PaymentController extends Controller
 
                         $request->user()->wallet()->create([
                             'reference' => $reference,
-                            'amount' => $due,
+                            'amount' => round($due + $fees, 2),
                             'type' => 'debit',
                             'source' => 'Savings',
                             'detail' => __('Payment for :0 subscription', [$subscription->plan->title]),
@@ -78,6 +81,10 @@ class PaymentController extends Controller
                     $paystack = new Paystack(env('PAYSTACK_SECRET_KEY'));
 
                     $real_due = $due * 100;
+
+                    if ($fees > 0) {
+                        $real_due = round($real_due + ($fees * 100));
+                    }
 
                     // Dont initialize paystack for inline transaction
                     if ($request->inline) {
@@ -117,7 +124,8 @@ class PaymentController extends Controller
                     'method' => ucfirst($method),
                     'status' => 'pending',
                     'amount' => $due,
-                    'due' => $due,
+                    'fees' => $fees,
+                    'due' => $due + $fees,
                 ]);
             } catch (ApiException | \InvalidArgumentException | \ErrorException $e) {
                 return $this->buildResponse([
@@ -310,16 +318,19 @@ class PaymentController extends Controller
             if ('success' === $tranx->data->status) {
                 $transaction = Transaction::where('reference', $request->reference)->where('status', 'pending')->first();
                 if ($request->get('method', $method) === 'wallet') {
-                    $tranx->data->amount = $transaction->amount * 100;
+                    $tranx->data->amount = $transaction?->amount * 100;
                 }
                 throw_if(! $transaction, \ErrorException::class, 'Transaction not found.');
-                if (($transactable = $transaction->transactable) instanceof Saving) {
-                    $processSaving = $this->processSaving($request, $tranx, $transactable);
-                } elseif (($transactable = $transaction->transactable) instanceof Order) {
-                    $processSaving = $this->processOrder($request, $tranx, $transactable);
+                if ($transaction->transactable instanceof Saving) {
+                    $processSaving = $this->processSaving($request, $tranx, $transaction);
+                } elseif ($transaction->transactable instanceof Order) {
+                    $processSaving = $this->processOrder($request, $tranx, $transaction);
                     $set_type = 'order';
                 }
-                extract($processSaving);
+                $msg = $processSaving['msg'] ?? 'OK';
+                $code = $processSaving['code'] ?? 200;
+                $status = $processSaving['status'] ?? 'success';
+
             }
         } catch (ApiException | \InvalidArgumentException | \ErrorException $e) {
             $payload = $e instanceof ApiException ? $e->getResponseObject() : [];
@@ -337,8 +348,8 @@ class PaymentController extends Controller
             'message' => $msg ?? 'OK',
             'status' => $status ?? 'success',
             'response_code' => $code ?? 200,
-            'payload' => $tranx ?? [],
-            $set_type => $subscription ?? $order ?? [],
+            'payload' => $tranx ?? new \stdClass(),
+            $set_type => $processSaving['data'] ?? new \stdClass(),
         ]);
     }
 
@@ -347,15 +358,17 @@ class PaymentController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  object  $tranx                          Transaction data returned by paystack
-     * @param  object  $saving                          Transaction saving retrieved from transaction
+     * @param  \App\Models\Transaction  $transaction    Transaction model
      * @return array
      */
-    public function processSaving(Request $request, $tranx, $saving = null): array
+    public function processSaving(Request $request, $tranx, Transaction $transaction = null): array
     {
         $msg = 'An unrecoverable error occured';
         $code = 422;
         $status = 'error';
         $subscription = [];
+        $saving = $transaction->transactable;
+
         // $saving = Saving::where('payment_ref', $request->reference)->where('status', 'pending')->first();
         if ($saving && $saving->status === 'pending') {
             $subscription = User::find($saving->user_id)->subscriptions()->where('id', $saving->subscription_id)->first();
@@ -375,6 +388,7 @@ class PaymentController extends Controller
                     $plantitle = $subscription->plan->title.(stripos($subscription->plan->title, 'plan') !== false ? '' : ' plan');
                     $msg = "You have successfully made {$saving->days} day(s) savings of {$_amount} for the {$plantitle}, you now have only {$_left} days left to save up.";
                 }
+                $subscription->fees_paid += $transaction->fees;
                 $subscription->save();
             } else {
                 $saving->status = 'rejected';
@@ -392,7 +406,7 @@ class PaymentController extends Controller
             'code' => $code,
             'status' => $status,
             'payload' => $tranx ?? [],
-            'subscription' => $subscription,
+            'data' => $subscription,
         ];
     }
 
@@ -401,14 +415,16 @@ class PaymentController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  object  $tranx                          Transaction data returned by paystack
-     * @param  object  $order                          Transaction order retrieved from transaction
+     * @param  \App\Models\Transaction  $transaction    Transaction model
      * @return array
      */
-    public function processOrder(Request $request, $tranx, $order = null): array
+    public function processOrder(Request $request, $tranx, Transaction $transaction = null): array
     {
         $msg = 'An unrecoverable error occured';
         $code = 422;
         $status = 'error';
+        $order = $transaction->transactable;
+
         if ($order && $order->payment === 'pending') {
             $trns = $order->transaction;
             if ('success' === $tranx->data->status) {
@@ -431,7 +447,7 @@ class PaymentController extends Controller
             'code' => $code,
             'status' => $status,
             'payload' => $tranx,
-            'order' => $order,
+            'data' => $order,
         ];
     }
 

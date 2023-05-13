@@ -20,7 +20,16 @@ class Subscription extends Model
         'total_left',
         'saved_amount',
         'left_amount',
+        'fees_split',
         'items',
+    ];
+
+    protected $casts = [
+        'fees_paid' => 'float',
+    ];
+
+    protected $attributes = [
+        'fees_paid' => 0.00,
     ];
 
     /**
@@ -126,6 +135,14 @@ class Subscription extends Model
 
         return Attribute::make(
             get: fn () => $total
+        );
+    }
+
+    public function feesSplit(): Attribute
+    {
+        // Divide the fees by the number of days left
+        return Attribute::make(
+            get: fn () => $this->bag->fees && $this->paid_days > 0 ? ($this->bag->fees / $this->paid_days) : 0
         );
     }
 

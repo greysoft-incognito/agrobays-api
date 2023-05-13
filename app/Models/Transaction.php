@@ -23,6 +23,7 @@ class Transaction extends Model
         'status',
         'method',
         'amount',
+        'fees',
         'due',
     ];
 

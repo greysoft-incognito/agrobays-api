@@ -208,7 +208,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::put('/{item}/foods', 'putFood');
             Route::delete('/{item}/foods/{food}', 'removeFood');
             Route::post('/{item?}', 'store');
-            Route::delete('/{item?}', 'destroy');
+            Route::delete('/{item}', 'destroy');
         });
 
         // Admin Transactions
@@ -333,8 +333,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::controller(SubscriptionController::class)
             ->group(function () {
                 Route::get('/subscriptions/data/{plan_id?}', 'dataTable')->name('data');
-                Route::get('/subscriptions/{limit?}/{status?}', 'index');
-                Route::post('/subscriptions/{limit?}/{status?}', 'index');
+                Route::match(['GET', 'POST'], '/subscriptions/{limit?}/{status?}', 'index');
                 Route::post('/update-bag/subscription/{subscription_id}/bag/{id}', 'updateBag');
                 Route::get('/subscription/{subscription_id?}', 'subscription');
             });

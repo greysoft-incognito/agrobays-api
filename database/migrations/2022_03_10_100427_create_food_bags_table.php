@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('food_bags', function (Blueprint $table) {
             $table->id();
             $table->foreignId('plan_id')->constrained('plans')->onUpdate('cascade')->onDelete('cascade');
+            $table->decimal('fees')->default(0.00);
             $table->string('title')->nullable();
             $table->text('description')->nullable();
             $table->timestamps();

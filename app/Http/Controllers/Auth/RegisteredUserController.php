@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use DeviceDetector\DeviceDetector;
 use Illuminate\Auth\Events\Registered;
@@ -83,12 +84,11 @@ class RegisteredUserController extends Controller
         Auth::loginUsingId($user_id);
         $user = Auth::user();
 
-        return $this->buildResponse([
-            'message' => 'Registration was successful',
+        return (new UserResource($user))->additional([
+            'message' => 'Registration was successfull',
             'status' => 'success',
-            'response_code' => 201,
+            'status_code' => 201,
             'token' => $token,
-            'user' => $user,
-        ]);
+        ])->response()->setStatusCode(201);
     }
 }

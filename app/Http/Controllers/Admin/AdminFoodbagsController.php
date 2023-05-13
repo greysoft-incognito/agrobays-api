@@ -146,6 +146,7 @@ class AdminFoodbagsController extends Controller
             'title' => ['required', 'min:3', 'max:25', Rule::unique('food_bags')->ignore($item)],
             'plan_id' => 'required|numeric',
             'description' => 'nullable|min:10|max:550',
+            'fees' => 'nullable|min:0|numeric',
         ], [], [
             'plan_id' => 'Plan',
         ]);
@@ -161,6 +162,7 @@ class AdminFoodbagsController extends Controller
 
         $bag = FoodBag::find($item) ?? new FoodBag;
 
+        $bag->fees = $request->fees;
         $bag->title = $request->title;
         $bag->plan_id = $request->plan_id;
         $bag->description = $request->description;

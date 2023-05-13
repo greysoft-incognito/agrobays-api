@@ -17,6 +17,7 @@ class FoodBagResource extends JsonResource
         return [
             'id' => $this->id,
             'plan_id' => $this->plan_id,
+            'fees' => $this->fees,
             'title' => $this->title,
             'description' => $this->description,
             'image' => $this->image,

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('plan_id')->constrained('plans')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('food_bag_id')->constrained('food_bags')->onUpdate('cascade')->onDelete('cascade');
+            $table->decimal('fees_paid')->default(0.00);
             $table->enum('status', ['pending', 'active', 'complete', 'withdraw', 'closed'])->default('pending');
             $table->timestamps();
         });

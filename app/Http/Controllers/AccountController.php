@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actions\Greysoft\Charts;
+use App\Http\Resources\UserResource;
 use App\Http\Resources\WalletCollection;
 use App\Models\Saving;
 use App\Models\User;
@@ -50,12 +51,11 @@ class AccountController extends Controller
             $user->load('dispatches');
         }
 
-        return $this->buildResponse([
+        return (new UserResource($user))->additional([
             'message' => 'OK',
             'status' => 'success',
             'response_code' => 200,
-            'user' => $user,
-        ]);
+        ])->response()->setStatusCode(200);
     }
 
     /**
@@ -67,7 +67,7 @@ class AccountController extends Controller
      */
     public function savings(Auth $auth, $id = null, $planned = false)
     {
-        if (! $id || $planned === 'planned') {
+        if (!$id || $planned === 'planned') {
             $model = Saving::where('user_id', Auth::id());
             if ($planned !== false) {
                 $model->where('subscription_id', $id);
@@ -88,7 +88,7 @@ class AccountController extends Controller
 
         $savings = $auth::user()->savings();
 
-        if ($id && ! ($saving = $savings->find($id))) {
+        if ($id && !($saving = $savings->find($id))) {
             return $this->buildResponse([
                 'message' => 'The requested saving no longer exists.',
                 'status' => 'error',
@@ -111,7 +111,7 @@ class AccountController extends Controller
 
         $updated = [];
         $user = User::find(Auth::id());
-        if (! $user) {
+        if (!$user) {
             return $this->buildResponse([
                 'message' => 'The requested user does not exists',
                 'status' => 'error',
@@ -135,7 +135,7 @@ class AccountController extends Controller
                 $vals .= '|min:8|confirmed';
             }
             if (is_array($filled[$field])) {
-                return [$field.'.*' => 'required'];
+                return [$field . '.*' => 'required'];
             }
 
             return [$field => "required|$vals"];
@@ -157,13 +157,14 @@ class AccountController extends Controller
         }
 
         $fields = $fields->filter(function ($k) {
-            return ! Str::contains($k, '_confirmation');
+            return !Str::contains($k, '_confirmation');
         });
 
         if ($request->hasFile('image')) {
             $user->image && Storage::delete($user->image ?? '');
             $user->image = $request->file('image')->storeAs(
-                'public/uploads/images', rand().'_'.rand().'.'.$request->file('image')->extension()
+                'public/uploads/images',
+                rand() . '_' . rand() . '.' . $request->file('image')->extension()
             );
         } else {
             foreach ($fields as $_field) {
@@ -180,12 +181,12 @@ class AccountController extends Controller
 
         $user->save();
 
-        return $this->buildResponse(collect($updated)->merge([
+        return (new UserResource($user))->additional([
             'message' => "Your profile $identifier has been successfully updated.",
             'status' => 'success',
             'response_code' => 200,
-            'user' => $user,
-        ])->all(), $identifier == 'image' ? ['image' => $user->image_url] : null);
+            'image' => $user->image_url,
+        ])->response()->setStatusCode(200);
     }
 
     /**
@@ -197,7 +198,7 @@ class AccountController extends Controller
     public function store(Request $request)
     {
         $user = User::find(Auth::id());
-        if (! $user) {
+        if (!$user) {
             return $this->buildResponse([
                 'message' => 'The requested user no longer exists',
                 'status' => 'error',
@@ -254,18 +255,18 @@ class AccountController extends Controller
         if ($request->hasFile('image')) {
             $user->image && Storage::delete($user->image ?? '');
             $user->image = $request->file('image')->storeAs(
-                'public/uploads/images', rand().'_'.rand().'.'.$request->file('image')->extension()
+                'public/uploads/images',
+                rand() . '_' . rand() . '.' . $request->file('image')->extension()
             );
         }
 
         $user->save();
 
-        return $this->buildResponse([
+        return (new UserResource($user))->additional([
             'message' => 'Your profile has been successfully updated.',
             'status' => 'success',
             'response_code' => 200,
-            'user' => $user,
-        ]);
+        ])->response()->setStatusCode(200);
     }
 
     /**

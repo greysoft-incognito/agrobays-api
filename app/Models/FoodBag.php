@@ -14,6 +14,21 @@ class FoodBag extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'fees',
+        'title',
+        'description',
+        'plan_id',
+    ];
+
+    protected $casts = [
+        'fees' => 'float',
+    ];
+
+    protected $attributes = [
+        'fees' => 0.00,
+    ];
+
     /**
      * Get the foods that belong to the foodbag
      *
