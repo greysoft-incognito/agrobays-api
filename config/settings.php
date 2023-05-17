@@ -23,6 +23,7 @@ return [
     'token_lifespan' => 30,
     'shipping_fee' => 5000,
     'paid_shipping' => false,
+    'feedback_system' => true,
     'withdraw_to' => 'wallet',
     'frontend_link' => 'http://localhost:8080',
     'payment_verify_url' => env('PAYMENT_VERIFY_URL', 'http://localhost:8080/payment/verify'),

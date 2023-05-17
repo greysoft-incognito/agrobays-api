@@ -37,6 +37,13 @@ class AccountController extends Controller
         'bank',
     ];
 
+    public function ping()
+    {
+        return response()->json([
+            'message' => 'PONG',
+        ], 200);
+    }
+
     /**
      * Get the currently logged user.
      *

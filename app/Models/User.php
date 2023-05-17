@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Events\ActionComplete;
 use App\Notifications\SendCode;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -51,6 +52,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
         'phone_verified_at' => 'datetime',
         'last_attempt' => 'datetime',
+        'last_seen' => 'datetime',
         'address' => 'collection',
         'country' => 'collection',
         'state' => 'collection',
@@ -99,7 +101,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return Attribute::make(
             get: function ($value, $attributes) {
-                if (! $value || ! is_string($value) || is_null($val = json_decode($value))) {
+                if (!$value || !is_string($value) || is_null($val = json_decode($value))) {
                     return [
                         'shipping' => '',
                         'home' => '',
@@ -124,7 +126,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return Attribute::make(
             get: function ($value, $attributes) {
-                if (! $value || ! is_string($value) || is_null($val = json_decode($value))) {
+                if (!$value || !is_string($value) || is_null($val = json_decode($value))) {
                     return [
                         'name' => '',
                         'iso2' => '',
@@ -151,7 +153,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return Attribute::make(
             get: function ($value, $attributes) {
-                if (! $value || ! is_string($value) || is_null($val = json_decode($value))) {
+                if (!$value || !is_string($value) || is_null($val = json_decode($value))) {
                     return [
                         'name' => '',
                         'iso2' => '',
@@ -176,7 +178,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return Attribute::make(
             get: function ($value, $attributes) {
-                if (! $value || ! is_string($value) || is_null($val = json_decode($value))) {
+                if (!$value || !is_string($value) || is_null($val = json_decode($value))) {
                     return [
                         'name' => '',
                     ];
@@ -203,7 +205,7 @@ class User extends Authenticatable implements MustVerifyEmail
             get: function ($value) use ($cIso2) {
                 // return $value;
                 try {
-                    if (! empty($this->country->iso2 ?? $this->country['iso2']) && $value) {
+                    if (!empty($this->country->iso2 ?? $this->country['iso2']) && $value) {
                         return (string) PhoneNumber::make($value, $this->country->iso2 ?? $this->country['iso2'])->formatE164();
                     }
 
@@ -213,11 +215,11 @@ class User extends Authenticatable implements MustVerifyEmail
                 }
             },
             set: function ($value) use ($cIso2) {
-                if (($ipInpfo = \Illuminate\Support\Facades\Http::get('ipinfo.io/'.request()->ip().'?token='.config('settings.ipinfo_access_token')))->status() === 200) {
+                if (($ipInpfo = \Illuminate\Support\Facades\Http::get('ipinfo.io/' . request()->ip() . '?token=' . config('settings.ipinfo_access_token')))->status() === 200) {
                     $cIso2 = $ipInpfo->json('country') ?? $cIso2;
                 }
                 $value = str_ireplace('-', '', $value);
-                if (! empty($this->country->iso2 ?? $this->country['iso2']) && $value) {
+                if (!empty($this->country->iso2 ?? $this->country['iso2']) && $value) {
                     return ['phone' => (string) PhoneNumber::make($value, $this->country->iso2 ?? $this->country['iso2'])->formatE164()];
                 }
 
@@ -243,8 +245,8 @@ class User extends Authenticatable implements MustVerifyEmail
     public function fullname(): Attribute
     {
         $name = isset($this->firstname) ? ucfirst($this->firstname) : '';
-        $name .= isset($this->lastname) ? ' '.ucfirst($this->lastname) : '';
-        $name .= ! isset($this->lastname) && ! isset($this->firstname) && isset($this->username) ? ucfirst($this->username) : '';
+        $name .= isset($this->lastname) ? ' ' . ucfirst($this->lastname) : '';
+        $name .= !isset($this->lastname) && !isset($this->firstname) && isset($this->username) ? ucfirst($this->username) : '';
 
         return new Attribute(
             get: fn () => $name,
@@ -378,6 +380,29 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Return the user's online status
+     *
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
+     */
+    public function onlinestatus(): Attribute
+    {
+        return new Attribute(
+            get: fn () => ($this->last_seen ?? now()->subMinutes(6))->gt(now()->subMinutes(5)) ? 'online' : 'offline',
+        );
+    }
+
+    public function scopeIsOnline($query, $is_online = true)
+    {
+        if ($is_online) {
+            // Check if the user's last last_seen was less than 5 minutes ago
+            $query->where('last_seen', '>=', now()->subMinutes(5));
+        } else {
+            // Check if the user's last last_seen was more than 5 minutes ago
+            $query->where('last_seen', '<', now()->subMinutes(5));
+        }
+    }
+
+    /**
      * Get the subscription associated with the User
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
@@ -437,5 +462,26 @@ class User extends Authenticatable implements MustVerifyEmail
         return new Attribute(
             get: fn () => $credit->sum('amount') - $debit->sum('amount'),
         );
+    }
+
+    public function refresh(): void
+    {
+        broadcast(new ActionComplete([
+            'type' => 'refresh',
+            'mode' => 'automatic',
+            'data' => $this,
+            'updated' => [
+                'user' => true,
+                'savings' => true,
+                'subscriptions' => true,
+                'transactions' => true,
+                'settings' => true,
+                'charts' => true,
+                'wallet' => true,
+                'orders' => true,
+                'auth' => true
+            ],
+            'created_at' => now(),
+        ], $this));
     }
 }

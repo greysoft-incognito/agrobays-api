@@ -31,6 +31,7 @@ class AdminController extends Controller
         // "trx_prefix" => "string",
         'verify_email' => 'boolean',
         'verify_phone' => 'boolean',
+        'feedback_system' => 'boolean',
     ];
 
     public function charts($type = 'pie')

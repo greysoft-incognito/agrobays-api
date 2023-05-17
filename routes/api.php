@@ -298,6 +298,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('/wallet', 'wallet')->name('wallet');
             Route::get('/charts/{type?}', 'charts')->name('charts');
 
+            Route::match(['get', 'delete'], '/ping', 'ping')->name('ping');
+
             // Transactions Controller Routes
             Route::prefix('transactions')->name('transactions.')
                 ->controller(TransactionController::class)
