@@ -19,6 +19,7 @@ class FruitbayResource extends JsonResource
             'slug' => $this->slug,
             'bag' => $this->bag,
             'name' => $this->name,
+            'fees' => $this->fees,
             'price' => $this->price,
             'image_url' => $this->image_url,
             'description' => $this->description,

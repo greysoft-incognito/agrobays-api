@@ -94,7 +94,7 @@ class FruitBayController extends Controller
             'message' => ! $item ? 'The requested item no longer exists' : 'OK',
             'status' => ! $item ? 'error' : 'success',
             'response_code' => ! $item ? 404 : 200,
-            ])->response()->setStatusCode(!$item ? 404 : 200);
+        ])->response()->setStatusCode(! $item ? 404 : 200);
     }
 
     /**

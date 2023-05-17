@@ -11,11 +11,16 @@ class Order extends Model
     use HasFactory;
 
     protected $casts = [
-        'items' => 'array',
+        'tax' => 'float',
+        'due' => 'float',
+        'fees' => 'float',
+        'items' => 'collection',
+        'amount' => 'float',
     ];
 
     protected $fillable = [
         'due',
+        'fees',
         'items',
         'status',
         'amount',
@@ -23,6 +28,14 @@ class Order extends Model
         'payment',
         'reference',
         'delivery_method',
+    ];
+
+    protected $attributes = [
+        'tax' => 0.00,
+        'due' => 0.00,
+        'fees' => 0.00,
+        'amount' => 0.00,
+        'delivery_method' => 'delivery',
     ];
 
     /**

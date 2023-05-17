@@ -11,6 +11,28 @@ use Illuminate\Support\Facades\Validator;
 
 class AdminController extends Controller
 {
+    protected $configs = [
+        'contact_phone' => 'string',
+        'contact_email' => 'string',
+        'contact_address' => 'string',
+        'office_address' => 'string',
+        'currency' => 'string',
+        'currency_symbol' => 'string',
+        // "default_banner" => "string",
+        'frontend_link' => 'string',
+        'prefered_notification_channels' => 'array',
+        'site_name' => 'string',
+        'withdraw_to' => 'string',
+        'slack_debug' => 'boolean',
+        'slack_logger' => 'boolean',
+        'token_lifespan' => 'integer',
+        'shipping_fee' => 'integer',
+        'paid_shipping' => 'boolean',
+        // "trx_prefix" => "string",
+        'verify_email' => 'boolean',
+        'verify_phone' => 'boolean',
+    ];
+
     public function charts($type = 'pie')
     {
         \Gate::authorize('usable', 'dashboard');
@@ -55,23 +77,18 @@ class AdminController extends Controller
         }
 
         collect($request->config)->map(function ($config, $key) {
-            if (in_array($key, [
-                'contact_address',
-                'office_address',
-                'currency',
-                'currency_symbol',
-                // "default_banner",
-                'frontend_link',
-                'prefered_notification_channels',
-                'site_name',
-                'withdraw_to',
-                'slack_debug',
-                'slack_logger',
-                'token_lifespan',
-                // "trx_prefix",
-                'verify_email',
-                'verify_phone',
-            ])) {
+            if (in_array($key, array_keys($this->configs))) {
+                // Cast the value to the correct type
+                if ($this->configs[$key] === 'boolean') {
+                    $config = (bool) $config;
+                } elseif ($this->configs[$key] === 'integer') {
+                    $config = (int) $config;
+                } elseif ($this->configs[$key] === 'array') {
+                    $config = (array) $config;
+                } elseif ($this->configs[$key] === 'string') {
+                    $config = (string) $config;
+                }
+                // Write the config to the file
                 Config::write("settings.{$key}", $config);
             }
         });

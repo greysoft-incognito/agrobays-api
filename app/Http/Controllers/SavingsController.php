@@ -183,9 +183,7 @@ class SavingsController extends Controller
                 'status' => 'error',
                 'response_code' => 404,
             ]);
-        }
-
-        elseif ($planActiveNoSavings) {
+        } elseif ($planActiveNoSavings) {
             return $this->buildResponse([
                 'message' => 'You need to make at least one savings on all your existing subscriptions before you can subscribe to another plan.',
                 'status' => 'info',
@@ -238,13 +236,13 @@ class SavingsController extends Controller
         if (config('settings.withdraw_to') === 'wallet') {
             $userPlan->status = 'closed';
             $userPlan->save();
-            $userPlan->user->wallet()->firstOrNew()->topup('Refunds', $userPlan->saved_amount, __("Refunds for :0.", [$userPlan->plan->title]));
+            $userPlan->user->wallet()->firstOrNew()->topup('Refunds', $userPlan->saved_amount, __('Refunds for :0.', [$userPlan->plan->title]));
             $userPlan->user->notify(new SubStatus($userPlan, 'closed'));
             $message = __('Your subscription for the :0 has been terminated, your savings will be withdrawn to your wallet.', [$userPlan->plan->title]);
         } else {
             $userPlan->status = 'withdraw';
             $userPlan->save();
-            $message = __("You have successfully terminated your saving for the :0, your withdrawal request has been logged and will be proccessed along with the next batch.", [$userPlan->plan->title]);
+            $message = __('You have successfully terminated your saving for the :0, your withdrawal request has been logged and will be proccessed along with the next batch.', [$userPlan->plan->title]);
         }
 
         return $this->buildResponse([

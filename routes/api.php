@@ -13,13 +13,16 @@ use App\Http\Controllers\Admin\AdminSavingController;
 use App\Http\Controllers\Admin\AdminSubscriptionController;
 use App\Http\Controllers\Admin\AdminTransactionController;
 use App\Http\Controllers\Admin\DispatchController;
+use App\Http\Controllers\Admin\FeedbackController as AdminFeedbackController;
 use App\Http\Controllers\Admin\UsersController;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\FrontContentController;
 use App\Http\Controllers\FruitBayController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PaymentMethodAuthoriseController;
 use App\Http\Controllers\SavingsController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TransactionController;
@@ -38,8 +41,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::apiResource('feedbacks', FeedbackController::class)
+    ->middleware('auth:sanctum')->except(['destroy']);
+
 Route::get('/check/update/{version}', function (Request $request, $version) {
     $has_update = version_compare($version, env('APP_VERSION'), '<');
+
     return (new Controller)->buildResponse([
         'message' => $has_update ? 'New version available' : 'No update available',
         'link' => $has_update ? env('APP_UPDATE_URL') : null,
@@ -84,276 +91,283 @@ Route::get('/track/order/{reference?}', function ($reference = null) {
 
 // Front Content
 Route::controller(FrontContentController::class)
-->prefix('front/content')
-->name('front.content.')
-->group(function () {
-    Route::get('/', 'index');
-    Route::get('/list/{limit?}/{type?}', 'index');
-    Route::get('/type/{type?}', 'index');
-    Route::get('/type/{type?}/limit/{limit?}', 'index');
-    Route::get('/{item}/{type?}', 'getContent');
-});
+    ->prefix('front/content')
+    ->name('front.content.')
+    ->group(function () {
+        Route::get('/', 'index');
+        Route::get('/list/{limit?}/{type?}', 'index');
+        Route::get('/type/{type?}', 'index');
+        Route::get('/type/{type?}/limit/{limit?}', 'index');
+        Route::get('/{item}/{type?}', 'getContent');
+    });
 
 Route::middleware(['auth:sanctum'])->group(function () {
     /**
      * Admin Routes
      */
     Route::middleware(['admin'])
-    ->prefix('admin')->name('admin.')
-    ->group(function () {
-        Route::get('/charts/{type?}', [AdminController::class, 'charts'])->name('charts');
-        Route::post('/config', [AdminController::class, 'saveSettings'])->name('config');
-
-        Route::controller(AdminController::class)
-        ->prefix('users')
-        ->name('users.')
+        ->prefix('admin')->name('admin.')
         ->group(function () {
-            Route::get('/', 'index');
-            Route::get('/user/{id}', 'getItem');
-        });
+            Route::get('/charts/{type?}', [AdminController::class, 'charts'])->name('charts');
+            Route::post('/config', [AdminController::class, 'saveSettings'])->name('config');
 
-        // Admin Front Content
-        Route::controller(AdminFrontContentController::class)
-        ->prefix('front/content')
-        ->name('front.content.')
-        ->group(function () {
-            Route::get('/', 'index');
-            Route::get('/list/{limit?}/{type?}', 'index');
-            Route::get('/{item}', 'getContent');
-            Route::post('/{item?}', 'store');
-            Route::delete('/{item?}', 'destroy');
-        });
+            Route::put('feedbacks/status', [AdminFeedbackController::class, 'status'])->name('feedbacks.status');
+            Route::apiResource('feedbacks', AdminFeedbackController::class)
+                ->middleware('auth:sanctum');
 
-        // Admin Users
-        Route::controller(UsersController::class)
-        ->prefix('users')
-        ->name('users.')
-        ->group(function () {
-            Route::get('/', 'index');
-            Route::get('/list/{limit?}/{role?}', 'index');
-            Route::get('/{id}', 'getUser');
-            Route::post('/{id?}', 'store');
-            Route::delete('/{id?}', 'destroy');
-        });
+            Route::controller(AdminController::class)
+                ->prefix('users')
+                ->name('users.')
+                ->group(function () {
+                    Route::get('/', 'index');
+                    Route::get('/user/{id}', 'getItem');
+                });
 
-        // Admin Dispatch
-        Route::controller(DispatchController::class)
-        ->prefix('dispatch')
-        ->name('dispatch.')
-        ->group(function () {
-            Route::get('/', 'index');
-            Route::get('/list/{limit?}/{role?}', 'index');
-            Route::get('/{id}', 'getDispatch');
-            Route::post('/update-status', 'setStatus');
-            Route::post('/{id?}', 'store');
-            Route::delete('/{id?}', 'destroy');
-        });
+            // Admin Front Content
+            Route::controller(AdminFrontContentController::class)
+                ->prefix('front/content')
+                ->name('front.content.')
+                ->group(function () {
+                    Route::get('/', 'index');
+                    Route::get('/list/{limit?}/{type?}', 'index');
+                    Route::get('/{item}', 'getContent');
+                    Route::post('/{item?}', 'store');
+                    Route::delete('/{item?}', 'destroy');
+                });
 
-        // Load admin fruitbay
-        Route::controller(AdminFruitBayController::class)
-        ->prefix('fruitbay')
-        ->name('fruitbay.')
-        ->group(function () {
-            Route::get('/', 'index');
-            Route::get('/limit/{limit?}', 'index');
-            Route::get('/{item}', 'getItem');
-            Route::post('/{item?}', 'store');
-            Route::delete('/{item?}', 'destroy');
-        });
+            // Admin Users
+            Route::controller(UsersController::class)
+                ->prefix('users')
+                ->name('users.')
+                ->group(function () {
+                    Route::get('/', 'index');
+                    Route::get('/list/{limit?}/{role?}', 'index');
+                    Route::get('/{id}', 'getUser');
+                    Route::post('/{id?}', 'store');
+                    Route::delete('/{id?}', 'destroy');
+                });
 
-        // Admin food bay category
-        Route::controller(AdminFruitBayCategoryController::class)
-        ->prefix('categories/fruitbay')
-        ->name('categories.fruitbay.')
-        ->group(function () {
-            Route::get('/', 'index');
-            Route::get('/limit/{limit?}', 'index');
-            Route::get('/{item}', 'getItem');
-            Route::post('/{item?}', 'store');
-            Route::delete('/{item?}', 'destroy');
-        });
+            // Admin Dispatch
+            Route::controller(DispatchController::class)
+                ->prefix('dispatch')
+                ->name('dispatch.')
+                ->group(function () {
+                    Route::get('/', 'index');
+                    Route::get('/list/{limit?}/{role?}', 'index');
+                    Route::get('/{id}', 'getDispatch');
+                    Route::post('/update-status', 'setStatus');
+                    Route::post('/{id?}', 'store');
+                    Route::delete('/{id?}', 'destroy');
+                });
 
-        // Admin Plans
-        Route::controller(AdminPlansController::class)
-        ->prefix('savings/plans')
-        ->name('savings.plan.')
-        ->group(function () {
-            Route::get('/', 'index');
-            Route::get('/limit/{limit?}', 'index');
-            Route::get('/{item}', 'getItem');
-            Route::post('/{item?}', 'store');
-            Route::delete('/{item?}', 'destroy');
-        });
+            // Load admin fruitbay
+            Route::controller(AdminFruitBayController::class)
+                ->prefix('fruitbay')
+                ->name('fruitbay.')
+                ->group(function () {
+                    Route::get('/', 'index');
+                    Route::get('/limit/{limit?}', 'index');
+                    Route::get('/{item}', 'getItem');
+                    Route::post('/{item?}', 'store');
+                    Route::delete('/{item?}', 'destroy');
+                });
 
-        // Admin Foods
-        Route::controller(AdminFoodsController::class)
-        ->prefix('foodbags/foods')
-        ->name('foodbags.foods')
-        ->group(function () {
-            Route::get('/', 'index');
-            Route::get('/limit/{limit?}', 'index');
-            Route::get('/{item}', 'getItem');
-            Route::post('/{item?}', 'store');
-            Route::delete('/{item?}', 'destroy');
-        });
+            // Admin food bay category
+            Route::controller(AdminFruitBayCategoryController::class)
+                ->prefix('categories/fruitbay')
+                ->name('categories.fruitbay.')
+                ->group(function () {
+                    Route::get('/', 'index');
+                    Route::get('/limit/{limit?}', 'index');
+                    Route::get('/{item}', 'getItem');
+                    Route::post('/{item?}', 'store');
+                    Route::delete('/{item?}', 'destroy');
+                });
 
-        // Admin Food Bags
-        Route::controller(AdminFoodbagsController::class)
-        ->prefix('foodbags')
-        ->name('foodbags.')
-        ->group(function () {
-            Route::get('/', 'index');
-            Route::get('/limit/{limit?}', 'index');
-            Route::get('/{item}', 'getItem');
-            Route::put('/{item}/foods', 'putFood');
-            Route::delete('/{item}/foods/{food}', 'removeFood');
-            Route::post('/{item?}', 'store');
-            Route::delete('/{item}', 'destroy');
-        });
+            // Admin Plans
+            Route::controller(AdminPlansController::class)
+                ->prefix('savings/plans')
+                ->name('savings.plan.')
+                ->group(function () {
+                    Route::get('/', 'index');
+                    Route::get('/limit/{limit?}', 'index');
+                    Route::get('/{item}', 'getItem');
+                    Route::post('/{item?}', 'store');
+                    Route::delete('/{item?}', 'destroy');
+                });
 
-        // Admin Transactions
-        Route::controller(AdminTransactionController::class)
-        ->prefix('transactions')
-        ->name('transactions.')
-        ->group(function () {
-            Route::get('/', 'index');
-            Route::get('/limit/{limit?}', 'index');
-            Route::get('/{item}', 'getItem');
-            Route::post('/{item?}', 'store');
-            Route::delete('/{item?}', 'destroy');
-        });
+            // Admin Foods
+            Route::controller(AdminFoodsController::class)
+                ->prefix('foodbags/foods')
+                ->name('foodbags.foods')
+                ->group(function () {
+                    Route::get('/', 'index');
+                    Route::get('/limit/{limit?}', 'index');
+                    Route::get('/{item}', 'getItem');
+                    Route::post('/{item?}', 'store');
+                    Route::delete('/{item?}', 'destroy');
+                });
 
-        // Admin Subscriptions
-        Route::controller(AdminSubscriptionController::class)
-        ->prefix('subscriptions')
-        ->name('subscriptions.')
-        ->group(function () {
-            Route::get('/', 'index');
-            Route::get('/limit/{limit?}', 'index');
-            Route::get('/{item}', 'getItem');
-            Route::post('/{item?}', 'store');
-            Route::delete('/{item?}', 'destroy');
-        });
+            // Admin Food Bags
+            Route::controller(AdminFoodbagsController::class)
+                ->prefix('foodbags')
+                ->name('foodbags.')
+                ->group(function () {
+                    Route::get('/', 'index');
+                    Route::get('/limit/{limit?}', 'index');
+                    Route::get('/{item}', 'getItem');
+                    Route::put('/{item}/foods', 'putFood');
+                    Route::delete('/{item}/foods/{food}', 'removeFood');
+                    Route::post('/{item?}', 'store');
+                    Route::delete('/{item}', 'destroy');
+                });
 
-        // Admin Orders
-        Route::controller(AdminOrderController::class)
-        ->prefix('orders')
-        ->name('orders.')
-        ->group(function () {
-            Route::get('/', 'index');
-            Route::get('/limit/{limit?}', 'index');
-            Route::get('/{item}', 'getItem');
-            Route::post('/{item?}', 'store');
-            Route::delete('/{item?}', 'destroy');
-        });
+            // Admin Transactions
+            Route::controller(AdminTransactionController::class)
+                ->prefix('transactions')
+                ->name('transactions.')
+                ->group(function () {
+                    Route::get('/', 'index');
+                    Route::get('/limit/{limit?}', 'index');
+                    Route::get('/{item}', 'getItem');
+                    Route::post('/{item?}', 'store');
+                    Route::delete('/{item?}', 'destroy');
+                });
 
-        // Admin Savings
-        Route::controller(AdminSavingController::class)
-        ->prefix('savings')
-        ->name('savings.')
-        ->group(function () {
-            Route::get('/', 'index');
-            Route::get('/limit/{limit?}', 'index');
-            Route::get('/{item}', 'getItem');
-            Route::post('/{item?}', 'store');
-            Route::delete('/{item?}', 'destroy');
+            // Admin Subscriptions
+            Route::controller(AdminSubscriptionController::class)
+                ->prefix('subscriptions')
+                ->name('subscriptions.')
+                ->group(function () {
+                    Route::get('/', 'index');
+                    Route::get('/limit/{limit?}', 'index');
+                    Route::get('/{item}', 'getItem');
+                    Route::post('/{item?}', 'store');
+                    Route::delete('/{item?}', 'destroy');
+                });
+
+            // Admin Orders
+            Route::controller(AdminOrderController::class)
+                ->prefix('orders')
+                ->name('orders.')
+                ->group(function () {
+                    Route::get('/', 'index');
+                    Route::get('/limit/{limit?}', 'index');
+                    Route::get('/{item}', 'getItem');
+                    Route::post('/{item?}', 'store');
+                    Route::delete('/{item?}', 'destroy');
+                });
+
+            // Admin Savings
+            Route::controller(AdminSavingController::class)
+                ->prefix('savings')
+                ->name('savings.')
+                ->group(function () {
+                    Route::get('/', 'index');
+                    Route::get('/limit/{limit?}', 'index');
+                    Route::get('/{item}', 'getItem');
+                    Route::post('/{item?}', 'store');
+                    Route::delete('/{item?}', 'destroy');
+                });
         });
-    });
 
     /**
      * Fruitbay Routes
      */
     Route::controller(FruitBayController::class)
-    ->prefix('fruitbay')->name('fruitbay.')
-    ->group(function () {
-        Route::get('/', 'index');
-        Route::get('/search', 'search');
-        Route::get('/category/{category?}', 'index');
-        Route::get('/categories/{item?}', 'categories');
-        Route::get('/{item}', 'getItem');
-        Route::post('/{item}/buy', 'buyItem');
-    });
+        ->prefix('fruitbay')->name('fruitbay.')
+        ->group(function () {
+            Route::get('/', 'index');
+            Route::get('/search', 'search');
+            Route::get('/category/{category?}', 'index');
+            Route::get('/categories/{item?}', 'categories');
+            Route::get('/{item}', 'getItem');
+            Route::post('/{item}/buy', 'buyItem');
+        });
 
     /**
      * Account Routes
      */
     Route::controller(AccountController::class)
-    ->prefix('account')->name('account.')
-    ->group(function () {
-        Route::get('/', 'index')->name('index');
-        Route::post('/update', 'store')->name('update');
-        Route::post('/update/field/{identifier}', 'updateField')->name('update.field');
-        Route::get('/savings/get/{id?}/{planned?}', 'savings')->name('savings');
-        Route::get('/wallet', 'wallet')->name('wallet');
-        Route::get('/charts/{type?}', 'charts')->name('charts');
-
-        // Transactions Controller Routes
-        Route::prefix('transactions')->name('transactions.')
-        ->controller(TransactionController::class)
+        ->prefix('account')->name('account.')
         ->group(function () {
-            Route::get('/{transaction_id?}', 'index')->name('index');
-            Route::get('/invoice/{transaction_id?}', 'invoice')->name('invoice');
-            Route::get('/limit/{limit?}/{status?}', 'transactions')->name('limited');
-        });
+            Route::get('/', 'index')->name('index');
+            Route::post('/update', 'store')->name('update');
+            Route::post('/update/field/{identifier}', 'updateField')->name('update.field');
+            Route::get('/savings/get/{id?}/{planned?}', 'savings')->name('savings');
+            Route::get('/wallet', 'wallet')->name('wallet');
+            Route::get('/charts/{type?}', 'charts')->name('charts');
 
-        // Notifications Controller Routes
-        Route::prefix('notifications')->name('notifications.')
-        ->controller(NotificationController::class)
-        ->group(function () {
-            Route::get('/{type?}', 'index')->name('index');
-            Route::post('/mark/read', 'markAsRead')->name('mark.read');
-        });
+            // Transactions Controller Routes
+            Route::prefix('transactions')->name('transactions.')
+                ->controller(TransactionController::class)
+                ->group(function () {
+                    Route::get('/{transaction_id?}', 'index')->name('index');
+                    Route::get('/invoice/{transaction_id?}', 'invoice')->name('invoice');
+                    Route::get('/limit/{limit?}/{status?}', 'transactions')->name('limited');
+                });
 
-        // Orders Controller Routes
-        Route::prefix('orders')->name('orders.')
-        ->controller(OrderController::class)
-        ->group(function () {
-            Route::get('/dispatch/limit/{limit?}', 'dispatches');
-            Route::get('/dispatch/{id?}', 'getDispatch');
-            Route::get('/dispatch', 'dispatches');
-            Route::get('/limit/{limit?}', 'index');
-            Route::get('/{id}', 'getOrder');
-            Route::get('/', 'index');
-        });
+            // Notifications Controller Routes
+            Route::prefix('notifications')->name('notifications.')
+                ->controller(NotificationController::class)
+                ->group(function () {
+                    Route::get('/{type?}', 'index')->name('index');
+                    Route::post('/mark/read', 'markAsRead')->name('mark.read');
+                });
 
-        // Savings Routes
-        Route::prefix('savings')->name('savings.')->group(function () {
-            // Savings Controller Routes
-            Route::controller(SavingsController::class)
-            ->group(function () {
-                Route::get('/list/{sub_id?}/{limit?}/{status?}', 'index')->name('all');
-                Route::get('/get-plans', 'plans');
-                Route::get('/get-plans/{plan}', 'getPlan');
-                Route::get('/get-plans/{plan}/foodbags/{id?}', 'getBags');
-                Route::post('/activate-plan/{id}', 'store');
-                Route::post('/terminate-plan', 'terminate');
+            // Orders Controller Routes
+            Route::prefix('orders')->name('orders.')
+                ->controller(OrderController::class)
+                ->group(function () {
+                    Route::get('/dispatch/limit/{limit?}', 'dispatches');
+                    Route::get('/dispatch/{id?}', 'getDispatch');
+                    Route::get('/dispatch', 'dispatches');
+                    Route::get('/limit/{limit?}', 'index');
+                    Route::get('/{id}', 'getOrder');
+                    Route::get('/', 'index');
+                });
+
+            // Savings Routes
+            Route::prefix('savings')->name('savings.')->group(function () {
+                // Savings Controller Routes
+                Route::controller(SavingsController::class)
+                    ->group(function () {
+                        Route::get('/list/{sub_id?}/{limit?}/{status?}', 'index')->name('all');
+                        Route::get('/get-plans', 'plans');
+                        Route::get('/get-plans/{plan}', 'getPlan');
+                        Route::get('/get-plans/{plan}/foodbags/{id?}', 'getBags');
+                        Route::post('/activate-plan/{id}', 'store');
+                        Route::post('/terminate-plan', 'terminate');
+                    });
+
+                // Savings Controller Routes
+                Route::controller(SubscriptionController::class)
+                    ->group(function () {
+                        Route::get('/subscriptions/data/{plan_id?}', 'dataTable')->name('data');
+                        Route::match(['GET', 'POST'], '/subscriptions/{limit?}/{status?}', 'index');
+                        Route::post('/update-bag/subscription/{subscription_id}/bag/{id}', 'updateBag');
+                        Route::get('/subscription/{subscription_id?}', 'subscription');
+                        Route::post('/subscription/{subscription}/automate', 'automate');
+                    });
             });
-
-            // Savings Controller Routes
-            Route::controller(SubscriptionController::class)
-            ->group(function () {
-                Route::get('/subscriptions/data/{plan_id?}', 'dataTable')->name('data');
-                Route::match(['GET', 'POST'], '/subscriptions/{limit?}/{status?}', 'index');
-                Route::post('/update-bag/subscription/{subscription_id}/bag/{id}', 'updateBag');
-                Route::get('/subscription/{subscription_id?}', 'subscription');
-            });
         });
-    });
 
     /**
      * Payment Routes
      */
     Route::controller(PaymentController::class)
-    ->prefix('payment')->name('payment.')
-    ->group(function () {
-        Route::post('/initialize/fruit-bay/{method?}', 'initializeFruitBay')->name('initialize.fruit.bay');
-        Route::post('/initialize/savings/{method?}', 'initializeSaving')->name('initialize.savings');
-        Route::post('/paystack/webhook', 'paystackWebhook')->name('paystack.webhook');
-        Route::delete('/terminate/transaction', 'terminateTransaction')->name('terminate.transaction');
-    });
+        ->prefix('payment')->name('payment.')
+        ->group(function () {
+            Route::post('/authorize/{method?}', [PaymentMethodAuthoriseController::class, 'store'])->name('autorize.method');
+            Route::get('/authorize/{method}/verify', [PaymentMethodAuthoriseController::class, 'show'])->name('autorize.method.verify');
+            Route::post('/initialize/fruit-bay/{method?}', 'initializeFruitBay')->name('initialize.fruit.bay');
+            Route::post('/initialize/savings/{method?}', 'initializeSaving')->name('initialize.savings');
+            Route::post('/paystack/webhook', 'paystackWebhook')->name('paystack.webhook');
+            Route::delete('/terminate/transaction', 'terminateTransaction')->name('terminate.transaction');
+        });
     Route::get('/payment/verify/{type?}', [PaymentController::class, 'paystackVerify'])->name('payment.verify');
 });
 
 Route::get('/payment/paystack/verify/{type?}', [PaymentController::class, 'paystackVerify'])->name('payment.paystack.verify');
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

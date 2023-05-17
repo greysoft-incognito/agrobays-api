@@ -20,7 +20,7 @@ class PaymentController extends Controller
     /**
      * Initialize Payment.
      *
-     * @param  \Illuminate\Http\Client\Request  $request
+     * @param  \Illuminate\Http\Request  $request
      * @param  string  $action
      * @return \Illuminate\Http\Response
      */
@@ -60,7 +60,7 @@ class PaymentController extends Controller
                     if ($request->user()->wallet_balance >= $due) {
                         $tranx = [
                             'reference' => $reference,
-                            'method' => 'wallet'
+                            'method' => 'wallet',
                         ];
 
                         $request->user()->wallet()->create([
@@ -151,7 +151,8 @@ class PaymentController extends Controller
     /**
      * Initialize FruitBay Payment.
      *
-     * @param  \Illuminate\Http\Client\Request  $request
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $method
      * @return \Illuminate\Http\Response
      */
     public function initializeFruitBay(Request $request, $method = 'paystack')
@@ -162,10 +163,16 @@ class PaymentController extends Controller
             return $this->validatorFails($validator, 'cart');
         }
 
+        $real_due = 0;
+        $code = 403;
+
+        $user = Auth::user();
         $items = collect($request->cart)->map(fn ($k) => collect($k)->except('qty'))->flatten()->all();
-        if (($available = FruitBay::whereIn('id', $items)->get('id'))) {
-            $cart = collect($request->cart)->map(function ($value) {
-                $item = FruitBay::find($value['item_id']);
+        $cartItems = FruitBay::whereIn('id', $items)->get();
+
+        if ($cartItems->isNotEmpty()) {
+            $cart = $cartItems->map(function ($item) use ($request) {
+                $value = collect($request->cart)->filter(fn ($k) => $k['item_id'] == $item->id)->first();
                 if ($item) {
                     $item->total = $item->price * $value['qty'];
                     $item->qty = $value['qty'];
@@ -174,23 +181,24 @@ class PaymentController extends Controller
                 return $item;
             })->filter(fn ($k) => $k !== null);
 
+            // Calculate the global shipping fee
             $delivery_method = $request->delivery_method ?? 'delivery';
+            $globalSshippingFee = config('settings.paid_shipping', false) || $delivery_method == 'delivery'
+                ? config('settings.shipping_fee')
+                : 0;
 
-            // if ($request->address && $request->address !== Auth::user()->address){
-            //     $user = User::find(Auth::id());
-            //     $user->address = $request->address;
-            //     $user->save();
-            // }
-
-            $real_due = 0;
-            $code = 403;
+            if ($user && $request->address && $request->address !== ($user->address->shipping ?? '')) {
+                $address = $user->address;
+                $address->shipping = $request->address;
+                $user->address = $address;
+                $user->save();
+            }
 
             if ($cart->count() <= 0) {
                 $msg = 'You have too few items in your basket, or some items may no longer be available.';
             } else {
-                $due = $cart->mapWithKeys(function ($value, $key) {
-                    return [$key => $value->total];
-                })->sum();
+                $shipping_fees = $cart->sum('fees') + $globalSshippingFee;
+                $due = $cart->sum('total');
                 $real_due = $due;
                 $method = $request->get('method', $method);
 
@@ -200,12 +208,12 @@ class PaymentController extends Controller
                         if ($request->user()->wallet_balance >= $due) {
                             $tranx = [
                                 'reference' => $reference,
-                                'method' => 'wallet'
+                                'method' => 'wallet',
                             ];
 
                             $request->user()->wallet()->create([
                                 'reference' => $reference,
-                                'amount' => $due,
+                                'amount' => $due + $shipping_fees,
                                 'type' => 'debit',
                                 'source' => 'Cart Checkout',
                                 'detail' => trans_choice('Payment for order of :0 items', $cart->count(), [$cart->count()]),
@@ -227,10 +235,10 @@ class PaymentController extends Controller
                             ];
                         } else {
                             $tranx = $paystack->transaction->initialize([
-                                'amount' => $due * 100,       // in kobo
-                                'email' => Auth::user()->email,         // unique to customers
+                                'amount' => ($due + $shipping_fees) * 100,       // in kobo
+                                'email' => $user->email,         // unique to customers
                                 'reference' => $reference,         // unique to transactions
-                                'callback_url' => config('settings.payment_verify_url', route('payment.paystack.verify')),
+                                'callback_url' => $request->get('callback_url', config('settings.payment_verify_url', route('payment.paystack.verify'))),
                             ]);
                         }
                     }
@@ -238,11 +246,12 @@ class PaymentController extends Controller
                     $code = 200;
 
                     $order = Order::create([
-                        'due' => $due,
+                        'due' => $due + $shipping_fees,
+                        'fees' => $shipping_fees,
                         'items' => $cart,
                         'status' => 'pending',
                         'amount' => $due,
-                        'user_id' => Auth::id(),
+                        'user_id' => $user->id,
                         'payment' => 'pending',
                         'reference' => $reference,
                         'delivery_method' => $delivery_method,
@@ -250,12 +259,13 @@ class PaymentController extends Controller
 
                     $transaction = $order->transaction();
                     $transaction->create([
-                        'user_id' => Auth::id(),
                         'reference' => $reference,
-                        'method' => ucfirst($method??'paystack'),
+                        'user_id' => $user->id,
+                        'method' => ucfirst($method ?? 'paystack'),
                         'status' => 'pending',
                         'amount' => $due,
-                        'due' => $due,
+                        'fees' => $shipping_fees,
+                        'due' => $due + $shipping_fees,
                     ]);
                 } catch (ApiException | \InvalidArgumentException | \ErrorException $e) {
                     return $this->buildResponse([
@@ -330,7 +340,6 @@ class PaymentController extends Controller
                 $msg = $processSaving['msg'] ?? 'OK';
                 $code = $processSaving['code'] ?? 200;
                 $status = $processSaving['status'] ?? 'success';
-
             }
         } catch (ApiException | \InvalidArgumentException | \ErrorException $e) {
             $payload = $e instanceof ApiException ? $e->getResponseObject() : [];
@@ -389,6 +398,7 @@ class PaymentController extends Controller
                     $msg = "You have successfully made {$saving->days} day(s) savings of {$_amount} for the {$plantitle}, you now have only {$_left} days left to save up.";
                 }
                 $subscription->fees_paid += $transaction->fees;
+                $subscription->next_date = $subscription->setDateByInterval(\Illuminate\Support\Carbon::parse(now()));
                 $subscription->save();
             } else {
                 $saving->status = 'rejected';
@@ -454,7 +464,7 @@ class PaymentController extends Controller
     /**
      * Subscribe the user.
      *
-     * @param  \Illuminate\Http\Client\Request  $request
+     * @param  \Illuminate\Http\Request  $request
      * @param  string  $action
      * @return \Illuminate\Http\Response
      */
@@ -529,7 +539,7 @@ class PaymentController extends Controller
      * The most appropriate place to use this is when a user cancels a transaction without
      * completing payments, although there are limitless use cases.
      *
-     * @param  Request  $request
+     * @param  \Illuminate\Http\Request  $request
      * @return void
      */
     public function terminateTransaction(Request $request)

@@ -13,11 +13,17 @@ class Subscription extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'delivery_method',
+        'interval',
+        'next_date',
+    ];
+
     protected $appends = [
         'paid_days',
         'days_left',
-        'total_saved',
         'total_left',
+        'total_saved',
         'saved_amount',
         'left_amount',
         'fees_split',
@@ -26,10 +32,12 @@ class Subscription extends Model
 
     protected $casts = [
         'fees_paid' => 'float',
+        'next_date' => 'datetime',
     ];
 
     protected $attributes = [
         'fees_paid' => 0.00,
+        'delivery_method' => 'delivery',
     ];
 
     /**
@@ -58,6 +66,59 @@ class Subscription extends Model
     public function allSavings(): HasMany
     {
         return $this->hasMany(Saving::class);
+    }
+
+    public function lastSaving()
+    {
+        return $this->hasOne(Saving::class)->latest();
+    }
+
+    /**
+     * Get the next amount for the Subscription
+     *
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
+     */
+    public function nextAmount(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                if ($this->interval === 'yearly') {
+                    $days = 365;
+                } elseif ($this->interval === 'monthly') {
+                    $days = 30;
+                } elseif ($this->interval === 'weekly') {
+                    $days = 7;
+                } else {
+                    $days = 1;
+                }
+
+                $amount = $this->plan->amount;
+                $duration = $this->plan->duration;
+                $nextAmount = ($amount / $duration) * $days;
+
+                // Check if the next amount would make the subscription exceed the plan amount
+                if ($this->left_amount + $nextAmount > $this->plan->amount) {
+                    $nextAmount = $this->plan->amount - $this->left_amount;
+                }
+
+                return $nextAmount;
+            },
+        );
+    }
+
+    public function setDateByInterval(\Illuminate\Support\Carbon $date)
+    {
+        if ($this->interval === 'daily') {
+            return $date->addDays(1);
+        } elseif ($this->interval === 'weekly') {
+            return $date->addWeeks(1);
+        } elseif ($this->interval === 'monthly') {
+            return $date->addMonths(1);
+        } elseif ($this->interval === 'yearly') {
+            return $date->addYears(1);
+        } else {
+            return $date;
+        }
     }
 
     /**
@@ -105,14 +166,14 @@ class Subscription extends Model
     public function paidDays(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->savings()->sum('days')
+            get: fn () => (int) $this->savings()->sum('days')
         );
     }
 
     public function daysLeft(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->plan->duration - $this->savings()->sum('days')
+            get: fn () => (int) $this->plan->duration - $this->savings()->sum('days')
         );
     }
 

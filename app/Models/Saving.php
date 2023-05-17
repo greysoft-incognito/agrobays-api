@@ -14,15 +14,22 @@ class Saving extends Model
     protected $fillable = [
         'amount',
         'due',
-        'user_id',
         'days',
+        'tax',
         'status',
+        'user_id',
         'payment_ref',
     ];
 
     protected $appends = [
         'total',
         'get_subscription',
+    ];
+
+    protected $casts = [
+        'due' => 'float',
+        'tax' => 'float',
+        'amount' => 'float',
     ];
 
     /**

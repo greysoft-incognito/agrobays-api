@@ -63,10 +63,10 @@ class AdminFoodbagsController extends Controller
         }
 
         return (new FoodBagResource($bag))->additional([
-            'message' => !$bag ? 'The requested foodbag no longer exists' : 'OK',
-            'status' => !$bag ? 'info' : 'success',
-            'response_code' => !$bag ? 404 : 200,
-        ])->response()->setStatusCode(!$bag ? 404 : 200);
+            'message' => ! $bag ? 'The requested foodbag no longer exists' : 'OK',
+            'status' => ! $bag ? 'info' : 'success',
+            'response_code' => ! $bag ? 404 : 200,
+        ])->response()->setStatusCode(! $bag ? 404 : 200);
     }
 
     /**
@@ -78,7 +78,7 @@ class AdminFoodbagsController extends Controller
     {
         \Gate::authorize('usable', 'foodbags');
         $validator = Validator::make($request->all(), [
-            'food_id' => 'required|numeric|exists:food,id|unique:food_bag_items,food_id,NULL,id,food_bag_id,' . $item,
+            'food_id' => 'required|numeric|exists:food,id|unique:food_bag_items,food_id,NULL,id,food_bag_id,'.$item,
             'quantity' => 'nullable|numeric|min:1|max:100',
             'is_active' => 'nullable|boolean',
         ], [
@@ -121,7 +121,7 @@ class AdminFoodbagsController extends Controller
 
         // Check if the food is still in the bag
         $bag->load('foods');
-        if (!$bag->foods->contains($food->id)) {
+        if (! $bag->foods->contains($food->id)) {
             return $this->buildResponse([
                 'message' => __(':0 is no longer in ":1"', [$food->name, $bag->title]),
                 'status' => 'info',
@@ -130,7 +130,6 @@ class AdminFoodbagsController extends Controller
             ]);
         }
         $bag->foods()->detach($food);
-
 
         return (new FoodBagResource($bag))->additional([
             'message' => __(':0 has been removed from ":1"', [$food->name, $bag->title]),

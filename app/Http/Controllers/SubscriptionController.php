@@ -44,7 +44,7 @@ class SubscriptionController extends Controller
 
         $msg = $subscriptions->isEmpty() ? 'You do not have an active subscription' : 'OK';
         $_period = $subscriptions->isNotEmpty()
-            ? ($subscriptions->last()->created_at->format('Y/m/d') . '-' . $subscriptions->first()->created_at->format('Y/m/d'))
+            ? ($subscriptions->last()->created_at->format('Y/m/d').'-'.$subscriptions->first()->created_at->format('Y/m/d'))
             : '';
 
         return (new SubscriptionCollection($subscriptions))->additional([
@@ -84,7 +84,7 @@ class SubscriptionController extends Controller
             })
             ->addColumn('action', function (Subscription $item) {
                 return implode([
-                    Html::el('a', ['onclick' => "hotLink('/savings/plan/" . $item->id . "')", 'href' => 'javascript:void(0)'])->title(__('View Savings'))->setHtml(Html::el('i')->class('ri-eye-fill ri-2x text-primary')),
+                    Html::el('a', ['onclick' => "hotLink('/savings/plan/".$item->id."')", 'href' => 'javascript:void(0)'])->title(__('View Savings'))->setHtml(Html::el('i')->class('ri-eye-fill ri-2x text-primary')),
                 ]);
             })
             ->removeColumn('updated_at')->toJson();
@@ -106,15 +106,42 @@ class SubscriptionController extends Controller
      */
     public function subscription(Request $request, $subscription_id = null)
     {
-        $subscription = Auth::user()->subscriptions()->find($subscription_id);
-
-        $msg = !$subscription ? 'The subscription you requested no longer exists.' : 'OK';
+        $subscription = Auth::user()->subscriptions()->findOrfail($subscription_id);
 
         return (new SubscriptionResource($subscription))
             ->additional([
-                'message' => $msg,
-                'status' => $subscription ? 'success' : 'error',
-                'response_code' => $subscription ? 200 : 404,
+                'message' => 'OK',
+                'status' => 'error',
+                'response_code' => 200,
+            ]);
+    }
+
+    /**
+     * Sets the automation mode for the subscription
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $subscription
+     * @return \Illuminate\Http\Response
+     */
+    public function automate(Request $request, $subscription_id)
+    {
+        $request->validate([
+            'interval' => ['nullable', 'in:daily,weekly,monthly,yearly'],
+        ]);
+
+        $subscription = Auth::user()->subscriptions()->findOrfail($subscription_id);
+
+        $subscription->interval = $request->interval ? $request->interval : 'manual';
+        $subscription->save();
+
+        return (new SubscriptionResource($subscription))
+            ->additional([
+                'message' => __('You have successfully :0 the :1automatic savings program for this plan.', [
+                    $request->interval ? 'activated' : 'deactivated',
+                    $request->interval ? $request->interval.' ' : '',
+                ]),
+                'status' => 'error',
+                'response_code' => 200,
             ]);
     }
 
@@ -142,7 +169,7 @@ class SubscriptionController extends Controller
             $ids = $sub ? $sub->plan->bags()->get('id')->values()->toArray() : [];
         }
 
-        if ($sub && (!$bag || !in_array($bag->id, Collect($ids[0] ?? [])->filter(fn ($k) => !empty($k))->values()->toArray()))) {
+        if ($sub && (! $bag || ! in_array($bag->id, Collect($ids[0] ?? [])->filter(fn ($k) => ! empty($k))->values()->toArray()))) {
             $msg = 'The requested food bag no longer exists.';
             $status = 'error';
             $code = 404;
@@ -153,6 +180,7 @@ class SubscriptionController extends Controller
             unset($msg, $status, $code);
             $plan = $sub;
             $plan->food_bag_id = $bag->id;
+            $plan->delivery_method = $request->delivery_method ?? 'delivery';
             $plan->save();
         }
 

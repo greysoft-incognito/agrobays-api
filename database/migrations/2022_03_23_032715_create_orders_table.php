@@ -20,6 +20,7 @@ return new class extends Migration
             $table->decimal('amount')->default(0.00);
             $table->decimal('due')->default(0.00);
             $table->decimal('tax')->default(0.00);
+            $table->decimal('fees')->default(0.00);
             $table->json('items');
             $table->enum('delivery_method', ['delivery', 'pickup'])->default('delivery');
             $table->enum('payment', ['pending', 'rejected', 'complete'])->default('pending');

@@ -67,7 +67,7 @@ class AccountController extends Controller
      */
     public function savings(Auth $auth, $id = null, $planned = false)
     {
-        if (!$id || $planned === 'planned') {
+        if (! $id || $planned === 'planned') {
             $model = Saving::where('user_id', Auth::id());
             if ($planned !== false) {
                 $model->where('subscription_id', $id);
@@ -88,7 +88,7 @@ class AccountController extends Controller
 
         $savings = $auth::user()->savings();
 
-        if ($id && !($saving = $savings->find($id))) {
+        if ($id && ! ($saving = $savings->find($id))) {
             return $this->buildResponse([
                 'message' => 'The requested saving no longer exists.',
                 'status' => 'error',
@@ -111,7 +111,7 @@ class AccountController extends Controller
 
         $updated = [];
         $user = User::find(Auth::id());
-        if (!$user) {
+        if (! $user) {
             return $this->buildResponse([
                 'message' => 'The requested user does not exists',
                 'status' => 'error',
@@ -135,7 +135,7 @@ class AccountController extends Controller
                 $vals .= '|min:8|confirmed';
             }
             if (is_array($filled[$field])) {
-                return [$field . '.*' => 'required'];
+                return [$field.'.*' => 'required'];
             }
 
             return [$field => "required|$vals"];
@@ -144,7 +144,7 @@ class AccountController extends Controller
         $validator = Validator::make($request->all(), $valid, [], $fields->filter(function ($k) use ($filled) {
             return is_array($filled[$k]);
         })->mapWithKeys(function ($field, $value) use ($filled) {
-            return collect(array_keys((array)$filled[$field]))->mapWithKeys(fn ($k) => ["$field.$k" => "$field $k"]);
+            return collect(array_keys((array) $filled[$field]))->mapWithKeys(fn ($k) => ["$field.$k" => "$field $k"]);
         })->all());
 
         if ($validator->fails()) {
@@ -157,14 +157,14 @@ class AccountController extends Controller
         }
 
         $fields = $fields->filter(function ($k) {
-            return !Str::contains($k, '_confirmation');
+            return ! Str::contains($k, '_confirmation');
         });
 
         if ($request->hasFile('image')) {
             $user->image && Storage::delete($user->image ?? '');
             $user->image = $request->file('image')->storeAs(
                 'public/uploads/images',
-                rand() . '_' . rand() . '.' . $request->file('image')->extension()
+                rand().'_'.rand().'.'.$request->file('image')->extension()
             );
         } else {
             foreach ($fields as $_field) {
@@ -198,7 +198,7 @@ class AccountController extends Controller
     public function store(Request $request)
     {
         $user = User::find(Auth::id());
-        if (!$user) {
+        if (! $user) {
             return $this->buildResponse([
                 'message' => 'The requested user no longer exists',
                 'status' => 'error',
@@ -256,7 +256,7 @@ class AccountController extends Controller
             $user->image && Storage::delete($user->image ?? '');
             $user->image = $request->file('image')->storeAs(
                 'public/uploads/images',
-                rand() . '_' . rand() . '.' . $request->file('image')->extension()
+                rand().'_'.rand().'.'.$request->file('image')->extension()
             );
         }
 

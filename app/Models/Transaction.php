@@ -37,6 +37,12 @@ class Transaction extends Model
         'type',
     ];
 
+    protected $casts = [
+        'due' => 'float',
+        'fees' => 'float',
+        'amount' => 'float',
+    ];
+
     /**
      * Get the transaction's transactable model (probably a fruit bay item).
      */

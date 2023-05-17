@@ -32,6 +32,7 @@ class Permissions
             'dispatch.confirmed',
             'dispatch.dispatched',
             'dispatch.delivered',
+            'feedback.manage',
         ],
         'manager' => [
             'users.user',
@@ -53,6 +54,7 @@ class Permissions
             'dispatch.confirmed',
             'dispatch.dispatched',
             'dispatch.delivered',
+            'feedback.manage',
         ],
         'dispatch' => [
             'dispatch.status',

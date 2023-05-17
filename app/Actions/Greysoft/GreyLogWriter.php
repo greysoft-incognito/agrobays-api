@@ -27,11 +27,11 @@ class GreyLogWriter implements LogWriter
             $status_code = $r->status();
 
             $message = "
-            *[$status_code $status]* \n 
-            {$method} _{$uri}_ - `{$bodyAsJson}` > *$getHost* \n 
-            *Request URL*: {$fullUrl} \n 
+            *[$status_code $status]* \n
+            {$method} _{$uri}_ - `{$bodyAsJson}` > *$getHost* \n
+            *Request URL*: {$fullUrl} \n
             *Headers:*
-            ```$headers``` 
+            ```$headers```
             ";
 
             // Log::channel(config('http-logger.log_channel'))->info($message);

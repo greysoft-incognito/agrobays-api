@@ -25,6 +25,7 @@ return [
      */
     'except' => [
         'password',
+        'token',
         'password_confirmation',
     ],
 

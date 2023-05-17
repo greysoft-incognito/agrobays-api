@@ -51,3 +51,7 @@ Route::get('/send/verification-notification/{type?}', [EmailPhoneVerificationNot
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware('auth:sanctum')
     ->name('logout');
+
+Route::post('broadcasting/auth', [AuthenticatedSessionController::class, 'broadcastingAuth'])
+    ->middleware('auth:sanctum')
+    ->name('broadcasting.auth');

@@ -51,11 +51,12 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
         'phone_verified_at' => 'datetime',
         'last_attempt' => 'datetime',
-        'address' => 'array',
-        'country' => 'array',
-        'state' => 'array',
-        'city' => 'array',
-        'bank' => 'array',
+        'address' => 'collection',
+        'country' => 'collection',
+        'state' => 'collection',
+        'city' => 'collection',
+        'bank' => 'collection',
+        'data' => 'collection',
     ];
 
     /**
@@ -86,6 +87,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'state' => '{"name": "", "iso2": ""}',
         'city' => '{"name": ""}',
         'bank' => '{"bank": "", "nuban":"", "account_name":""}',
+        'data' => '{"settings": {"notifications": {"email": true, "sms": true, "push": true}}}',
     ];
 
     /**
@@ -279,6 +281,16 @@ class User extends Authenticatable implements MustVerifyEmail
     public function dispatches(): HasMany
     {
         return $this->hasMany(Dispatch::class);
+    }
+
+    /**
+     * Get all of the feedbacks for the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function feedbacks(): HasMany
+    {
+        return $this->hasMany(Feedback::class);
     }
 
     /**

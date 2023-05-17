@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->text('description');
             $table->decimal('price')->default(0.00);
+            $table->decimal('fees')->default(0.00);
             $table->string('image', 550)->nullable();
             $table->json('bag')->nullable();
             $table->timestamps();

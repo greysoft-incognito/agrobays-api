@@ -26,6 +26,7 @@ return new class extends Migration
             $table->string('username')->unique();
             $table->string('password');
             $table->string('phone')->nullable();
+            $table->json('data')->nullable();
             $table->json('bank')->nullable();
             $table->json('address')->nullable();
             $table->json('city')->nullable();

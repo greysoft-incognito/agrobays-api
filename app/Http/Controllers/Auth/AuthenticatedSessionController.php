@@ -8,6 +8,7 @@ use App\Http\Resources\UserResource;
 use DeviceDetector\DeviceDetector;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Broadcast;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -97,13 +98,13 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
-
         if (! $request->isXmlHttpRequest()) {
             session()->flush();
 
             return response()->redirectToRoute('web.login');
         }
+
+        $request->user()->currentAccessToken()->delete();
 
         return $this->buildResponse([
             'message' => 'You have been successfully logged out',
@@ -158,5 +159,16 @@ class AuthenticatedSessionController extends Controller
             'status' => 'success',
             'status_code' => 200,
         ]);
+    }
+
+    /**
+     * Authenticate the request for channel access.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function broadcastingAuth(Request $request)
+    {
+        return Broadcast::auth($request);
     }
 }

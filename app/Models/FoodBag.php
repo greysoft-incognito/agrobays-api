@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class FoodBag extends Model
 {
@@ -43,7 +41,6 @@ class FoodBag extends Model
 
     /**
      * Merge all food images into one image array
-     *
      */
     public function image(): Attribute
     {

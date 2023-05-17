@@ -14,26 +14,44 @@ class SubscriptionResource extends JsonResource
      */
     public function toArray($request)
     {
+        $with = is_array($request->with) ? $request->with : explode(',', $request->with);
+
         return [
-            "id" => $this->id,
-            "user_id" => $this->user_id,
-            "plan_id" => $this->plan_id,
-            "food_bag_id" => $this->food_bag_id,
-            "paid_days" => $this->paid_days,
-            "days_left" => $this->days_left,
-            "total_saved" => $this->total_saved,
-            "total_left" => $this->total_left,
-            "saved_amount" => $this->saved_amount,
-            "left_amount" => $this->left_amount,
-            "status" => $this->status,
-            "fees_split" => $this->fees_split,
-            "fees_paid" => $this->fees_paid,
-            "fees_left" => ($this->bag?->fees ??0) - $this->fees_paid,
-            "items" => new FoodCollection($this->items),
-            "bag" => new FoodBagResource($this->bag),
-            "plan" => new PlanResource($this->plan),
-            "updated_at" => $this->updated_at,
-            "created_at" => $this->created_at,
+            'id' => $this->id,
+            'fees' => $this->fees_paid,
+            'status' => $this->status,
+            'user_id' => $this->user_id,
+            'plan_id' => $this->plan_id,
+            'food_bag_id' => $this->food_bag_id,
+            'paid_days' => $this->paid_days,
+            'days_left' => $this->days_left,
+            'total_left' => $this->total_left,
+            'total_saved' => $this->total_saved,
+            'left_amount' => $this->left_amount,
+            'amount' => $this->saved_amount,
+            'saved_amount' => $this->saved_amount,
+            'next_amount' => $this->next_amount,
+            'fees_left' => ($this->bag?->fees ?? 0) - $this->fees_paid,
+            'fees_paid' => $this->fees_paid,
+            'fees_split' => $this->fees_split,
+            'delivery_method' => $this->delivery_method,
+            'items' => $request->subscription
+            ? new SavingCollection($this->savings)
+            : new FoodCollection($this->items),
+            'bag' => new FoodBagResource($this->bag),
+            'plan' => new PlanResource($this->plan),
+            'user' => $this->when(in_array('user', $with), new UserSlimResource($this->user)),
+            'transaction' => [
+                'reference' => str($this->plan->title)->camel().'-'.$this->id.$this->plan_id,
+                'amount' => $this->saved_amount,
+                'fees' => $this->fees_paid,
+                'updated_at' => $this->updated_at,
+                'created_at' => $this->created_at,
+            ],
+            'interval' => $this->interval,
+            'next_date' => $this->next_date,
+            'updated_at' => $this->updated_at,
+            'created_at' => $this->created_at,
         ];
     }
 

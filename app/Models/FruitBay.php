@@ -27,6 +27,8 @@ class FruitBay extends Model
      */
     protected $casts = [
         'bag' => 'array',
+        'fees' => 'double',
+        'price' => 'double',
     ];
 
     /**
@@ -36,6 +38,7 @@ class FruitBay extends Model
      */
     protected $attributes = [
         'bag' => '[]',
+        'fees' => 0.00,
     ];
 
     public static function boot()

@@ -2,6 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\OrderResource;
+use App\Http\Resources\SavingResource;
+use App\Http\Resources\SubscriptionResource;
+use App\Models\Order;
+use App\Models\Saving;
 use App\Models\Transaction;
 use Carbon\CarbonImmutable as Carbon;
 use Illuminate\Http\Request;
@@ -100,14 +105,35 @@ class TransactionController extends Controller
     /**
      * Display an invoice of the user's transactions.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @param  \Illuminate\Support\Facades\Auth  $auth
      * @return \Illuminate\Http\Response
      */
-    public function invoice($transaction_id = null)
+    public function invoice(Request $request, $transaction_id = null)
     {
-        $transaction = Auth::user()->transactions()->with('user')->find($transaction_id);
+        $transaction = Auth::user()->transactions()->with('user')->findOrFail($transaction_id);
 
         $msg = $transaction ? 'Ok' : 'This transaction does not exist';
+
+        $additionalData = [
+            'message' => $msg,
+            'status' => $transaction ? 'success' : 'info',
+            'response_code' => $transaction ? 200 : 404,
+        ];
+
+        if ($transaction->transactable instanceof Order) {
+            return (new OrderResource($transaction->transactable))
+                ->additional($additionalData)
+                ->response()
+                ->setStatusCode($additionalData['response_code']);
+        } elseif ($transaction->transactable instanceof Saving) {
+            return ($request->subscription
+                ? new SubscriptionResource($transaction->transactable->subscription)
+                : new SavingResource($transaction->transactable))
+                ->additional($additionalData)
+                ->response()
+                ->setStatusCode($additionalData['response_code']);
+        }
 
         return $this->buildResponse([
             'message' => $msg,

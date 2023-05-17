@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\DispatchCollection;
-use App\Http\Resources\DispatchResource;
 use App\Models\Dispatch;
 use App\Notifications\Dispatched;
 use Illuminate\Http\Request;

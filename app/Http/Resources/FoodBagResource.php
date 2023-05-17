@@ -22,7 +22,7 @@ class FoodBagResource extends JsonResource
             'description' => $this->description,
             'image' => $this->image,
             'price' => $this->price,
-            'weight' => $this->weight . ($this->weight_unit ?? 'kg'),
+            'weight' => $this->weight.($this->weight_unit ?? 'kg'),
             'foods' => new FoodCollection($this->whenLoaded('foods')),
             'plan' => $this->whenLoaded('plan'),
             'created_at' => $this->created_at,

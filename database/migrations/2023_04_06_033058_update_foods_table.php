@@ -25,7 +25,7 @@ return new class extends Migration
                 // Enable foreign key constraints
                 Schema::enableForeignKeyConstraints();
             }
-            if (!Schema::hasColumn('food', 'weight')) {
+            if (! Schema::hasColumn('food', 'weight')) {
                 $table->integer('weight')->default(1)->after('description');
             } else {
                 // If the column exists, empty it first
@@ -46,14 +46,14 @@ return new class extends Migration
     {
         Schema::table('food', function (Blueprint $table) {
             // Disable foreign key constraints
-            if (!Schema::hasColumn('food', 'food_bag_id')) {
+            if (! Schema::hasColumn('food', 'food_bag_id')) {
                 Schema::disableForeignKeyConstraints();
                 // Add food_bag_id column only if it doesn't exist
                 $table->foreignId('food_bag_id')->nullable()->after('id')->constrained('food_bags')->onUpdate('cascade')->onDelete('cascade');
                 // Enable foreign key constraints
                 Schema::enableForeignKeyConstraints();
             }
-            if (!Schema::hasColumn('food', 'weight')) {
+            if (! Schema::hasColumn('food', 'weight')) {
                 $table->string('weight')->after('description');
             } else {
                 // If the column exists, empty it first

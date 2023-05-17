@@ -65,8 +65,11 @@ class AdminFruitBayController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|min:3|max:25',
             'price' => 'required|numeric|min:1',
+            'fees' => 'nullable|numeric|min:0',
             'bag' => 'nullable|array|max:10',
             'description' => 'nullable|min:10|max:550',
+        ], [], [
+            'fees' => 'Shipping/Handling Fees',
         ]);
 
         if ($validator->fails()) {
@@ -80,6 +83,7 @@ class AdminFruitBayController extends Controller
 
         $fruitbay = FruitBay::whereId($item)->orWhere(['slug' => $item])->first() ?? new FruitBay;
 
+        $fruitbay->fees = $request->fees ?? 0.00;
         $fruitbay->name = $request->name;
         $fruitbay->price = $request->price;
         $fruitbay->description = $request->description;
