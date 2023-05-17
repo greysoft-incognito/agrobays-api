@@ -21,12 +21,11 @@ class UsageMonitor
         $user = $request->user();
 
         // If user has been away for longer than an hour refresh the user
-        if ($user && $user->last_seen->diffInMinutes(now()) > 60) {
+        if ($user && ($user->last_seen?->diffInMinutes(now()) || 0) > 60) {
             $user->refresh();
         }
 
         if ($user) {
-            $user->refresh();
             $user->last_seen = now();
             $user->save();
 
