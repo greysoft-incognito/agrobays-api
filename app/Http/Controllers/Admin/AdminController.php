@@ -94,6 +94,8 @@ class AdminController extends Controller
             }
         });
 
+        Config::write("settings.last_setting_time", now()->toDateTimeString());
+
         return $this->buildResponse([
             'message' => 'Configuration Saved.',
             'status' => 'success',

@@ -35,6 +35,7 @@ return [
     'contact_email' => 'hi@greysoft.ng',
     'contact_address' => '31 Gwari Avenue, Barnawa, Kaduna',
     'office_address' => '31 Gwari Avenue, Barnawa, Kaduna',
+    'last_setting_time' => '2023-05-18 00:03:57',
     'permissions' => [
         'manage_guests' => 'View, manage and get notifications for guest and bootcamp registrations',
         'manage_users' => 'Create, view, manage and get notifications for user access',
