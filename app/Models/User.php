@@ -51,6 +51,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         'email_verified_at' => 'datetime',
         'phone_verified_at' => 'datetime',
+        'last_refreshed' => 'datetime',
         'last_attempt' => 'datetime',
         'last_seen' => 'datetime',
         'address' => 'collection',
@@ -464,23 +465,23 @@ class User extends Authenticatable implements MustVerifyEmail
         );
     }
 
-    public function refresh(): void
+    public function refresh($updates = [
+        'user' => true,
+        'savings' => true,
+        'subscriptions' => true,
+        'transactions' => true,
+        'settings' => true,
+        'charts' => true,
+        'wallet' => true,
+        'orders' => true,
+        'auth' => true
+    ]): void
     {
         broadcast(new ActionComplete([
             'type' => 'refresh',
             'mode' => 'automatic',
             'data' => $this,
-            'updated' => [
-                'user' => true,
-                'savings' => true,
-                'subscriptions' => true,
-                'transactions' => true,
-                'settings' => true,
-                'charts' => true,
-                'wallet' => true,
-                'orders' => true,
-                'auth' => true
-            ],
+            'updated' => $updates,
             'created_at' => now(),
         ], $this));
     }

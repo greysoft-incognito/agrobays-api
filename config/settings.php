@@ -23,7 +23,7 @@ return [
     'token_lifespan' => 30,
     'shipping_fee' => 5000,
     'paid_shipping' => false,
-    'feedback_system' => true,
+    'feedback_system' => false,
     'withdraw_to' => 'wallet',
     'frontend_link' => 'http://localhost:8080',
     'payment_verify_url' => env('PAYMENT_VERIFY_URL', 'http://localhost:8080/payment/verify'),
@@ -35,7 +35,7 @@ return [
     'contact_email' => 'hi@greysoft.ng',
     'contact_address' => '31 Gwari Avenue, Barnawa, Kaduna',
     'office_address' => '31 Gwari Avenue, Barnawa, Kaduna',
-    'last_setting_time' => '2023-05-18 00:03:57',
+    'last_setting_time' => '2023-05-18 00:44:29',
     'permissions' => [
         'manage_guests' => 'View, manage and get notifications for guest and bootcamp registrations',
         'manage_users' => 'Create, view, manage and get notifications for user access',
