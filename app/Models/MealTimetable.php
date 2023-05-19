@@ -16,7 +16,7 @@ class MealTimetable extends Pivot
      * @var array
      */
     protected $casts = [
-        'date' => 'date',
+        'date' => 'date:Y-m-d',
         'meal_plan_id' => 'integer',
         'user_id' => 'integer',
     ];

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\AutoTimetableCollection;
-use App\Http\Resources\MealPlanCollection;
 use App\Http\Resources\MealPlanResource;
 use App\Models\MealPlan;
 use Carbon\Carbon;
@@ -91,7 +90,7 @@ class MealTimetableController extends Controller
         // Check if the user already has this meal plan for the given date
         $existingTimetable = $user->mealTimetable()
             ->where('meal_plan_id', $plan->id)
-            ->where('date', $request->date)
+            ->whereDate('date', $request->date)
             ->exists();
 
         if ($existingTimetable) {
@@ -103,12 +102,16 @@ class MealTimetableController extends Controller
         }
 
         $user->mealTimetable()->attach($plan, [
-            'date' => $request->date,
+            'date' => Carbon::parse($request->date)->format('Y-m-d'),
         ]);
 
         $timetable = $user->mealTimetable()->whereMealPlanId($plan->id)->first();
-
-        dd($timetable);
+        return (new MealPlanResource($timetable))
+            ->additional([
+                'message' => 'OK',
+                'status' => 'success',
+                'response_code' => '201',
+            ]);
     }
 
     /**
