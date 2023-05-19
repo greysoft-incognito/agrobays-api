@@ -7,6 +7,7 @@ use App\Notifications\SendCode;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -14,10 +15,11 @@ use Laravel\Sanctum\HasApiTokens;
 use libphonenumber\NumberParseException as LibphonenumberNumberParseException;
 use Propaganistas\LaravelPhone\Exceptions\NumberParseException;
 use Propaganistas\LaravelPhone\PhoneNumber;
+use Overtrue\LaravelFavorite\Traits\Favoriter;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, Favoriter;
 
     /**
      * The attributes that are mass assignable.
@@ -378,6 +380,19 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         return false;
+    }
+
+    /**
+     * Get the user's meals timetable.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function mealTimetable(): BelongsToMany
+    {
+        return $this->belongsToMany(MealPlan::class, 'meal_timetables', 'user_id', 'meal_plan_id')
+            ->using(MealTimetable::class)
+            ->withPivot('date')
+            ->withTimestamps();
     }
 
     /**

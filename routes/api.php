@@ -19,6 +19,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\FrontContentController;
 use App\Http\Controllers\FruitBayController;
+use App\Http\Controllers\MealPlanController;
+use App\Http\Controllers\MealTimetableController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
@@ -283,6 +285,25 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('/categories/{item?}', 'categories');
             Route::get('/{item}', 'getItem');
             Route::post('/{item}/buy', 'buyItem');
+        });
+
+    /**
+     * Meal Plan Routes
+     */
+    Route::controller(MealPlanController::class)
+        ->prefix('meal-plans')->name('meal.plans.')
+        ->group(function () {
+            Route::post('/favorite/{plan}', 'toggleFavorite')->name('toggle.favorite')->middleware('auth:sanctum');
+            Route::apiResource('/', MealPlanController::class)->parameters(['' => 'meal_plan']);
+        });
+
+    /**
+     * Meal Timetable Routes
+     */
+    Route::controller(MealTimetableController::class)
+        ->prefix('meal-timetable')->name('meal.timetable.')
+        ->group(function () {
+            Route::apiResource('/', MealTimetableController::class)->parameters(['' => 'meal_timetable']);
         });
 
     /**
