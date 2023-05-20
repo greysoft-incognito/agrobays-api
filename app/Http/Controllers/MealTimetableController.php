@@ -105,10 +105,11 @@ class MealTimetableController extends Controller
             'date' => Carbon::parse($request->date)->format('Y-m-d'),
         ]);
 
-        $timetable = $user->mealTimetable()->whereMealPlanId($plan->id)->first();
-        return (new MealPlanResource($timetable))
+        $item = $user->mealTimetable()->whereMealPlanId($plan->id)->first();
+
+        return (new MealPlanResource($item))
             ->additional([
-                'message' => 'OK',
+                'message' => __("You have successfully added :0 to your meal timetable for :1", [$plan->item, $request->date]),
                 'status' => 'success',
                 'response_code' => '201',
             ]);
@@ -145,5 +146,29 @@ class MealTimetableController extends Controller
             ])
             ->response()
             ->setStatusCode(200);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Request $request)
+    {
+        $request->validate([
+            'plan_id' => 'required|exists:meal_plans,id',
+            'date' => 'required|date',
+        ]);
+
+        $user = $request->user();
+        $plan = $user->mealTimetable()->whereMealPlanId($request->plan_id)->firstOrFail();
+        $user->mealTimetable()->wherePivot('date', $request->date)->detach($plan);
+
+        return $this->buildResponse([
+            'message' => __("You have successfully removed :0 from your meal timetable for :1", [$plan->name, $request->date]),
+            'status' => 'success',
+            'response_code' => '200',
+        ]);
     }
 }

@@ -22,7 +22,7 @@ class DispatchController extends Controller
      */
     public function index(Request $request, $limit = '15', $status = 'pending')
     {
-        \Gate::authorize('usable', 'dispatch.'.$status);
+        \Gate::authorize('usable', 'dispatch.' . $status);
         $query = Dispatch::query()->with(['dispatchable', 'user']);
 
         if (Auth::user()->role === 'dispatch') {
@@ -84,12 +84,12 @@ class DispatchController extends Controller
         } elseif ($item->type === 'foodbag') {
             $item->load('dispatchable.bag', 'dispatchable.user');
         }
-        $item && \Gate::authorize('usable', 'dispatch.'.$item->status);
+        $item && \Gate::authorize('usable', 'dispatch.' . $item->status);
 
         return $this->buildResponse([
-            'message' => ! $item ? 'The requested item no longer exists' : 'OK',
-            'status' => ! $item ? 'info' : 'success',
-            'response_code' => ! $item ? 404 : 200,
+            'message' => !$item ? 'The requested item no longer exists' : 'OK',
+            'status' => !$item ? 'info' : 'success',
+            'response_code' => !$item ? 404 : 200,
             'item' => $item ?? (object) [],
         ]);
     }
@@ -111,8 +111,8 @@ class DispatchController extends Controller
         }
 
         $item = $query->find($request->id);
-        $item && \Gate::authorize('usable', 'dispatch.'.$item->status);
-        if (! $item) {
+        $item && \Gate::authorize('usable', 'dispatch.' . $item->status);
+        if (!$item) {
             return $this->buildResponse([
                 'message' => 'The requested item no longer exists',
                 'status' => 'info',
@@ -128,7 +128,7 @@ class DispatchController extends Controller
         $item->status = $request->status ?? 'pending';
 
         // Verify confirmation code
-        if ($request->status === 'delivered' && (! $request->code || $request->code !== $item->code)) {
+        if ($request->status === 'delivered' && (!$request->code || $request->code !== $item->code)) {
             return $this->buildResponse([
                 'message' => 'Your input has a few errors',
                 'status' => 'error',
@@ -147,7 +147,7 @@ class DispatchController extends Controller
         }
 
         // Notify the user of the change
-        if ((! $item_user_id && $request->status === 'pending') || $item_status !== $request->status) {
+        if ((!$item_user_id && $request->status === 'pending') || $item_status !== $request->status) {
             $item->dispatchable->user->notify(new Dispatched($item));
         }
 
@@ -176,7 +176,7 @@ class DispatchController extends Controller
         }
 
         $item = $query->find($id);
-        if ($id && ! $item) {
+        if ($id && !$item) {
             return $this->buildResponse([
                 'message' => 'The requested item no longer exists',
                 'status' => 'info',
@@ -188,7 +188,7 @@ class DispatchController extends Controller
             'user_id' => ['required', 'numeric'],
             'last_location' => 'nullable|array',
             'status' => 'required|string',
-        ], );
+        ],);
 
         if ($validator->fails()) {
             return $this->buildResponse([
@@ -209,7 +209,7 @@ class DispatchController extends Controller
         $item->status = $request->status ?? 'pending';
 
         // Verify confirmation code
-        if (Auth::user()->role !== 'admin' && $request->status === 'delivered' && (! $request->code || $request->code !== $item_code)) {
+        if (Auth::user()->role !== 'admin' && $request->status === 'delivered' && (!$request->code || $request->code !== $item_code)) {
             return $this->buildResponse([
                 'message' => 'Your input has a few errors',
                 'status' => 'error',
@@ -226,7 +226,7 @@ class DispatchController extends Controller
         }
 
         // Notify the user of the change
-        if ((! $item_user_id && $request->status === 'pending') || $item_status !== $request->status) {
+        if ((!$item_user_id && $request->status === 'pending') || $item_status !== $request->status) {
             $item->dispatchable->user->notify(new Dispatched($item));
         }
 
@@ -241,6 +241,7 @@ class DispatchController extends Controller
     /**
      * Remove the specified dispatch from storage.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function destroy(Request $request, $id = null)
@@ -255,7 +256,7 @@ class DispatchController extends Controller
         if ($request->items) {
             $count = collect($request->items)->map(function ($id) use ($query) {
                 $item = $query->whereId($id)->first();
-                $item && \Gate::authorize('usable', 'dispatch.'.$item->status);
+                $item && \Gate::authorize('usable', 'dispatch.' . $item->status);
                 if ($item) {
                     return $item->delete();
                 }
@@ -286,6 +287,7 @@ class DispatchController extends Controller
             'message' => 'The requested item no longer exists.',
             'status' => 'error',
             'response_code' => 404,
+            'ignore' => [404]
         ]);
     }
 }

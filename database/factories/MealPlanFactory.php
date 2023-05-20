@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class MealPlanFactory extends Factory
 {
     use WithoutModelEvents;
-    
+
     /**
      * Define the model's default state.
      *
@@ -49,7 +49,6 @@ class MealPlanFactory extends Factory
                 'breakfast',
                 'lunch',
                 'dinner',
-                'snack',
             ][rand(0, 3)],
             'description' => $this->faker->paragraph(),
             'calories' => rand(100, 1000),

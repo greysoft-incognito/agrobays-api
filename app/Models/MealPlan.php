@@ -6,11 +6,27 @@ use App\Http\Resources\MealPlanResource;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Overtrue\LaravelFavorite\Traits\Favoriteable;
+use ToneflixCode\LaravelFileable\Traits\Fileable;
 
 class MealPlan extends Model
 {
-    use HasFactory, Favoriteable;
+    use HasFactory, Favoriteable, Fileable;
+
+    public static function registerEvents()
+    {
+        parent::boot();
+        static::creating(function (MealPlan $plan) {
+            $slug = str($plan->title)->slug();
+            $plan->slug = (string) MealPlan::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
+        });
+    }
+
+    public function registerFileable()
+    {
+        $this->fileableLoader('image', 'plans', true);
+    }
 
     /**
      * Retrieve the model for a bound value.
@@ -46,5 +62,15 @@ class MealPlan extends Model
         }
 
         return $recommendation;
+    }
+
+    /**
+     * Get the user's meals timetable.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function timetables(): HasMany
+    {
+        return $this->hasMany(MealTimetable::class);
     }
 }

@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\AutoTimetableCollection;
 use App\Http\Resources\MealPlanCollection;
 use App\Http\Resources\MealPlanResource;
 use App\Models\MealPlan;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class MealPlanController extends Controller

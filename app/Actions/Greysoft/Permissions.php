@@ -33,6 +33,7 @@ class Permissions
             'dispatch.dispatched',
             'dispatch.delivered',
             'feedback.manage',
+            'mealplans.manage',
         ],
         'manager' => [
             'users.user',

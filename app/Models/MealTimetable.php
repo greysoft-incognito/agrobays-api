@@ -10,6 +10,8 @@ class MealTimetable extends Pivot
 {
     use HasFactory;
 
+    protected $table = 'meal_timetables';
+
     /**
      * The attributes that should be cast.
      *

@@ -6,6 +6,11 @@ return [
             'path' => 'media/feedback/',
             'default' => 'default.png',
         ],
+        'plans' => [
+            'path' => 'media/plans/',
+            'default' => 'default.png',
+            'size' => [400, 400],
+        ],
         'private' => [
             'files' => [
                 'path' => 'files/',

@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\AdminSubscriptionController;
 use App\Http\Controllers\Admin\AdminTransactionController;
 use App\Http\Controllers\Admin\DispatchController;
 use App\Http\Controllers\Admin\FeedbackController as AdminFeedbackController;
+use App\Http\Controllers\Admin\MealPlanController as AdminMealPlanController;
 use App\Http\Controllers\Admin\UsersController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\FeedbackController;
@@ -270,6 +271,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
                     Route::get('/{item}', 'getItem');
                     Route::post('/{item?}', 'store');
                     Route::delete('/{item?}', 'destroy');
+                });
+
+            /**
+             * Admin Meal Plan Routes
+             */
+            Route::controller(AdminMealPlanController::class)
+                ->prefix('meal-plans')->name('meal.plans.')
+                ->group(function () {
+                    Route::apiResource('/', AdminMealPlanController::class)->parameters(['' => 'meal_plan']);
                 });
         });
 
