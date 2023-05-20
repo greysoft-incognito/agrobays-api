@@ -23,7 +23,7 @@ class Kernel extends ConsoleKernel
         $schedule->command(HandleTransactions::class, ['abandoned', '--action clear', '--source paystack', '--perpage 100', '--persistent'])
             // ->twiceDaily(1, 13)
             // ->everyMinute()
-            ->hourly()
+            ->everyThirtyMinutes()
             ->withoutOverlapping()
             ->onSuccess(function (Stringable $output) {
                 SlackAlert::message($output);
