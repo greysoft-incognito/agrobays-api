@@ -97,11 +97,11 @@ class Subscription extends Model
                 $nextAmount = ($amount / $duration) * $days;
 
                 // Check if the next amount would make the subscription exceed the plan amount
-                if ($this->left_amount + $nextAmount > $this->plan->amount) {
+                if ($this->left_amount + $nextAmount > $this->plan->amount && $this->paid_days > 0) {
                     $nextAmount = $this->plan->amount - $this->left_amount;
                 }
 
-                return $nextAmount ? $nextAmount : $this->plan->amount;
+                return $nextAmount;
             },
         );
     }
