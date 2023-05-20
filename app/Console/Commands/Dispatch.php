@@ -113,6 +113,7 @@ class Dispatch extends Command
                 $query->orWhereJsonContains('data->payment_method->type', 'wallet');
             })->whereDoesntHave('allSavings', function ($query) {
                 $query->whereRaw('created_at >= subscriptions.next_date');
+                $query->orWhere('next_date', null);
             });
 
         // Based on interval, get all savings that are due for processing
