@@ -101,7 +101,7 @@ class Subscription extends Model
                     $nextAmount = $this->plan->amount - $this->left_amount;
                 }
 
-                return $nextAmount;
+                return $nextAmount ? $nextAmount : $this->plan->amount;
             },
         );
     }
