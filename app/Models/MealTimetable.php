@@ -10,6 +10,13 @@ class MealTimetable extends Pivot
 {
     use HasFactory;
 
+    /**
+    * Indicates if the IDs are auto-incrementing.
+    *
+    * @var bool
+    */
+   public $incrementing = true;
+
     protected $table = 'meal_timetables';
 
     /**
