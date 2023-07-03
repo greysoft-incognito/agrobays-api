@@ -1,6 +1,7 @@
 <?php
 
 return [
+
     /*
     |--------------------------------------------------------------------------
     | Site specific Configuration
@@ -9,12 +10,17 @@ return [
     | These settings determine how the site is to be run or managed
     |
     */
+
     'site_name' => 'Agrobays AgroFoods',
     'currency_symbol' => '₦',
     'currency' => 'NGN',
     'use_queue' => true,
-    'prefered_notification_channels' => ['mail'],
+    'prefered_notification_channels' => [
+        'mail',
+    ],
+
     // 'prefered_notification_channels' => ['sms', 'mail'],
+
     'keep_successful_queue_logs' => true,
     'slack_debug' => false,
     'slack_logger' => false,
@@ -24,10 +30,12 @@ return [
     'shipping_fee' => 5000,
     'paid_shipping' => false,
     'feedback_system' => true,
+    'require_org_approval' => false,
+    'foodbag_locktime' => 0.5,
     'withdraw_to' => 'wallet',
     'frontend_link' => 'http://localhost:8080',
     'payment_verify_url' => env('PAYMENT_VERIFY_URL', 'http://localhost:8080/payment/verify'),
-    'default_banner' => env('ASSETS_URL', 'http://localhost:8080').'/media/default_banner.png',
+    'default_banner' => env('ASSETS_URL', 'http://localhost:8080') . '/media/default_banner.png',
     'paystack_public_key' => env('PAYSTACK_PUBLIC_KEY', 'pk_'),
     'ipinfo_access_token' => env('IPINFO_ACCESS_TOKEN', 'a349_'),
     'trx_prefix' => 'AGB-',
@@ -35,7 +43,7 @@ return [
     'contact_email' => 'hi@greysoft.ng',
     'contact_address' => '31 Gwari Avenue, Barnawa, Kaduna',
     'office_address' => '31 Gwari Avenue, Barnawa, Kaduna',
-    'last_setting_time' => '2023-05-18 00:49:29',
+    'last_setting_time' => '2023-07-02 10:45:50',
     'permissions' => [
         'manage_guests' => 'View, manage and get notifications for guest and bootcamp registrations',
         'manage_users' => 'Create, view, manage and get notifications for user access',
@@ -48,13 +56,15 @@ return [
         'plans_and_subscriptions' => 'Create and manage subscriptions and subscription plans',
         'hahaha_ahahah' => 'LOL Haha!',
     ],
+
     /*
-    |---------------------------------------------------------------------------------
-    | Message templates
-    |---------------------------------------------------------------------------------
-    | Variables include {username}, {name}, {firstname}, {lastname}, {site_name}, {message}, {reserved}
-    |
-     */
+        |---------------------------------------------------------------------------------
+        | Message templates
+        |---------------------------------------------------------------------------------
+        | Variables include {username}, {name}, {firstname}, {lastname}, {site_name}, {message}, {reserved}
+        |
+    */
+
     'messages' => [
         'variables' => 'Available Variables: {username}, {name}, {firstname}, {lastname}, {site_name}, {message}, {reserved}. (Some variables may not apply to some actions)',
         'greeting' => 'Hello {username},',

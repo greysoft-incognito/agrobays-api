@@ -20,10 +20,10 @@ return new class extends Migration
             $table->string('image')->nullable();
             $table->string('category')->nullable();
             $table->text('description')->fulltext();
-            $table->integer('calories')->nullable();
-            $table->integer('protein')->nullable();
-            $table->integer('carbohydrates')->nullable();
-            $table->integer('fat')->nullable();
+            $table->float('calories')->nullable();
+            $table->float('protein')->nullable();
+            $table->float('carbohydrates')->nullable();
+            $table->float('fat')->nullable();
             $table->timestamps();
         });
     }

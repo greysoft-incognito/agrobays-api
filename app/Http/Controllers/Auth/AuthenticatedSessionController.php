@@ -44,7 +44,7 @@ class AuthenticatedSessionController extends Controller
         return (new UserResource($user))->additional([
             'message' => 'Login was successfull',
             'status' => 'success',
-            'status_code' => 200,
+            'response_code' => 200,
             'token' => $user->createToken($device)->plainTextToken,
         ])->response()->setStatusCode(200);
     }
@@ -82,10 +82,10 @@ class AuthenticatedSessionController extends Controller
             ];
         });
 
-        return $this->buildResponse([
+        return $this->responseBuilder([
             'message' => 'Tokens retrieved successfully',
             'status' => 'success',
-            'status_code' => 200,
+            'response_code' => 200,
             'data' => $data,
         ]);
     }
@@ -110,7 +110,7 @@ class AuthenticatedSessionController extends Controller
 
         $request->user()->currentAccessToken()->delete();
 
-        return $this->buildResponse([
+        return $this->responseBuilder([
             'message' => 'You have been successfully logged out',
             'status' => 'success',
             'response_code' => 200,
@@ -151,17 +151,17 @@ class AuthenticatedSessionController extends Controller
 
             $tokens->each->delete();
         } else {
-            return $this->buildResponse([
+            return $this->responseBuilder([
                 'message' => __('You are no longer logged in on any of the selected devices'),
                 'status' => 'error',
-                'status_code' => 422,
+                'response_code' => 422,
             ]);
         }
 
-        return $this->buildResponse([
+        return $this->responseBuilder([
             'message' => __('You have been successfully logged out of :0', [$names]),
             'status' => 'success',
-            'status_code' => 200,
+            'response_code' => 200,
         ]);
     }
 

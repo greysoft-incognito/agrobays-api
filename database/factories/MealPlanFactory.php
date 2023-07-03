@@ -19,37 +19,29 @@ class MealPlanFactory extends Factory
      */
     public function definition()
     {
+        $names = [
+            'Roasted Chicken and Veggies',
+            'Grilled Salmon with Avocado Salsa',
+            'Pasta with Tomato Sauce',
+            'Fried Rice with Tofu',
+            'Shrimp and Broccoli Stir Fry',
+            'Baked Chicken Breast',
+            'Salmon with Lemon and Capers',
+            'Chicken Burrito Bowls',
+            'Turkey Chili',
+            'Chicken Parmesan',
+        ];
+
+        $name = $names[rand(0, 9)];
+
         return [
-            'name' => [
-                'Roasted Chicken and Veggies',
-                'Grilled Salmon with Avocado Salsa',
-                'Pasta with Tomato Sauce',
-                'Fried Rice with Tofu',
-                'Shrimp and Broccoli Stir Fry',
-                'Baked Chicken Breast',
-                'Salmon with Lemon and Capers',
-                'Chicken Burrito Bowls',
-                'Turkey Chili',
-                'Chicken Parmesan',
-            ][rand(0, 9)],
-            'slug' => [
-                'roasted-chicken-and-veggies',
-                'grilled-salmon-with-avocado-salsa',
-                'pasta-with-tomato-sauce',
-                'fried-rice-with-tofu',
-                'shrimp-and-broccoli-stir-fry',
-                'baked-chicken-breast',
-                'salmon-with-lemon-and-capers',
-                'chicken-burrito-bowls',
-                'turkey-chili',
-                'chicken-parmesan',
-            ][rand(0, 9)] . '-' . rand(1000, 9999),
-            'image' => $this->faker->imageUrl(),
+            'name' => $name,
+            'slug' => str($name)->slug()->append('-'.rand(1000, 9999)),
             'category' => [
                 'breakfast',
                 'lunch',
                 'dinner',
-            ][rand(0, 3)],
+            ][rand(0, 2)],
             'description' => $this->faker->paragraph(),
             'calories' => rand(100, 1000),
             'protein' => rand(10, 100),

@@ -6,8 +6,8 @@ use App\Actions\Greysoft\Charts;
 use App\Http\Controllers\Controller;
 use App\Models\Subscription;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Validator;
+use App\Actions\ArrayFile;
 
 class AdminController extends Controller
 {
@@ -32,6 +32,7 @@ class AdminController extends Controller
         'verify_email' => 'boolean',
         'verify_phone' => 'boolean',
         'feedback_system' => 'boolean',
+        'foodbag_locktime' => 'decimal',
     ];
 
     public function charts($type = 'pie')
@@ -43,12 +44,12 @@ class AdminController extends Controller
             'status' => 'success',
             'response_code' => 200,
             'charts' => [
-                'pie' => (new Charts)->getPie('admin'),
-                'bar' => (new Charts)->getBar('admin'),
-                'transactions' => (new Charts)->totalTransactions('admin', 'month'),
-                'customers' => (new Charts)->customers('admin', 'month'),
-                'income' => (new Charts)->income('admin', 'month'),
-                'sales' => (new Charts)->sales('admin', 'week'),
+                'pie' => (new Charts())->getPie('admin'),
+                'bar' => (new Charts())->getBar('admin'),
+                'transactions' => (new Charts())->totalTransactions('admin', 'month'),
+                'customers' => (new Charts())->customers('admin', 'month'),
+                'income' => (new Charts())->income('admin', 'month'),
+                'sales' => (new Charts())->sales('admin', 'week'),
                 'subscriptions' => [
                     'all' => Subscription::count(),
                     'pending' => Subscription::whereStatus('pending')->count(),
@@ -77,26 +78,30 @@ class AdminController extends Controller
             ]);
         }
 
-        collect($request->config)->map(function ($config, $key) {
+        $config = ArrayFile::open(base_path('config/settings.php'));
+
+        collect($request->config)->map(function ($value, $key) use ($config) {
             if (in_array($key, array_keys($this->configs))) {
                 // Cast the value to the correct type
-                if ($this->configs[$key] === 'boolean') {
-                    $config = (bool) $config;
-                } elseif ($this->configs[$key] === 'integer') {
-                    $config = (int) $config;
-                } elseif ($this->configs[$key] === 'array') {
-                    $config = (array) $config;
-                } elseif ($this->configs[$key] === 'string') {
-                    $config = (string) $config;
-                }
+                $type = $this->configs[$key];
+                $value = match (true) {
+                    $type == 'boolean' => (bool) $value,
+                    $type == 'integer' => (int) $value,
+                    $type == 'array' => (array) $value,
+                    $type == 'string' => (string) $value,
+                    $type == 'decimal' => (float) $value,
+                    default => $value,
+                };
+
                 // Write the config to the file
-                Config::write("settings.{$key}", $config);
+                $config->set($key, $value);
             }
         });
 
-        Config::write("settings.last_setting_time", now()->toDateTimeString());
+        $config->set('last_setting_time', now()->toDateTimeString());
+        $config->write();
 
-        return $this->buildResponse([
+        return $this->responseBuilder([
             'message' => 'Configuration Saved.',
             'status' => 'success',
             'response_code' => 200,

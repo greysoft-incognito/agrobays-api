@@ -53,7 +53,7 @@ class FeedbackController extends Controller
         return (new FeedbackCollection($feedbacks))->additional([
             'message' => $feedbacks->isEmpty() ? __('There are no feedbacks for now.') : 'OK',
             'status' => $feedbacks->isEmpty() ? 'info' : 'success',
-            'status_code' => 200,
+            'response_code' => 200,
         ])->response()->setStatusCode(200);
     }
 
@@ -61,7 +61,7 @@ class FeedbackController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param int $thread_id
+     * @param  int  $thread_id
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $thread_id)
@@ -119,7 +119,7 @@ class FeedbackController extends Controller
         return (new FeedbackResource($feedback))->additional([
             'message' => __('Feedback status has successfully been changed to :0.', [$feedback->status]),
             'status' => 'success',
-            'status_code' => 202,
+            'response_code' => 202,
         ])->response()->setStatusCode(202);
     }
 
@@ -144,7 +144,7 @@ class FeedbackController extends Controller
         return (new FeedbackResource($feedback))->additional([
             'message' => __("Github :0 for Feedback #:1 has been :2 (Please don't resend this request, refresh the page after a few seconds to check for updated status).", [ucfirst($request->type), $feedback->id, $request->action]),
             'status' => 'success',
-            'status_code' => 202,
+            'response_code' => 202,
         ])->response()->setStatusCode(202);
     }
 
@@ -161,7 +161,7 @@ class FeedbackController extends Controller
         return (new FeedbackResource($feedback))->additional([
             'message' => 'OK',
             'status' => 'success',
-            'status_code' => 200,
+            'response_code' => 200,
         ])->response()->setStatusCode(200);
     }
 
@@ -193,7 +193,7 @@ class FeedbackController extends Controller
                     ? __('Feedback #:0 has been deleted', [$items->first()])
                     : __(':0 feedbacks have been deleted.', [$items->count()]),
                 'status' => 'success',
-                'status_code' => 202,
+                'response_code' => 202,
             ]);
         } else {
             $item = Feedback::findOrFail($id);
@@ -203,7 +203,7 @@ class FeedbackController extends Controller
             return $this->buildResponse([
                 'message' => __('Feedback #:0 has been deleted.', [$item->id]),
                 'status' => 'success',
-                'status_code' => 202,
+                'response_code' => 202,
             ]);
         }
     }

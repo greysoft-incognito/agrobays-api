@@ -7,7 +7,6 @@
     "require": {
         "php": "^8.1",
         "doctrine/dbal": "^3.6",
-        "hrace009/config-writer": "^1.3",
         "intervention/image": "^2.7",
         "intervention/imagecache": "^2.5",
         "laravel-notification-channels/twilio": "^3.2",
@@ -24,6 +23,7 @@
         "spatie/laravel-slack-slash-command": "^1.11",
         "toneflix-code/cuttly-laravel": "^1.0",
         "toneflix-code/laravel-fileable": "^1.1",
+        "winter/laravel-config-writer": "^1.0",
         "yabacon/paystack-php": "^2.2",
         "yajra/laravel-datatables-oracle": "~9.0"
     },

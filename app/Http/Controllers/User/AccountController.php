@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\User;
 
 use App\Actions\Greysoft\Charts;
+use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Http\Resources\WalletCollection;
 use App\Models\Saving;
@@ -10,7 +11,6 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -142,7 +142,7 @@ class AccountController extends Controller
                 $vals .= '|min:8|confirmed';
             }
             if (is_array($filled[$field])) {
-                return [$field.'.*' => 'required'];
+                return [$field . '.*' => 'required'];
             }
 
             return [$field => "required|$vals"];
@@ -167,13 +167,7 @@ class AccountController extends Controller
             return ! Str::contains($k, '_confirmation');
         });
 
-        if ($request->hasFile('image')) {
-            $user->image && Storage::delete($user->image ?? '');
-            $user->image = $request->file('image')->storeAs(
-                'public/uploads/images',
-                rand().'_'.rand().'.'.$request->file('image')->extension()
-            );
-        } else {
+        if (!$request->hasFile('image')) {
             foreach ($fields as $_field) {
                 if (Str::contains($_field, ':image')) {
                     $_field = current(explode(':image', (string) $_field));
@@ -259,42 +253,10 @@ class AccountController extends Controller
         $user->state = $request->state;
         $user->city = $request->city;
 
-        if ($request->hasFile('image')) {
-            $user->image && Storage::delete($user->image ?? '');
-            $user->image = $request->file('image')->storeAs(
-                'public/uploads/images',
-                rand().'_'.rand().'.'.$request->file('image')->extension()
-            );
-        }
-
         $user->save();
 
         return (new UserResource($user))->additional([
             'message' => 'Your profile has been successfully updated.',
-            'status' => 'success',
-            'response_code' => 200,
-        ])->response()->setStatusCode(200);
-    }
-
-    /**
-     * Display a listing of the wallet resource.
-     *
-     * @param  Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function wallet(Request $request)
-    {
-        $query = Auth::user()->wallet()->orderByDesc('id');
-
-        if ($p = $request->get('period')) {
-            $period = explode('-', $p);
-            $from = new Carbon($period[0]);
-            $to = new Carbon($period[1]);
-            $query->whereBetween('created_at', [$from, $to]);
-        }
-
-        return (new WalletCollection($query->paginate()))->additional([
-            'message' => 'OK',
             'status' => 'success',
             'response_code' => 200,
         ])->response()->setStatusCode(200);
@@ -307,9 +269,9 @@ class AccountController extends Controller
             'status' => 'success',
             'response_code' => 200,
             'charts' => [
-                'pie' => (new Charts)->getPie('user'),
-                'bar' => (new Charts)->getBar('user'),
-                'transactions' => (new Charts)->totalTransactions('user', 'month'),
+                'pie' => (new Charts())->getPie('user'),
+                'bar' => (new Charts())->getBar('user'),
+                'transactions' => (new Charts())->totalTransactions('user', 'month'),
             ],
         ]);
     }

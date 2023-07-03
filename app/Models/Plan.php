@@ -24,6 +24,10 @@ class Plan extends Model
             $slug = Str::of($plan->title)->slug();
             $plan->slug = (string) Plan::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
         });
+
+        static::deleting(function (Saving $org) {
+            $org->bags()->delete();
+        });
     }
 
     /**
@@ -52,7 +56,7 @@ class Plan extends Model
     {
         $image = $this->image
             ? img($this->image, 'banner', 'large')
-            : 'https://loremflickr.com/320/320/'.urlencode($this->title ?? 'fruit');
+            : 'https://loremflickr.com/320/320/' . urlencode($this->title ?? 'fruit');
 
         return Attribute::make(
             get: fn () => $image,

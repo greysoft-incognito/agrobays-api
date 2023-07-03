@@ -20,15 +20,16 @@ class HandleTransactions extends Command
      *
      * @var string
      */
-    protected $signature = "transactions
-                            {status=success : Filter transactions by status paystack('failed', 'success', 'abandoned'), local('pending','complete','rejected')}
-                            {--f|from= : A timestamp from which to start listing transactions e.g. 2016-09-24T00:00:05.000Z, 2016-09-21}
-                            {--t|to= : A timestamp to which to end listing transactions e.g. 2016-09-30T00:00:05.000Z, 2016-09-30}
-                            {--r|persistent : Determine wether to load all available pages iteratively or just return the first page}
-                            {--a|action=list : An action to perform on the transaction ('list', 'clear')}
-                            {--p|perpage=50 : Specify how many records you want to retrieve per page. Default value is 50.}
-                            {--o|offset=1 : Specify exactly what page you want to retrieve. If not specify we use a default value of 1.}
-                            {--s|source=paystack : The source of the transactions to shoe ('local', 'paystack')}";
+    protected $signature =
+    "transactions
+        {status=success : Filter transactions by status paystack('failed', 'success', 'abandoned'), local('pending','complete','rejected')}
+        {--f|from= : A timestamp from which to start listing transactions e.g. 2016-09-24T00:00:05.000Z, 2016-09-21}
+        {--t|to= : A timestamp to which to end listing transactions e.g. 2016-09-30T00:00:05.000Z, 2016-09-30}
+        {--r|persistent : Determine wether to load all available pages iteratively or just return the first page}
+        {--a|action=list : An action to perform on the transaction ('list', 'clear')}
+        {--p|perpage=50 : Specify how many records you want to retrieve per page. Default value is 50.}
+        {--o|offset=1 : Specify exactly what page you want to retrieve. If not specify we use a default value of 1.}
+        {--s|source=paystack : The source of the transactions to shoe ('local', 'paystack')}";
 
     /**
      * The console command description.

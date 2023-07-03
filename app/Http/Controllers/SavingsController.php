@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\EnumsAndConsts\HttpStatus;
 use App\Http\Resources\FoodBagCollection;
 use App\Http\Resources\FoodBagResource;
 use App\Http\Resources\PlanCollection;
+use App\Http\Resources\SavingCollection;
+use App\Models\Cooperative;
 use App\Models\FoodBag;
 use App\Models\Plan;
+use App\Models\Saving;
 use App\Models\Subscription;
 use App\Notifications\SubStatus;
 use Carbon\CarbonImmutable as Carbon;
@@ -25,50 +29,63 @@ class SavingsController extends Controller
      * @param  int  $limit
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request, Auth $auth, $sub_id = null, $limit = 1, $status = null)
+    public function index(Request $request, Auth $auth, $subscription = null)
     {
-        $save = $auth::user()->savings()->orderBy('id', 'DESC');
+        $limit = $request->limit;
+        $status = $request->status;
 
-        if (is_numeric($limit) && $limit > 0) {
-            $save->limit($limit);
-        }
 
-        if ($status !== null && in_array($status, ['rejected', 'pending', 'complete'])) {
-            $save->where('status', $status);
-        }
-
-        if (is_numeric($sub_id)) {
-            $save->where('subscription_id', $sub_id);
-        }
-
-        if ($p = $request->query('period')) {
-            $period = explode('-', $p);
-            $from = new Carbon($period[0]);
-            $to = new Carbon($period[1]);
-            $save->whereBetween('created_at', [$from, $to]);
-        }
-
-        $savings = $save->get();
-
-        if ($savings->isNotEmpty()) {
-            $savings->each(function ($tr) {
-                $tr->date = $tr->created_at->format('Y-m-d H:i');
-                $tr->title = $tr->subscription->plan->title;
+        if ($request->cooperative_id) {
+            $query = Saving::query();
+            $query->whereHas('subscription', function (Builder $q) use ($request) {
+                $q->whereHas('cooperative', function (Builder $q) use ($request) {
+                    $q->whereSlug($request->cooperative_id)->orWhere('id', $request->cooperative_id);
+                });
+            });
+        } else {
+            $query = $auth::user()->savings()->whereDoesntHave('subscription', function (Builder $q) {
+                $q->whereHas('cooperative');
             });
         }
 
+        if ($subscription) {
+            $query->where('subscription_id', $subscription);
+        }
+
+        if (in_array($status, ['rejected', 'pending', 'complete'])) {
+            $query->where('status', $status);
+        }
+
+        if ($p = $request->get('period')) {
+            $period = explode('-', $p);
+            $query->whereBetween('created_at', [new Carbon($period[0]), new Carbon($period[1])]);
+        }
+
+        if ($limit > 0 && !$request->paginate) {
+            $query->limit($limit);
+        }
+
+        $query->orderBy('id', 'DESC');
+
+        /** @var \App\Models\Saving */
+        $savings = $request->boolean('paginate')
+            ? $query->paginate($request->get('limit', 30))
+            : $query->get();
+
         $msg = $savings->isEmpty() ? 'You have not made any savings.' : 'OK';
+        $last = $savings->last();
+        $first = $savings->first();
+
         $_period = $savings->isNotEmpty()
-            ? ($savings->last()->created_at->format('Y/m/d').'-'.$savings->first()->created_at->format('Y/m/d'))
+            ? ($last->created_at->format('Y/m/d') . '-' . $first->created_at->format('Y/m/d'))
             : '';
 
-        return $this->buildResponse([
+        return (new SavingCollection($savings))->additional([
             'message' => $msg,
             'status' => $savings->isEmpty() ? 'info' : 'success',
-            'response_code' => 200,
-            'savings' => $savings ?? [],
+            'response_code' => HttpStatus::OK,
             'period' => $p ? urldecode($p) : $_period,
-        ]);
+        ])->response()->setStatusCode(HttpStatus::OK);
     }
 
     /**
@@ -173,24 +190,40 @@ class SavingsController extends Controller
     {
         $plan = Plan::find($id);
 
-        $planActiveNoSavings = Subscription::where('user_id', Auth::id())->whereDoesntHave('allSavings', function (Builder $query) {
+        $checkQuery = Subscription::where('user_id', Auth::id())->whereDoesntHave('allSavings', function (Builder $query) {
             $query->where('status', 'complete');
-        })->exists();
+        });
+
+        /** @var \App\Models\Subscription */
+        $query = $request->user()->subscriptions();
+
+        if ($request->cooperative_id) {
+            $checkQuery->whereCooperativeId($request->cooperative_id);
+
+            /** @var \App\Models\Cooperative */
+            $cooperative = Cooperative::find($request->cooperative_id);
+            $this->authorize('manage', [$cooperative, 'manage_plans']);
+
+            /** @var \App\Models\Subscription */
+            $query = $cooperative->subscriptions();
+        }
+
+        $planActiveNoSavings = $checkQuery->exists();
 
         if (! $plan) {
-            return $this->buildResponse([
+            return $this->responseBuilder([
                 'message' => 'The requested plan no longer exists.',
                 'status' => 'error',
                 'response_code' => 404,
             ]);
         } elseif ($planActiveNoSavings) {
-            return $this->buildResponse([
+            return $this->responseBuilder([
                 'message' => 'You need to make at least one savings on all your existing subscriptions before you can subscribe to another plan.',
                 'status' => 'info',
                 'response_code' => 406,
             ]);
-        } elseif (Auth::user()->subscriptions()->where([['plan_id', '=', $id], ['status', '=', 'active']])->exists()) {
-            return $this->buildResponse([
+        } elseif ($query->where([['plan_id', '=', $id], ['status', '=', 'active']])->exists()) {
+            return $this->responseBuilder([
                 'message' => 'You are already active on this plan, but you can subscribe to another plan.',
                 'status' => 'info',
                 'response_code' => 406,
@@ -201,14 +234,21 @@ class SavingsController extends Controller
         Subscription::where('user_id', Auth::id())->where('status', 'pending')->delete();
 
         // Create the new plan
-        $userPlan = new Subscription;
+        $userPlan = new Subscription();
         $userPlan->user_id = Auth::id();
         $userPlan->plan_id = $plan->id;
         $userPlan->food_bag_id = $plan->bags()->first()->id ?? FoodBag::first()->id;
+
+        if ($request->cooperative_id) {
+            $userPlan->cooperative_id = $request->cooperative_id;
+        }
         $userPlan->save();
 
-        return $this->buildResponse([
-            'message' => "You have successfully activated the {$plan->title}",
+        return $this->responseBuilder([
+            'message' => __('You have successfully activated the :0:1', [
+                $plan->title,
+                $request->cooperative_id ? ' for ' . $userPlan->cooperative->name : null,
+            ]),
             'status' => 'success',
             'response_code' => 201,
             'data' => $userPlan,
@@ -225,8 +265,14 @@ class SavingsController extends Controller
     {
         $userPlan = Subscription::find($request->plan_id);
 
+        if ($userPlan->cooperative) {
+            $this->authorize('manage', [$userPlan->cooperative, 'manage_plans']);
+        } else {
+            $this->authorize('be-owner', [$userPlan->user_id]);
+        }
+
         if (! $userPlan) {
-            return $this->buildResponse([
+            return $this->responseBuilder([
                 'message' => 'You do not have an active subscription.',
                 'status' => 'error',
                 'response_code' => 404,

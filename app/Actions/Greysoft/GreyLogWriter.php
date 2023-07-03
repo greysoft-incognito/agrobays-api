@@ -12,7 +12,7 @@ class GreyLogWriter implements LogWriter
 {
     public function logRequest(Request $request): void
     {
-        $r = new Response;
+        $r = new Response();
 
         $method = strtoupper($request->getMethod());
 

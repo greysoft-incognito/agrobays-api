@@ -1,0 +1,6 @@
+*
+!.gitignore
+!default.*
+!default_*.*
+!banners/
+!plans/

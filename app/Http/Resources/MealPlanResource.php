@@ -16,29 +16,23 @@ class MealPlanResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name'=> $this->name,
-            'slug'=> $this->slug,
-            'image'=> $this->image,
-            'image_url'=> $this->images['image'],
-            'category'=> $this->category,
-            'description'=> $this->description,
-            'calories'=> $this->calories,
-            'protein'=> $this->protein,
-            'carbohydrates'=> $this->carbohydrates,
-            'fat'=> $this->fat,
-            'favorite_count'=> $this->favorite_to_users_count,
-            'favorited'=> $this->hasBeenFavoritedBy($request->user()),
-            'pivot'=> $this->whenPivotLoaded('meal_timetables', function () {
-                return [
-                    'date'=> $this->pivot->date->format('Y-m-d'),
-                    'time'=> $this->pivot->time,
-                ];
-            }),
-            'date'=> $this->whenPivotLoaded('meal_timetables', function () {
-                return $this->pivot->date->format('Y-m-d');
-            }),
-            'created_at'=> $this->created_at,
-            'updated_at'=> $this->updated_at,
+            'name' => $this->name,
+            'slug' => $this->slug,
+            'image' => $this->image,
+            'image_url' => $this->images['image'],
+            'category' => $this->category,
+            'description' => $this->description,
+            'calories' => $this->calories,
+            'protein' => $this->protein,
+            'carbohydrates' => $this->carbohydrates,
+            'fat' => $this->fat,
+            'favorite_count' => $this->favoriters()->count(),
+            'favorited' => $this->hasBeenFavoritedBy($request->user()),
+            'days' => $this->timetable()->forUser($request->user())->pluck('date'),
+            'date' => $this->whenNotNull($this->date),
+            'saved' => $this->is_saved,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
     }
 }

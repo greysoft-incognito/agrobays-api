@@ -52,17 +52,17 @@ class Handler extends ExceptionHandler
     {
         if (! config('app.testing')) {
             if ($request->isXmlHttpRequest() || request()->is('api/*')) {
-                $line = method_exists($e, 'getFile') ? ' in '.$e->getFile() : '';
-                $line .= method_exists($e, 'getLine') ? ' on line '.$e->getLine() : '';
-                $getMessage = method_exists($e, 'getMessage') ? $e->getMessage().$line : 'An error occured'.$line;
+                $line = method_exists($e, 'getFile') ? ' in ' . $e->getFile() : '';
+                $line .= method_exists($e, 'getLine') ? ' on line ' . $e->getLine() : '';
+                $getMessage = method_exists($e, 'getMessage') ? $e->getMessage() . $line : 'An error occured' . $line;
                 $plainMessage = method_exists($e, 'getMessage') ? $e->getMessage() : null;
 
-                $prefix = $e instanceof ModelNotFoundException ? str($e->getModel())->afterLast('\\')->title().' ' : '';
+                $prefix = $e instanceof ModelNotFoundException ? str($e->getModel())->afterLast('\\')->title() . ' ' : '';
 
                 return match (true) {
                     $e instanceof NotFoundHttpException ||
                         $e instanceof ModelNotFoundException => $this->renderException(
-                            $prefix.HttpStatus::message(HttpStatus::NOT_FOUND),
+                            $prefix . HttpStatus::message(HttpStatus::NOT_FOUND),
                             HttpStatus::NOT_FOUND
                         ),
                     $e instanceof AuthorizationException ||
@@ -119,7 +119,7 @@ class Handler extends ExceptionHandler
 
     protected function renderException(string $msg, $code = 404, array $misc = [])
     {
-        return (new Controller)->buildResponse(collect([
+        return (new Controller())->buildResponse(collect([
             'message' => $msg,
             'status' => 'error',
             'response_code' => $code,

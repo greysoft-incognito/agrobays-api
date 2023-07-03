@@ -23,7 +23,6 @@ class Saving extends Model
 
     protected $appends = [
         'total',
-        'get_subscription',
     ];
 
     protected $casts = [
@@ -31,6 +30,16 @@ class Saving extends Model
         'tax' => 'float',
         'amount' => 'float',
     ];
+
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        static::deleting(function (Saving $org) {
+            $org->transaction()->delete();
+        });
+    }
 
     /**
      * Get the saving's subscription.

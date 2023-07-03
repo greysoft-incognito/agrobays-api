@@ -56,7 +56,7 @@ class Dispatch extends Command
             ->doesntHave('dispatch')->get()->filter(fn ($s) => $s->days_left <= 0);
         if ($savings->isNotEmpty()) {
             $savings->each(function ($saving) {
-                $dispatch = new ModelsDispatch;
+                $dispatch = new ModelsDispatch();
                 $dispatch->code = mt_rand(100000, 999999);
                 $dispatch->reference = config('settings.trx_prefix', 'AGB-') . Str::random(12);
                 $saving->dispatch()->save($dispatch);
@@ -71,7 +71,7 @@ class Dispatch extends Command
         $orders = Order::whereRelation('transaction', 'status', 'complete')->doesntHave('dispatch')->get();
         if ($orders->isNotEmpty()) {
             $orders->each(function ($order) {
-                $dispatch = new ModelsDispatch;
+                $dispatch = new ModelsDispatch();
                 $dispatch->code = mt_rand(100000, 999999);
                 $dispatch->reference = config('settings.trx_prefix', 'AGB-') . Str::random(12);
                 $order->dispatch()->save($dispatch);
@@ -143,6 +143,9 @@ class Dispatch extends Command
             $savings->each(function ($sub) use ($days, $interval) {
                 $this->info("Now processing {$interval} savings for user with ID of {$sub->user_id}.");
 
+                /**
+                 * @var \App\Models\User $user
+                 */
                 $user = $sub->user;
                 $due = round($sub->next_amount, 2);
                 $fees = ($sub->bag->fees / $sub->plan->duration) * $days;
@@ -161,7 +164,7 @@ class Dispatch extends Command
                     if ($tranx->data->status == 'success') {
                         $saving = $sub->savings()->save(
                             new Saving([
-                                'user_id' => $sub->user_id,
+                                'user_id' => $user->id,
                                 'status' => 'complete',
                                 'payment_ref' => $reference,
                                 'days' => $days,
@@ -173,7 +176,7 @@ class Dispatch extends Command
                         $transaction = $saving->transaction();
 
                         $transaction->create([
-                            'user_id' => $sub->user_id,
+                            'user_id' => $user->id,
                             'reference' => $reference,
                             'method' => 'Paystack',
                             'status' => 'complete',
@@ -189,16 +192,19 @@ class Dispatch extends Command
                         $sub->save();
 
                         // Notify the user of the new savings
-                        $sub->user->notify(new AutoSavingsMade($sub));
+                        $user->notify(new AutoSavingsMade($sub));
                         broadcast(new ActionComplete([
                             'type' => 'savings',
                             'mode' => 'automatic',
                             'data' => collect($sub)->except(['user', 'savings', 'transaction', 'items', 'bag']),
                             'updated' => ['user' => true, 'savings' => true, 'subscriptions' => true, 'transactions' => true],
                             'created_at' => now(),
-                        ], $sub->user));
+                        ], $user));
 
                         $this->info("Saving with ID of {$saving->id} has been processed.");
+                    } else {
+                        $user->notify(new AutoSavingsMade($sub, 'failed'));
+                        $this->error("Unable to process saving for user with ID of {$user->id}.");
                     }
                 }
             });

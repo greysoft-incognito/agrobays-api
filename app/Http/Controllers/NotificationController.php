@@ -24,7 +24,7 @@ class NotificationController extends Controller
         preg_match('/[?&]'.$list->getCursorName().'=([^&]+).*$/', $list->previousPageUrl(), $prev_cursor);
         preg_match('/[?&]'.$list->getCursorName().'=([^&]+).*$/', $list->nextPageUrl(), $next_cursor);
 
-        return (new Controller)->buildResponse([
+        return (new Controller())->buildResponse([
             'message' => $items ? 'OK' : 'No notifications available!',
             'status' => $items ? 'success' : 'info',
             'response_code' => 200,
@@ -62,7 +62,7 @@ class NotificationController extends Controller
         $list = \Auth::user()->unreadNotifications()->whereIn('id', is_string($items) ? [$items] : $items);
         $list->update(['read_at' => now()]);
 
-        return (new Controller)->buildResponse([
+        return (new Controller())->buildResponse([
             'message' => $list ? $list->count().' Marked as read.' : 'No notifications available!',
             'status' => $list ? 'success' : 'info',
             'response_code' => 200,

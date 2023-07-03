@@ -13,13 +13,18 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use libphonenumber\NumberParseException as LibphonenumberNumberParseException;
+use Overtrue\LaravelFavorite\Traits\Favoriter;
 use Propaganistas\LaravelPhone\Exceptions\NumberParseException;
 use Propaganistas\LaravelPhone\PhoneNumber;
-use Overtrue\LaravelFavorite\Traits\Favoriter;
+use ToneflixCode\LaravelFileable\Traits\Fileable;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable, Favoriter;
+    use HasApiTokens;
+    use HasFactory;
+    use Notifiable;
+    use Favoriter;
+    use Fileable;
 
     /**
      * The attributes that are mass assignable.
@@ -33,6 +38,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'phone',
         'username',
         'password',
+        'address'
     ];
 
     /**
@@ -95,6 +101,36 @@ class User extends Authenticatable implements MustVerifyEmail
         'data' => '{"settings": {"notifications": {"email": true, "sms": true, "push": true}}}',
     ];
 
+    public function registerFileable()
+    {
+        $this->fileableLoader([
+            'image' => 'avatar',
+        ], 'default', true);
+    }
+
+    public static function registerEvents()
+    {
+        static::creating(function ($user) {
+            $e = $user->email
+                ? str($user->email)->explode('@')
+                : str($user->name ?? $user->firstname)->slug();
+
+            $user->username = $user->username ?? $e->first(fn ($k) => (User::where('username', $k)
+                ->doesntExist()), $e->first() . rand(100, 999));
+        });
+
+        static::deleting(function (User $org) {
+            $org->subscriptions()->delete();
+            $org->transactions()->delete();
+            $org->cooperatives()->delete();
+            $org->dispatches()->delete();
+            $org->feedbacks()->delete();
+            $org->savings()->delete();
+            $org->orders()->delete();
+            $org->wallet()->delete();
+        });
+    }
+
     /**
      * Interact with the user's address.
      *
@@ -104,7 +140,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return Attribute::make(
             get: function ($value, $attributes) {
-                if (!$value || !is_string($value) || is_null($val = json_decode($value))) {
+                if (! $value || ! is_string($value) || is_null($val = json_decode($value))) {
                     return [
                         'shipping' => '',
                         'home' => '',
@@ -129,7 +165,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return Attribute::make(
             get: function ($value, $attributes) {
-                if (!$value || !is_string($value) || is_null($val = json_decode($value))) {
+                if (! $value || ! is_string($value) || is_null($val = json_decode($value))) {
                     return [
                         'name' => '',
                         'iso2' => '',
@@ -156,7 +192,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return Attribute::make(
             get: function ($value, $attributes) {
-                if (!$value || !is_string($value) || is_null($val = json_decode($value))) {
+                if (! $value || ! is_string($value) || is_null($val = json_decode($value))) {
                     return [
                         'name' => '',
                         'iso2' => '',
@@ -181,7 +217,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return Attribute::make(
             get: function ($value, $attributes) {
-                if (!$value || !is_string($value) || is_null($val = json_decode($value))) {
+                if (! $value || ! is_string($value) || is_null($val = json_decode($value))) {
                     return [
                         'name' => '',
                     ];
@@ -208,7 +244,7 @@ class User extends Authenticatable implements MustVerifyEmail
             get: function ($value) use ($cIso2) {
                 // return $value;
                 try {
-                    if (!empty($this->country->iso2 ?? $this->country['iso2']) && $value) {
+                    if (! empty($this->country->iso2 ?? $this->country['iso2']) && $value) {
                         return (string) PhoneNumber::make($value, $this->country->iso2 ?? $this->country['iso2'])->formatE164();
                     }
 
@@ -222,7 +258,7 @@ class User extends Authenticatable implements MustVerifyEmail
                     $cIso2 = $ipInpfo->json('country') ?? $cIso2;
                 }
                 $value = str_ireplace('-', '', $value);
-                if (!empty($this->country->iso2 ?? $this->country['iso2']) && $value) {
+                if (! empty($this->country->iso2 ?? $this->country['iso2']) && $value) {
                     return ['phone' => (string) PhoneNumber::make($value, $this->country->iso2 ?? $this->country['iso2'])->formatE164()];
                 }
 
@@ -239,9 +275,19 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function imageUrl(): Attribute
     {
         return Attribute::make(
-            get: fn ($value, $attributes) => ($attributes['image']
-                ? img($attributes['image'], 'avatar', 'medium-square')
-                : asset('media/default_avatar.png')),
+            get: fn () => $this->media_file,
+        );
+    }
+
+    /**
+     * Get the URL to the user's photo.
+     *
+     * @return string
+     */
+    protected function avatar(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->media_file,
         );
     }
 
@@ -249,11 +295,25 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $name = isset($this->firstname) ? ucfirst($this->firstname) : '';
         $name .= isset($this->lastname) ? ' ' . ucfirst($this->lastname) : '';
-        $name .= !isset($this->lastname) && !isset($this->firstname) && isset($this->username) ? ucfirst($this->username) : '';
+        $name .= ! isset($this->lastname) && ! isset($this->firstname) && isset($this->username) ? ucfirst($this->username) : '';
 
         return new Attribute(
             get: fn () => $name,
         );
+    }
+
+    /**
+     * Get all of the cooperatives the User is a member of
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function cooperatives(): HasMany
+    {
+        return $this->hasMany(Cooperative::class);
+    }
+
+    public function hasRequestedToJoin($model)
+    {
     }
 
     /**
@@ -447,7 +507,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function subscriptions(): HasMany
     {
-        return $this->hasMany(Subscription::class);
+        return $this->hasMany(Subscription::class)->whereDoesntHave('cooperative');
     }
 
     /**
@@ -472,11 +532,11 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function walletBalance(): Attribute
     {
-        $credit = Wallet::where([['type', 'credit'], ['user_id', auth()->id()]]);
-        $debit = Wallet::where([['type', 'debit'], ['user_id', auth()->id()]]);
-
+        // Sum wallet credit transactions and subtract wallet debit transactions
         return new Attribute(
-            get: fn () => $credit->sum('amount') - $debit->sum('amount'),
+            get: fn () => $this->wallet()
+                ->selectRaw('sum(case when type = "credit" then amount else -amount end) as balance')
+                ->value('balance'),
         );
     }
 
@@ -489,7 +549,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'charts' => true,
         'wallet' => true,
         'orders' => true,
-        'auth' => true
+        'auth' => true,
     ]): void
     {
         broadcast(new ActionComplete([

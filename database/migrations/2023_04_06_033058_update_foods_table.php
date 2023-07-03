@@ -59,8 +59,8 @@ return new class extends Migration
                 // If the column exists, empty it first
                 $table->string('weight')->change()->after('description');
             }
-            $table->dropColumn('unit')->after('weight');
-            $table->dropColumn('price')->after('unit');
+            $table->dropColumn('unit');
+            $table->dropColumn('price');
         });
     }
 };

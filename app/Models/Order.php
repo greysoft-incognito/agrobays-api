@@ -39,6 +39,17 @@ class Order extends Model
     ];
 
     /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        static::deleting(function (Order $org) {
+            $org->transaction()->delete();
+            $org->dispatch()->delete();
+        });
+    }
+
+    /**
      * Get the order's transaction.
      */
     public function transaction()

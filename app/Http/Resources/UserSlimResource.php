@@ -22,6 +22,7 @@ class UserSlimResource extends JsonResource
             'firstname' => $this->firstname,
             'lastname' => $this->lastname,
             'fullname' => $this->fullname,
+            'avatar' => $this->avatar,
             'image_url' => $this->image_url,
             'wallet_balance' => $this->wallet_balance,
             'bank' => $this->bank,

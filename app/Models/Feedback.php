@@ -10,7 +10,8 @@ use ToneflixCode\LaravelFileable\Traits\Fileable;
 
 class Feedback extends Model
 {
-    use HasFactory, Fileable;
+    use HasFactory;
+    use Fileable;
 
     public function registerFileable()
     {
@@ -19,6 +20,9 @@ class Feedback extends Model
 
     public static function registerEvents()
     {
+        static::deleting(function (Feedback $org) {
+            $org->replies()->delete();
+        });
     }
 
     /**

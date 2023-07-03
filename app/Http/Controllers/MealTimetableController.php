@@ -68,7 +68,7 @@ class MealTimetableController extends Controller
                 'message' => 'OK',
                 'status' => 'success',
                 'response_code' => '200',
-            ]);
+            ])->response()->setStatusCode(200);
     }
 
     /**
@@ -109,10 +109,10 @@ class MealTimetableController extends Controller
 
         return (new MealPlanResource($item))
             ->additional([
-                'message' => __("You have successfully added :0 to your meal timetable for :1", [$plan->item, $request->date]),
+                'message' => __('You have successfully added :0 to your meal timetable for :1', [$plan->item, $request->date]),
                 'status' => 'success',
                 'response_code' => '201',
-            ]);
+            ])->response()->setStatusCode(201);
     }
 
     /**
@@ -162,13 +162,20 @@ class MealTimetableController extends Controller
         ]);
 
         $user = $request->user();
-        $plan = $user->mealTimetable()->whereMealPlanId($request->plan_id)->firstOrFail();
+        $plan = $user->mealTimetable()->findOrFail($request->plan_id);
         $user->mealTimetable()->wherePivot('date', $request->date)->detach($plan);
 
-        return $this->buildResponse([
-            'message' => __("You have successfully removed :0 from your meal timetable for :1", [$plan->name, $request->date]),
-            'status' => 'success',
-            'response_code' => '200',
-        ]);
+        // Get the plan again to get the updated pivot data
+        $plan = MealPlan::findOrFail($request->plan_id);
+
+        return (new MealPlanResource($plan))
+            ->additional([
+                'message' => __('You have successfully removed :0 from your meal timetable for :1', [
+                    $plan->name,
+                    $request->date,
+                ]),
+                'status' => 'success',
+                'response_code' => '202',
+            ])->response()->setStatusCode(202);
     }
 }

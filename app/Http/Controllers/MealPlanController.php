@@ -19,6 +19,13 @@ class MealPlanController extends Controller
     {
         $query = MealPlan::query();
 
+        // if (auth('sanctum')->user()) {
+        //     $query->with('users');
+        // $query->whereHas('users', function ($query) use ($request) {
+        //     $query->where('user_id', $request->user()->id);
+        // });
+        // }
+
         if ($request->has('search')) {
             $query->where(function ($query) use ($request) {
                 $search = $request->search;
@@ -56,6 +63,10 @@ class MealPlanController extends Controller
 
         if ($request->has('fat')) {
             $query->where('fat', '<=', $request->fat);
+        }
+
+        if ($request->has('random')) {
+            $query->inRandomOrder();
         }
 
         $mealPlans = $query->paginate($request->get('limit', 30))->withQueryString();
@@ -113,7 +124,7 @@ class MealPlanController extends Controller
         return (new MealPlanResource($plan))
             ->additional([
                 'message' => $message,
-                'status' =>  'success',
+                'status' => 'success',
                 'response_code' => '202',
             ])
             ->response()

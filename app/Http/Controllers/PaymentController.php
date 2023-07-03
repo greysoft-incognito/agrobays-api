@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\EnumsAndConsts\HttpStatus;
+use App\Models\Cooperative;
+use App\Models\CooperativeWallet;
 use App\Models\FruitBay;
 use App\Models\Order;
 use App\Models\Saving;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Models\Wallet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -26,13 +30,22 @@ class PaymentController extends Controller
      */
     public function initializeSaving(Request $request, $method = 'paystack')
     {
-        if (($validator = Validator::make($request->all(), [
-            'subscription_id' => ['required', 'numeric'],
-        ]))->stopOnFirstFailure()->fails()) {
+        if (
+            ($validator = Validator::make($request->all(), [
+                'subscription_id' => ['required', 'numeric', 'exists:subscriptions,id'],
+            ]))->stopOnFirstFailure()->fails()
+        ) {
             return $this->validatorFails($validator, 'subscription_id');
         }
 
-        $subscription = Auth::user()->subscriptions()->find($request->subscription_id);
+        if ($request->cooperative_id) {
+            /** @var Cooperative */
+            $cooperative = Cooperative::findOrFail($request->cooperative_id);
+            $subscription = $cooperative->subscriptions()
+                                ->find($request->subscription_id);
+        } else {
+            $subscription = Auth::user()->subscriptions()->find($request->subscription_id);
+        }
 
         $real_due = 0;
         $code = 403;
@@ -40,13 +53,15 @@ class PaymentController extends Controller
         if (! $subscription) {
             $msg = 'You do not have an active subscription';
         } else {
-            if (($validator = Validator::make($request->all(), [
-                'days' => ['required', 'numeric', 'min:1', 'max:'.$subscription->days_left],
-            ], [
-                'days.min' => 'You have to save for at least 1 day.',
-                'days.max' => "You cannot save for more than {$subscription->days_left} days.",
-            ]))->stopOnFirstFailure()->fails()) {
-                return $this->validatorFails($validator, 'email');
+            if (
+                ($validator = Validator::make($request->all(), [
+                    'days' => ['required', 'numeric', 'min:1', 'max:' . $subscription->days_left],
+                ], [
+                    'days.min' => 'You have to save for at least 1 day.',
+                    'days.max' => "You cannot save for more than {$subscription->days_left} days.",
+                    ]))->stopOnFirstFailure()->fails()
+            ) {
+                        return $this->validatorFails($validator, 'email');
             }
 
             $method = $request->get('method', $method);
@@ -55,15 +70,17 @@ class PaymentController extends Controller
             $fees = ($subscription->bag->fees / $subscription->plan->duration) * $request->days;
 
             try {
-                $reference = config('settings.trx_prefix', 'AGB-').Str::random(12);
+                $reference = config('settings.trx_prefix', 'AGB-') . Str::random(12);
                 if ($request->get('method', $method) === 'wallet') {
-                    if ($request->user()->wallet_balance >= $due) {
+                    /** @var Cooperative|User */
+                    $handler = $request->cooperative_id ? $cooperative : $request->user();
+                    if ($handler->wallet_balance >= $due) {
                         $tranx = [
                             'reference' => $reference,
                             'method' => 'wallet',
                         ];
 
-                        $request->user()->wallet()->create([
+                        $handler->wallet()->create([
                             'reference' => $reference,
                             'amount' => round($due + $fees, 2),
                             'type' => 'debit',
@@ -72,9 +89,12 @@ class PaymentController extends Controller
                         ]);
                     } else {
                         return $this->buildResponse([
-                            'message' => 'You do not have enough funds in your wallet',
+                            'message' => __(':0 not have enough funds in :1 wallet', [
+                                $request->cooperative_id ? $handler->name . ' does' : 'You do',
+                                $request->cooperative_id ? 'the cooperative' : 'your',
+                            ]),
                             'status' => 'error',
-                            'status_code' => HttpStatus::BAD_REQUEST,
+                            'response_code' => HttpStatus::BAD_REQUEST,
                         ], HttpStatus::BAD_REQUEST);
                     }
                 } else {
@@ -93,13 +113,19 @@ class PaymentController extends Controller
                         ];
                         $real_due = $due;
                     } else {
+                        $callback_url = config('settings.frontend_link')
+                                ? config('settings.frontend_link') . '/payment/verify'
+                                : config('settings.payment_verify_url', route('payment.paystack.verify'));
+
+                        if ($request->cooperative_id) {
+                            $callback_url .= '?cooperative_id=' . $request->cooperative_id;
+                        }
+
                         $tranx = $paystack->transaction->initialize([
                             'amount' => $real_due,       // in kobo
                             'email' => Auth::user()->email,         // unique to customers
                             'reference' => $reference,         // unique to transactions
-                            'callback_url' => config('settings.frontend_link')
-                                ? config('settings.frontend_link').'/payment/verify'
-                                : config('settings.payment_verify_url', route('payment.paystack.verify')),
+                            'callback_url' => $callback_url,
                         ]);
                         $real_due = $due;
                     }
@@ -145,6 +171,7 @@ class PaymentController extends Controller
             'payload' => $tranx ?? [],
             'transaction' => $transaction ?? [],
             'amount' => $real_due,
+            'cooperative_id' => $request->cooperative_id,
         ]);
     }
 
@@ -157,9 +184,11 @@ class PaymentController extends Controller
      */
     public function initializeFruitBay(Request $request, $method = 'paystack')
     {
-        if (($validator = Validator::make($request->all(), [
-            'cart' => ['required', 'array'],
-        ]))->stopOnFirstFailure()->fails()) {
+        if (
+            ($validator = Validator::make($request->all(), [
+                'cart' => ['required', 'array'],
+            ]))->stopOnFirstFailure()->fails()
+        ) {
             return $this->validatorFails($validator, 'cart');
         }
 
@@ -203,7 +232,7 @@ class PaymentController extends Controller
                 $method = $request->get('method', $method);
 
                 try {
-                    $reference = config('settings.trx_prefix', 'AGB-').Str::random(15);
+                    $reference = config('settings.trx_prefix', 'AGB-') . Str::random(15);
                     if ($request->get('method', $method) === 'wallet') {
                         if ($request->user()->wallet_balance >= $due) {
                             $tranx = [
@@ -222,7 +251,7 @@ class PaymentController extends Controller
                             return $this->buildResponse([
                                 'message' => 'You do not have enough funds in your wallet',
                                 'status' => 'error',
-                                'status_code' => HttpStatus::BAD_REQUEST,
+                                'response_code' => HttpStatus::BAD_REQUEST,
                             ], HttpStatus::BAD_REQUEST);
                         }
                     } else {
@@ -315,7 +344,16 @@ class PaymentController extends Controller
                 $tranx = new \stdClass();
                 $tranx->data = new \stdClass();
                 $tranx->data->status = 'failed';
-                if ($request->user()->wallet()->where('reference', $request->reference)->exists()) {
+
+                /** @var CooperativeWallet|Wallet */
+                $wallet = app($request->cooperative_id ? CooperativeWallet::class : Wallet::class);
+                if ($request->cooperative_id) {
+                    $wallet->whereCooperativeId($request->cooperative_id);
+                } else {
+                    $wallet->whereUserId($request->user()->id);
+                }
+
+                if ($wallet->whereReference($request->reference)->exists()) {
                     $tranx->data->status = 'success';
                 }
             } else {
@@ -380,9 +418,21 @@ class PaymentController extends Controller
 
         // $saving = Saving::where('payment_ref', $request->reference)->where('status', 'pending')->first();
         if ($saving && $saving->status === 'pending') {
-            $subscription = User::find($saving->user_id)->subscriptions()->where('id', $saving->subscription_id)->first();
-            $_amount = money($tranx->data->amount / 100);
-            $_left = $subscription->days_left - $saving->days;
+            if ($request->cooperative_id) {
+                $subscription = Cooperative::findOrFail($request->cooperative_id)
+                                    ->subscriptions()
+                                    ->find($saving->subscription_id);
+            } else {
+                $subscription = User::find($saving->user_id)->subscriptions()->find($saving->subscription_id);
+            }
+
+            if ($subscription) {
+                $_amount = money($tranx->data->amount / 100);
+                $_left = $subscription->days_left - $saving->days;
+            } else {
+                $tranx->data->status = 'failed';
+                $msg = 'We could not find the subscription for this saving.';
+            }
 
             if ('success' === $tranx->data->status) {
                 $saving->status = 'complete';
@@ -394,21 +444,32 @@ class PaymentController extends Controller
                     $msg = 'You have completed the saving circle for this subscription, you would be notified when your food bag is ready for pickup or delivery.';
                 } else {
                     $subscription->status = 'active';
-                    $plantitle = $subscription->plan->title.(stripos($subscription->plan->title, 'plan') !== false ? '' : ' plan');
-                    $msg = "You have successfully made {$saving->days} day(s) savings of {$_amount} for the {$plantitle}, you now have only {$_left} days left to save up.";
+                    $plantitle = $subscription->plan->title . (stripos($subscription->plan->title, 'plan') !== false ? '' : ' plan');
+                    $msg = __(
+                        "You have successfully made :days day(s) savings of :amount for
+                        the :plan, you now have only :left days left to save up.",
+                        [
+                            'days' => $saving->days,
+                            'amount' => $_amount,
+                            'plan' => $plantitle,
+                            'left' => $_left,
+                        ]
+                    );
                 }
                 $subscription->fees_paid += $transaction->fees;
                 $subscription->next_date = $subscription->setDateByInterval(\Illuminate\Support\Carbon::parse(now()));
                 $subscription->save();
+                $code = 200;
             } else {
                 $saving->status = 'rejected';
                 $trns = $saving->transaction;
                 $trns->status = 'rejected';
+                $code = 406;
             }
+
             $saving->save();
             $trns->save();
             $status = 'success';
-            $code = 200;
         }
 
         return [
@@ -470,7 +531,12 @@ class PaymentController extends Controller
      */
     public function makeSaving(Request $request)
     {
-        $subscription = Auth::user()->subscriptions()->where([
+        if ($request->cooperative_id) {
+            $query = Cooperative::findOrFail($request->cooperative_id)->subscriptions();
+        } else {
+            $query = Auth::user()->subscriptions();
+        }
+        $subscription = $query->where([
             ['status', '!=', 'complete'],
             ['status', '!=', 'withdraw'],
             ['status', '!=', 'closed'],
@@ -478,7 +544,7 @@ class PaymentController extends Controller
 
         $key = 'subscription';
         $validator = Validator::make($request->all(), [
-            'days' => ['required', 'numeric', 'min:1', 'max:'.$subscription->plan->duration],
+            'days' => ['required', 'numeric', 'min:1', 'max:' . $subscription->plan->duration],
         ], [
             'days.min' => 'You have to save for at least 1 day.',
             'days.max' => "You cannot save for more than {$subscription->plan->duration} days.",
@@ -491,7 +557,8 @@ class PaymentController extends Controller
         if (! $subscription) {
             $msg = 'You do not have an active subscription';
         } elseif ($subscription->days_left <= 1) {
-            $msg = 'You have completed the saving circle for this subscription, you would be notified when your food bag is ready for pickup or delivery.';
+            $msg = 'You have completed the saving circle for this subscription,
+                you would be notified when your food bag is ready for pickup or delivery.';
         } else {
             $save = new Saving([
                 'user_id' => Auth::id(),
@@ -512,7 +579,14 @@ class PaymentController extends Controller
 
             $subscription->status = $subscription->days_left >= 1 ? 'active' : 'complete';
             $subscription->save();
-            $subscription = Auth::user()->subscriptions()->where([
+
+            if ($request->cooperative_id) {
+                $query = Cooperative::findOrFail($request->cooperative_id)->subscriptions();
+            } else {
+                $query = Auth::user()->subscriptions();
+            }
+
+            $subscription = $query->where([
                 ['status', '!=', 'complete'],
                 ['status', '!=', 'withdraw'],
                 ['status', '!=', 'closed'],

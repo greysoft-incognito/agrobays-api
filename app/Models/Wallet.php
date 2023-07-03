@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -26,24 +27,25 @@ class Wallet extends Model
     ];
 
     /**
-     * The accessors to append to the model's array form.
-     *
-     * @var array
+     * The "booted" method of the model.
      */
-    protected $appends = [
-        'balance',
-    ];
-
-    public function balance(): Attribute
+    protected static function booted(): void
     {
-        return new Attribute(
-            get: fn () => $this->where('type', 'credit')->sum('amount'),
-        );
+        static::addGlobalScope('account', function (Builder $builder) {
+            $builder->whereNull('cooperative_id');
+        });
+
+        static::creating(function (Wallet $wallet) {
+            $reference = config('settings.trx_prefix', 'AGB-') . Str::random(12);
+            if (!$wallet->reference) {
+                $wallet->reference = $reference;
+            }
+        });
     }
 
     public function topup($source, $amount, $detail = null): self
     {
-        $reference = config('settings.trx_prefix', 'TRX-').Str::random(12);
+        $reference = config('settings.trx_prefix', 'TRX-') . Str::random(12);
 
         return $this->create([
             'user_id' => $this->user_id,

@@ -1,6 +1,5 @@
 *
-!media
-!media/default_*
-!media/plans
-!uploads
+!media/
+!uploads/
+!avatars/
 !.gitignore

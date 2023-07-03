@@ -29,7 +29,7 @@ class UsageMonitor
         // If settings have been updated since the last time the user was refreshed, refresh the user
         $last_setting_time = Carbon::parse(config('settings.last_setting_time'));
 
-        if ($user && ($last_setting_time->isAfter($user->last_refreshed) || !$user->last_refreshed)) {
+        if ($user && ($last_setting_time->isAfter($user->last_refreshed) || ! $user->last_refreshed)) {
             $user->last_refreshed = now();
             $user->refresh(['settings' => true]);
         }

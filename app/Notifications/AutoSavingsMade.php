@@ -14,14 +14,29 @@ class AutoSavingsMade extends Notification implements ShouldQueue
 
     public $sub;
 
+    public $status;
+
+    public $message;
+
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct($sub)
+    public function __construct($sub, $status = null)
     {
         $this->sub = $sub;
+
+        $message = $status === 'failed'
+            ? 'We were unable to automatically charge your payment method for :plan :interval savings.'
+            : 'Your payment method has been automatically charged :amount for :plan :interval savings.';
+
+        $this->message = __($message, [
+            'amount' => money($sub->lastSaving->amount),
+            'plan' => $sub->plan->title,
+            'interval' => $sub->interval,
+        ]);
+
         $this->afterCommit();
     }
 
@@ -56,15 +71,11 @@ class AutoSavingsMade extends Notification implements ShouldQueue
     {
         $message = [
             'name' => $notifiable->firstname,
-            'message_line1' => __('Your payment method has been automatically charged :amount for :plan :interval savings.', [
-                'amount' => money($this->sub->lastSaving->amount),
-                'plan' => $this->sub->plan->title,
-                'interval' => $this->sub->interval,
-            ]),
+            'message_line1' => $this->message,
             'close_greeting' => 'Regards, <br/>'.config('settings.site_name'),
         ];
 
-        return (new MailMessage)->view(
+        return (new MailMessage())->view(
             ['email', 'email-plain'],
             $message
         )
@@ -79,13 +90,7 @@ class AutoSavingsMade extends Notification implements ShouldQueue
      */
     public function toTwilio($n)
     {
-        $message = __('Your payment method has been automatically charged :amount for :plan :interval savings.', [
-            'amount' => money($this->sub->lastSaving->amount),
-            'plan' => $this->sub->plan->title,
-            'interval' => $this->sub->interval,
-        ]);
-
-        $message = __('Hi :0, :1', [$n->firstname, $message]);
+        $message = __('Hi :0, :1', [$n->firstname, $this->message]);
 
         return (new TwilioSmsMessage())
             ->content($message);
@@ -104,11 +109,7 @@ class AutoSavingsMade extends Notification implements ShouldQueue
         return [
             'type' => 'Subscription',
             'title' => 'Automatic Savings Program',
-            'message' => __('Your payment method has been automatically charged :amount for :plan :interval savings.', [
-                'amount' => money($this->sub->lastSaving->amount),
-                'plan' => $this->sub->plan->title,
-                'interval' => $this->sub->interval,
-            ]),
+            'message' => $this->message,
         ];
     }
 }

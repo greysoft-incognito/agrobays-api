@@ -28,6 +28,10 @@ class FruitBayCategory extends Model
             $slug = Str::of($category->title)->slug();
             $category->slug = (string) FruitBayCategory::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
         });
+
+        static::deleting(function (FruitBayCategory $org) {
+            $org->items()->delete();
+        });
     }
 
     /**
@@ -39,7 +43,7 @@ class FruitBayCategory extends Model
     {
         $image = $this->image
             ? img($this->image, 'banner', 'large')
-            : 'https://loremflickr.com/320/320/'.urlencode($this->title ?? 'fruit').'?random='.rand();
+            : 'https://loremflickr.com/320/320/' . urlencode($this->title ?? 'fruit') . '?random=' . rand();
 
         return Attribute::make(
             get: fn () => $image,

@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -22,7 +21,7 @@ class UsersController extends Controller
      */
     public function index(Request $request, $limit = '15', $role = 'user')
     {
-        \Gate::authorize('usable', 'users.'.$role);
+        \Gate::authorize('usable', 'users.' . $role);
         $query = User::query();
 
         if ($role !== 'all') {
@@ -32,16 +31,14 @@ class UsersController extends Controller
         // Search and filter columns
         if ($request->search) {
             $query->where(function ($query) use ($request) {
-                $query->where('username', 'like', "%$request->search%")
-                    ->orWhere('lastname', 'like', "%$request->search%")
-                    ->orWhere('firstname', 'like', "%$request->search%")
+                $query->where('username', $request->search)
+                    ->orWhereRaw("CONCAT_WS(' ', firstname, lastname) LIKE '%$request->search%'")
                     ->orWhere('address->home', 'like', "%$request->search%")
                     ->orWhere('address->shipping', 'like', "%$request->search%")
                     ->orWhere('country->name', 'like', "%$request->search%")
-                    ->orWhere('city->name', 'like', "%$request->search%")
-                    ->orWhere('state->name', 'like', "%$request->search%")
-                    ->orWhere('gender', 'like', "%$request->search%")
-                    ->orWhere('state', 'like', "%$request->search%");
+                    ->orWhere('city->name', $request->search)
+                    ->orWhere('state->name', $request->search)
+                    ->orWhere('state', $request->search);
             });
         }
 
@@ -73,7 +70,7 @@ class UsersController extends Controller
     public function getUser(Request $request, $id)
     {
         $user = User::find($id);
-        $user && \Gate::authorize('usable', 'users.'.$user->role);
+        $user && \Gate::authorize('usable', 'users.' . $user->role);
 
         return $this->buildResponse([
             'message' => ! $user ? 'The requested user no longer exists' : 'OK',
@@ -86,7 +83,7 @@ class UsersController extends Controller
     public function store(Request $request, $id = '')
     {
         $user = User::find($id);
-        $user && \Gate::authorize('usable', 'users.'.$user->role);
+        $user && \Gate::authorize('usable', 'users.' . $user->role);
         if ($id && ! $user) {
             return $this->buildResponse([
                 'message' => 'The requested user no longer exists',
@@ -123,7 +120,7 @@ class UsersController extends Controller
             ]);
         }
 
-        $user = $user ?? new User;
+        $user = $user ?? new User();
 
         $user->firstname = $request->firstname;
         $user->lastname = $request->lastname;
@@ -143,13 +140,6 @@ class UsersController extends Controller
         }
         if ($request->password) {
             $user->password = Hash::make($request->password);
-        }
-
-        if ($request->hasFile('image')) {
-            $user->image && Storage::delete($user->image ?? '');
-            $user->image = $request->file('image')->storeAs(
-                'public/uploads/images', rand().'_'.rand().'.'.$request->file('image')->extension()
-            );
         }
 
         $user->save();
@@ -172,7 +162,7 @@ class UsersController extends Controller
         // Delete multiple users
         if ($request->users) {
             $count = User::whereIn('id', $request->users)->with(['transactions', 'subscription'])->get()->map(function ($user) {
-                $user && \Gate::authorize('usable', 'users.'.$user->role);
+                $user && \Gate::authorize('usable', 'users.' . $user->role);
                 // Delete Transactions
                 if ($user->transactions) {
                     $user->transactions->map(function ($transaction) {
@@ -188,8 +178,6 @@ class UsersController extends Controller
                     });
                 }
                 if ($user) {
-                    $user->image && Storage::delete($user->image);
-
                     return $user->delete();
                 }
 
@@ -203,12 +191,11 @@ class UsersController extends Controller
             ]);
         } else {
             $user = User::whereId($id)->first();
-            $user && \Gate::authorize('usable', 'users.'.$user->role);
+            $user && \Gate::authorize('usable', 'users.' . $user->role);
         }
 
         // Delete single user
         if ($user) {
-            $user->image && Storage::delete($user->image);
             if ($user->transactions) {
                 $user->transactions->map(function ($transaction) {
                     if ($transaction->transactable) {

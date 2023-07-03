@@ -28,7 +28,7 @@ class RegisteredUserController extends Controller
     public function store(Request $request)
     {
         $cIso2 = 'NG';
-        if (($ipInpfo = \Illuminate\Support\Facades\Http::get('ipinfo.io/'.request()->ip().'?token='.config('settings.ipinfo_access_token')))->status() === 200) {
+        if (($ipInpfo = \Illuminate\Support\Facades\Http::get('ipinfo.io/' . request()->ip() . '?token=' . config('settings.ipinfo_access_token')))->status() === 200) {
             $cIso2 = $ipInpfo->json('country') ?? $cIso2;
         }
 
@@ -49,26 +49,18 @@ class RegisteredUserController extends Controller
 
         $name = Str::of($request->name)->explode(' ');
 
-        if (config('settings.verify_email', true)) {
-            $eser = Str::of($request->email)->explode('@');
-            $username = $eser->first(fn ($k) => (User::where('username', $k)->doesntExist()), $eser->first().rand());
-        } else {
-            $username = Str::of($name)->append();
-        }
-
         $user = User::create([
             'firstname' => ($firstname = $name->first(fn ($k) => $k !== null, $request->name)),
             'lastname' => $name->last(fn ($k) => $k !== $firstname, ''),
             'email' => $request->email,
             'phone' => $request->phone,
-            'username' => $username,
             'password' => Hash::make($request->password),
         ]);
 
         event(new Registered($user));
 
         $dev = new DeviceDetector($request->userAgent());
-        $device = $dev->getBrandName() ? ($dev->getBrandName().$dev->getDeviceName()) : $request->userAgent();
+        $device = $dev->getBrandName() ? ($dev->getBrandName() . $dev->getDeviceName()) : $request->userAgent();
 
         $token = $user->createToken($device)->plainTextToken;
 
@@ -87,7 +79,7 @@ class RegisteredUserController extends Controller
         return (new UserResource($user))->additional([
             'message' => 'Registration was successfull',
             'status' => 'success',
-            'status_code' => 201,
+            'response_code' => 201,
             'token' => $token,
         ])->response()->setStatusCode(201);
     }

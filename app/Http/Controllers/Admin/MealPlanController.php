@@ -18,7 +18,7 @@ class MealPlanController extends Controller
      */
     public function index(Request $request)
     {
-        return (new ControllersMealPlanController)->index($request);
+        return (new ControllersMealPlanController())->index($request);
     }
 
     /**
@@ -33,10 +33,10 @@ class MealPlanController extends Controller
             'name' => 'required|string',
             'category' => 'required|string',
             'description' => 'required|string',
-            'calories' => 'required|integer',
-            'protein' => 'required|integer',
-            'fat' => 'required|integer',
-            'carbohydrates' => 'required|integer',
+            'calories' => 'required|numeric',
+            'protein' => 'required|numeric',
+            'fat' => 'required|numeric',
+            'carbohydrates' => 'required|numeric',
             'image' => 'sometimes|image',
         ]);
 
@@ -81,10 +81,10 @@ class MealPlanController extends Controller
             'name' => 'required|string',
             'category' => 'required|string',
             'description' => 'required|string',
-            'calories' => 'required|integer',
-            'protein' => 'required|integer',
-            'fat' => 'required|integer',
-            'carbohydrates' => 'required|integer',
+            'calories' => 'required|numeric',
+            'protein' => 'required|numeric',
+            'fat' => 'required|numeric',
+            'carbohydrates' => 'required|numeric',
             'image' => 'sometimes|image',
         ]);
 
@@ -118,12 +118,13 @@ class MealPlanController extends Controller
         $count = false;
 
         if ($request->items) {
-            $count = collect($request->items)->map(function ($id) use ($request) {
+            $count = collect($request->items)->map(function ($id) {
                 $item = MealPlan::find($id);
                 if ($item) {
                     $item->favorites()->delete();
                     $item->timetables()->delete();
                     $item->delete();
+
                     return $item->name;
                 }
 
@@ -142,7 +143,7 @@ class MealPlanController extends Controller
 
         if ($count) {
             return $this->buildResponse([
-                'message' => __(":0 been deleted.", [is_numeric($count) ? "{$count} items have" : "{$count} has"]),
+                'message' => __(':0 been deleted.', [is_numeric($count) ? "{$count} items have" : "{$count} has"]),
                 'status' => 'success',
                 'response_code' => 200,
             ]);

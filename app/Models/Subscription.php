@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,6 +18,7 @@ class Subscription extends Model
         'delivery_method',
         'interval',
         'next_date',
+        'cooperative_id',
     ];
 
     protected $appends = [
@@ -41,6 +43,56 @@ class Subscription extends Model
     ];
 
     /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        static::deleting(function (Subscription $org) {
+            $org->allSavings()->delete();
+            $org->bag()->delete();
+            $org->dispatch()->delete();
+        });
+
+        static::retrieved(function (Subscription $sub) {
+            if ($sub->cooperative) {
+                $participants = $sub->cooperative->foodbags()->isApproved()->whereSubscriptionId($sub->id)->count();
+                $plan_amount = $participants > 0 ? $sub->plan->amount * $participants : $sub->plan->amount;
+                $sub->plan->amount = $plan_amount;
+            }
+        });
+    }
+
+    /**
+     * Get all of the savings for the Subscription
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function allSavings(): HasMany
+    {
+        return $this->hasMany(Saving::class);
+    }
+
+    /**
+     * Get the foodBag associated with the Subscription
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function bag(): HasOne
+    {
+        return $this->hasOne(FoodBag::class, 'id', 'food_bag_id');
+    }
+
+    /**
+     * Get the cooperative if the plan is attached to one
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function cooperative(): BelongsTo
+    {
+        return $this->belongsTo(Cooperative::class);
+    }
+
+    /**
      * Get the foodbag's dispatch.
      */
     public function dispatch()
@@ -56,16 +108,6 @@ class Subscription extends Model
     public function savings(): HasMany
     {
         return $this->hasMany(Saving::class)->where('status', 'complete');
-    }
-
-    /**
-     * Get all of the savings for the Subscription
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function allSavings(): HasMany
-    {
-        return $this->hasMany(Saving::class);
     }
 
     public function lastSaving()
@@ -142,16 +184,6 @@ class Subscription extends Model
     }
 
     /**
-     * Get the foodBag associated with the Subscription
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
-     */
-    public function bag(): HasOne
-    {
-        return $this->hasOne(FoodBag::class, 'id', 'food_bag_id');
-    }
-
-    /**
      * Get the items in the foodBag associated with the Subscription
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
@@ -179,20 +211,14 @@ class Subscription extends Model
 
     public function leftAmount(): Attribute
     {
-        $total = $this->savings()->get()->map(function ($value) {
-            return $value->total;
-        })->sum();
-
         return Attribute::make(
-            get: fn () => ($this->plan->amount - $total)
+            get: fn () => (float)($this->plan->amount - $this->saved_amount)
         );
     }
 
     public function savedAmount(): Attribute
     {
-        $total = $this->savings()->get()->map(function ($value) {
-            return $value->total ?? 0;
-        })->sum();
+        $total = (float) $this->savings()->sum('amount');
 
         return Attribute::make(
             get: fn () => $total
@@ -209,23 +235,35 @@ class Subscription extends Model
 
     public function totalSaved(): Attribute
     {
-        $total = $this->savings()->get()->map(function ($value) {
-            return $value->total ?? 0;
-        })->sum();
-
         return Attribute::make(
-            get: fn () => number_format($total)
+            get: fn () => number_format($this->saved_amount)
         );
     }
 
     public function totalLeft(): Attribute
     {
-        $total = $this->savings()->get()->map(function ($value) {
-            return $value->total;
-        })->sum();
-
         return Attribute::make(
-            get: fn () => number_format($this->plan->amount - $total, 2)
+            get: fn () => number_format($this->plan->amount - $this->saved_amount, 2)
         );
+    }
+
+    public function scopeCurrentStatus(Builder $query, $status = 'active')
+    {
+        if (is_array($status)) {
+            foreach ($status as $stat) {
+                if (str($stat)->contains('!')) {
+                    $stat = str_replace('!', '', $stat);
+                    $query->where('status', '!=', $stat);
+                } else {
+                    $query->orWhere('status', $stat);
+                }
+            }
+        } else {
+            if (str($status)->contains('!')) {
+                $status = str_replace('!', '', $status);
+                return $query->where('status', '!=', $status);
+            }
+            return $query->where('status', $status);
+        }
     }
 }

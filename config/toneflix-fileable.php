@@ -2,6 +2,16 @@
 
 return [
     'collections' => [
+        'avatar' => [
+            'size' => [400, 400],
+            'path' => 'avatars/',
+            'default' => 'default.png',
+        ],
+        'banner' => [
+            'size' => [1200, 600],
+            'path' => 'media/banners/',
+            'default' => 'default.png',
+        ],
         'feedback' => [
             'path' => 'media/feedback/',
             'default' => 'default.png',
@@ -37,5 +47,6 @@ return [
     ],
     'symlinks' => [
         public_path('media') => storage_path('app/public/media'),
+        public_path('avatars') => storage_path('app/public/avatars'),
     ],
 ];

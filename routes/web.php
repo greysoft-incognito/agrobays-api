@@ -68,5 +68,3 @@ Route::get('/web/user', [AuthenticatedSessionController::class, 'index'])
         ->name('web.user');
 
 // Route::post('slacker/{action?}', [Slack::class, 'index']);
-
-require __DIR__.'/auth.php';

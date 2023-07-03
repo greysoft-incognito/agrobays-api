@@ -3,19 +3,19 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class MealTimetable extends Pivot
 {
     use HasFactory;
 
     /**
-    * Indicates if the IDs are auto-incrementing.
-    *
-    * @var bool
-    */
-   public $incrementing = true;
+     * Indicates if the IDs are auto-incrementing.
+     *
+     * @var bool
+     */
+    public $incrementing = true;
 
     protected $table = 'meal_timetables';
 
@@ -48,5 +48,15 @@ class MealTimetable extends Pivot
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Scope a query to only include meal plans for a given user.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     */
+    public function scopeForUser($query, $user)
+    {
+        return $query->where('user_id', $user->id);
     }
 }
