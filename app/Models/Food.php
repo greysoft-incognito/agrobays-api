@@ -27,7 +27,7 @@ class Food extends Model
      */
     protected $casts = [
         'weight' => 'float',
-        'price' => 'decimal:2',
+        'price' => 'float',
     ];
 
     /**
