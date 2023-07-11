@@ -79,7 +79,7 @@ class FoodBag extends Model
     public function weight(): Attribute
     {
         return Attribute::make(
-            get: fn () => (float)$this->foods->sum(fn ($food) => $food->weight * $food->pivot->quantity),
+            get: fn () => $this->foods->sum(fn ($food) => $food->weight * $food->pivot->quantity),
         );
     }
 

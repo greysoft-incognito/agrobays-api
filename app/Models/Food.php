@@ -21,6 +21,16 @@ class Food extends Model
     ];
 
     /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'weight' => 'float',
+        'price' => 'decimal:2',
+    ];
+
+    /**
      * Get the URL to the fruit bay category's photo.
      *
      * @return string
