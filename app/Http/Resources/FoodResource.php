@@ -19,7 +19,7 @@ class FoodResource extends JsonResource
             'name' => $this->name,
             'description' => $this->description,
             'price' => $this->price ?? 0,
-            'price_total' => ($this->price ?? 0) * ($this->pivot?->quantity ?? 0),
+            'price_total' => (float)($this->price ?? 0) * ($this->pivot?->quantity ?? 0),
             'unit' => $this->when($request->editing, $this->unit),
             'weight' => $this->when(
                 $request->editing,
