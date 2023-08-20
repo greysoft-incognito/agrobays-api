@@ -125,12 +125,13 @@ class User extends Authenticatable implements MustVerifyEmail
     public static function registerEvents()
     {
         static::creating(function ($user) {
-            $e = $user->email
-                ? str($user->email)->explode('@')
-                : str($user->name ?? $user->firstname)->slug();
+            if (!$user->username) {
+                $u = str($user->email
+                    ? str($user->email)->explode('@')->first()
+                    : str($user->name ?? $user->firstname)->slug())->replace('.', '_')->toString();
 
-            $user->username = $user->username ?? $e->first(fn ($k) => (User::where('username', $k)
-                ->doesntExist()), $e->first() . rand(100, 999));
+                $user->username = User::where('username', $u)->exists() ? $u . rand(100, 999) : $u;
+            }
         });
 
         static::deleting(function (User $org) {
