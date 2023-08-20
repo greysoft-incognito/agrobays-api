@@ -32,18 +32,23 @@ class RegisteredUserController extends Controller
         //     $cIso2 = $ipInpfo->json('country') ?? $cIso2;
         // }
 
-        $validator = Validator::make($request->all(), [
-            'name' => ['required', 'string', 'max:255'],
-            // 'lastname' => ['required', 'string', 'max:255'],
-            'email' => [config('settings.verify_email', true) ? 'required' : 'nullable', 'string', 'email', 'max:255', 'unique:users'],
-            // 'phone' => config('settings.verify_phone', false)
-                // ? "required|phone:$cIso2"
-                // : 'nullable|string|max:255|unique:users',
-            // 'username' => ['required', 'string', 'max:255', 'unique:users'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ], [], [
-            'phone' => 'Phone Number',
-        ]);
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'name' => ['required', 'string', 'max:255'],
+                // 'lastname' => ['required', 'string', 'max:255'],
+                'email' => [config('settings.verify_email', true) ? 'required' : 'nullable', 'string', 'email', 'max:255', 'unique:users'],
+                // 'phone' => config('settings.verify_phone', false)
+                    // ? "required|phone:$cIso2"
+                    // : 'nullable|string|max:255|unique:users',
+                // 'username' => ['required', 'string', 'max:255', 'unique:users'],
+                'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            ],
+            // [],
+            // [
+            //     'phone' => 'Phone Number',
+            // ]
+        );
 
         if ($validator->fails()) {
             return $this->validatorFails($validator);
