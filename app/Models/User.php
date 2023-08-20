@@ -254,15 +254,21 @@ class User extends Authenticatable implements MustVerifyEmail
                 }
             },
             set: function ($value) use ($cIso2) {
-                if (($ipInpfo = \Illuminate\Support\Facades\Http::get('ipinfo.io/' . request()->ip() . '?token=' . config('settings.ipinfo_access_token')))->status() === 200) {
-                    $cIso2 = $ipInpfo->json('country') ?? $cIso2;
-                }
-                $value = str_ireplace('-', '', $value);
-                if (! empty($this->country->iso2 ?? $this->country['iso2']) && $value) {
-                    return ['phone' => (string) PhoneNumber::make($value, $this->country->iso2 ?? $this->country['iso2'])->formatE164()];
-                }
+                if (!empty($value)) {
+                    $token = config('settings.ipinfo_access_token');
+                    $ipInpfo = \Illuminate\Support\Facades\Http::get('ipinfo.io/' . request()->ip() . '?token=' . $token);
 
-                return ['phone' => $value ? (string) PhoneNumber::make($value, $cIso2)->formatE164() : $value];
+                    if ($ipInpfo->status() === 200) {
+                        $cIso2 = $ipInpfo->json('country') ?? $cIso2;
+                    }
+                    $value = str_ireplace('-', '', $value);
+                    if (! empty($this->country->iso2 ?? $this->country['iso2']) && $value) {
+                        return ['phone' => (string) PhoneNumber::make($value, $this->country->iso2 ?? $this->country['iso2'])->formatE164()];
+                    }
+
+                    return ['phone' => $value ? (string) PhoneNumber::make($value, $cIso2)->formatE164() : $value];
+                }
+                return ['phone' => $value];
             }
         );
     }
