@@ -1,9 +1,12 @@
 <?php
 
+use App\Http\Controllers\Admin\Cooperative\CooperativeController as AdminCooperativeController;
+use App\Http\Controllers\Admin\Cooperative\CooperativeMemberController as AdminCooperativeMemberController;
+use App\Http\Controllers\Admin\Cooperative\CooperativeMgtController as AdminCooperativeMgtController;
 use App\Http\Controllers\Cooperative\CooperativeController;
 use App\Http\Controllers\Cooperative\CooperativeSubscriptionController;
 use App\Http\Controllers\Cooperative\CooperativeMgtController;
-use App\Http\Controllers\User\CooperativeMemberController;
+use App\Http\Controllers\Cooperative\CooperativeMemberController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum'])->prefix('cooperatives')->name('cooperatives.')
@@ -35,3 +38,20 @@ Route::middleware(['auth:sanctum'])->prefix('cooperatives')->name('cooperatives.
         Route::put('invitations/{member}/request/{status}', 'appprove')->name('appprove.request'); //Approve Or Decline
     });
 });
+
+
+Route::middleware(['auth:sanctum', 'admin'])
+    ->prefix('admin/cooperatives')
+    ->name('admin.cooperatives')
+    ->controller(AdminCooperativeMgtController::class)->group(function () {
+        Route::get('/', [AdminCooperativeController::class, 'index'])->name('index');
+        Route::get('/{cooperative}', [AdminCooperativeController::class, 'show'])->name('show');
+        Route::put('/{cooperative}', 'update')->name('update');
+        Route::put('/{cooperative}/toggle/verification', 'toggleVerification')->name('toggle.verification');
+        Route::put('/{cooperative}/wallet/topup', 'walletTopup')->name('wallet.topup');
+
+        Route::controller(AdminCooperativeMemberController::class)->group(function () {
+            Route::get('/{cooperative}/members', 'index')->name('index');
+            Route::delete('/{cooperative}/members/{member}', 'destroy')->name('destroy');
+        });
+    });

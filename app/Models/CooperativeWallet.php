@@ -26,6 +26,7 @@ class CooperativeWallet extends Model
      */
     protected $fillable = [
         'user_id',
+        'cooperative_id',
         'reference',
         'amount',
         'source',
@@ -55,8 +56,9 @@ class CooperativeWallet extends Model
         $reference = config('settings.trx_prefix', 'TRX-') . Str::random(12);
 
         return $this->create([
-            'user_id' => $this->user_id,
+            'cooperative_id' => $this->cooperative_id,
             'reference' => $reference,
+            'user_id' => $this->user_id,
             'amount' => $amount,
             'source' => $source,
             'detail' => $detail,

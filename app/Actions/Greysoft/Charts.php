@@ -135,7 +135,9 @@ class Charts
         }
 
         return (($for === 'user') ? Auth::user()->transactions() : Transaction::query())
-            ->whereBetween('created_at', [$start, $end])->sum('amount');
+            ->when($period !== 'all', function ($q) use ($start, $end) {
+                $q->whereBetween('created_at', [$start, $end]);
+            })->sum('amount');
     }
 
     public function sales($for = 'user', $period = 'year')
@@ -152,7 +154,9 @@ class Charts
         }
 
         return (($for === 'user') ? Auth::user()->orders() : Order::query())
-            ->whereBetween('created_at', [$start, $end])->sum('amount');
+            ->when($period !== 'all', function ($q) use ($start, $end) {
+                $q->whereBetween('created_at', [$start, $end]);
+            })->sum('amount');
     }
 
     public function income($for = 'user', $period = 'year')
@@ -169,7 +173,9 @@ class Charts
         }
 
         return (($for === 'user') ? Auth::user()->transactions() : Transaction::query())
-            ->whereBetween('created_at', [$start, $end])->sum('amount');
+            ->when($period !== 'all', function ($q) use ($start, $end) {
+                $q->whereBetween('created_at', [$start, $end]);
+            })->sum('amount');
     }
 
     public function customers($for = 'user', $period = 'year')
@@ -185,7 +191,9 @@ class Charts
             $end = Carbon::now()->endOfWeek();
         }
 
-        return User::whereBetween('created_at', [$start, $end])->count('id');
+        return User::when($period !== 'all', function ($q) use ($start, $end) {
+            $q->whereBetween('created_at', [$start, $end]);
+        })->count('id');
     }
 
     /**

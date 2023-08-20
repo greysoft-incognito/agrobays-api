@@ -34,6 +34,8 @@ class Permissions
             'dispatch.delivered',
             'feedback.manage',
             'mealplans.manage',
+            'cooperatives.manage',
+            'cooperatives.wallet'
         ],
         'manager' => [
             'users.user',
@@ -56,6 +58,7 @@ class Permissions
             'dispatch.dispatched',
             'dispatch.delivered',
             'feedback.manage',
+            'cooperatives.manage',
         ],
         'dispatch' => [
             'dispatch.status',

@@ -55,8 +55,11 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->name('admin.')->g
         ->group(function () {
             Route::get('/', 'index');
             Route::get('/list/{limit?}/{role?}', 'index');
-            Route::get('/{id}', 'getUser');
-            Route::post('/{id?}', 'store');
+            // Route::get('/{id}', 'getUser');
+            Route::get('/{user}', 'show');
+            Route::post('/{id?}', 'storeLegacy');
+            Route::put('/{user?}', 'store');
+            Route::put('/{user}/password', 'updatePassword');
             Route::delete('/{id?}', 'destroy');
         });
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -80,12 +81,27 @@ class UsersController extends Controller
         ]);
     }
 
-    public function store(Request $request, $id = '')
+    public function show(Request $request, User $user)
+    {
+        \Gate::authorize('usable', 'users.' . $user->role);
+
+        return (new UserResource($user))->additional([
+            'message' => 'OK',
+            'status' => 'success',
+            'response_code' => 200,
+        ]);
+    }
+
+    public function store(Request $request, $id = '', $skip = false, $legacy = false)
     {
         $user = User::find($id);
         $user && \Gate::authorize('usable', 'users.' . $user->role);
         if ($id && ! $user) {
-            return $this->buildResponse([
+            return $legacy ? $this->buildResponse([
+                'message' => 'The requested user no longer exists',
+                'status' => 'info',
+                'response_code' => 404,
+            ]) : $this->responseBuilder([
                 'message' => 'The requested user no longer exists',
                 'status' => 'info',
                 'response_code' => 404,
@@ -112,7 +128,12 @@ class UsersController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return $this->buildResponse([
+            return $legacy ? $this->buildResponse([
+                'message' => 'Your input has a few errors',
+                'status' => 'error',
+                'response_code' => 422,
+                'errors' => $validator->errors(),
+            ]) : $this->responseBuilder([
                 'message' => 'Your input has a few errors',
                 'status' => 'error',
                 'response_code' => 422,
@@ -144,11 +165,41 @@ class UsersController extends Controller
 
         $user->save();
 
-        return $this->buildResponse([
+        return $legacy ? $this->buildResponse([
             'message' => $id ? Str::of($user->fullname)->append(' Has been updated!') : 'New user has been created.',
             'status' => 'success',
             'response_code' => 200,
             'content' => $user,
+        ]) : (new UserResource($user))->additional([
+            'message' => $id ? Str::of($user->fullname)->append(' Has been updated!') : 'New user has been created.',
+            'status' => 'success',
+            'response_code' => 200,
+        ]);
+    }
+
+    public function storeLegacy(Request $request, $id = '')
+    {
+        return $this->store($request, $id, true, true);
+    }
+
+    public function updatePassword(Request $request, User $user)
+    {
+        $user && \Gate::authorize('usable', 'users.' . $user->role);
+
+        $request->validate([
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $user = $user ?? new User();
+
+        $user->password = Hash::make($request->password);
+
+        $user->save();
+
+        return (new UserResource($user))->additional([
+            'message' => __('Password has been updated!'),
+            'status' => 'success',
+            'response_code' => 200,
         ]);
     }
 

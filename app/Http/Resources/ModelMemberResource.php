@@ -16,7 +16,7 @@ class ModelMemberResource extends JsonResource
     {
         $permissions = $this->model->permissions ?? $this->abilities;
 
-        $isAdmin = $this->abilities?->count() > 0;
+        $isAdmin = $this->abilities?->count() > 0 || auth()->user()->role == 'admin';
 
         return [
             'id' => $this->id,

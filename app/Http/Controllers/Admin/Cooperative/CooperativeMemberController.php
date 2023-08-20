@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\User;
+namespace App\Http\Controllers\Admin\Cooperative;
 
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
@@ -27,7 +27,7 @@ class CooperativeMemberController extends Controller
 
         if ($request->search) {
             $query->whereHas('user', function ($query) use ($request) {
-                $query->whereRaw('concat_ws(" ", firstname, lastname) like ?', ['%'.$request->search.'%']);
+                $query->whereRaw('concat_ws(" ", firstname, lastname) like ?', ['%' . $request->search . '%']);
             });
         }
 
@@ -67,7 +67,7 @@ class CooperativeMemberController extends Controller
      */
     public function appprove(Cooperative $cooperative, User $member, $status = 'accepted')
     {
-        $this->authorize('manage', [$cooperative, 'manage_members']);
+        \Gate::authorize('usable', 'cooperatives.manage');
 
         Validator::make(['status' => $status], [
             'status' => ['required', 'string', 'in:accepted,declined'],
@@ -121,7 +121,7 @@ class CooperativeMemberController extends Controller
     {
         $abilities = implode(',', $cooperative->permissions);
 
-        $this->authorize('manage', [$cooperative, 'manage_admins']);
+        \Gate::authorize('usable', 'cooperatives.manage');
         $this->validate($request, [
             'abilities' => [
                 'required',
@@ -151,109 +151,6 @@ class CooperativeMemberController extends Controller
     }
 
     /**
-     * Invite a user to [manage] a Cooperative
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  App\Models\Cooperative  $cooperative
-     * @return \Illuminate\Http\Response
-     */
-    public function invitations(Request $request, Cooperative $cooperative)
-    {
-        $abilities = implode(',', $cooperative->permissions);
-
-        $this->authorize('manage', [$cooperative, 'manage_admins']);
-
-        $this->validate($request, [
-            'user_id' => [
-                'required',
-                'exists:users,id',
-                Rule::unique('model_members')
-                    ->where(fn (Builder $query) => $query
-                    ->where('user_id', $request->user_id)
-                    ->where('model_id', $cooperative->id))
-                    ->where('model_type', Cooperative::class),
-            ],
-            'abilities' => [
-                'nullable',
-                'array',
-                "in:all,$abilities",
-            ],
-        ], [
-            'user_id.required' => 'Please select a user to add.',
-            'user_id.exists' => 'This user does not exist.',
-            'user_id.unique' => 'This user is already a member of this cooperative or has a pending request/invitation.',
-            'abilities.required' => 'Please grant at least one abilty to the user.',
-        ]);
-
-        $user = User::find($request->user_id);
-
-        // Create a new member
-        $member = $cooperative->members()->create([
-            'user_id' => $request->user_id,
-            'abilities' => $request->abilities,
-        ]);
-
-        // Send notification to the user
-        $user->notify(new \App\Notifications\MemberInvitation($member, auth()->user()));
-
-        // Return the Cooperative
-        return (new CooperativeResource($cooperative))->additional([
-            'message' => __('Your invitation to :0 has been sent', [$user->fullname]),
-            'status' => 'success',
-            'response_code' => HttpStatus::CREATED,
-        ])->response()->setStatusCode(HttpStatus::CREATED);
-    }
-
-    /**
-     * Invite a user to [manage] a Cooperative
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Cooperative  $cooperative
-     * @return \Illuminate\Http\Response
-     */
-    public function invitationsStatus(Request $request, Cooperative $cooperative, $status)
-    {
-        $this->authorize('manage', [$cooperative, 'exists', false, 'You do not have any pending invitations.']);
-
-        // Validate the status
-        Validator::make(['status' => $status], [
-            'status' => 'required|in:accepted,rejected',
-        ], [
-            'status.required' => 'Please select a status.',
-            'status.in' => 'Invalid status.',
-        ])->validate();
-
-        /**
-         * Get the invitation
-         *
-         * @var \App\Models\v1\Modelmember
-         */
-        $invitation = $cooperative->members()->forUser(auth()->user())->isAccepted(false)->firstOrFail();
-
-        // Update the status of the invitation
-        $invitation->update([
-            'accepted' => $status == 'accepted',
-        ]);
-
-        // Delete the invitation if it was rejected
-        if ($status == 'rejected') {
-            $invitation->delete();
-        }
-
-        // Update the notification
-        $invitation->notification && $invitation->notification->update([
-            'read_at' => $invitation->notification->read_at ?? now(), 'data->actions' => [],
-        ]);
-
-        // Return the Cooperative
-        return (new CooperativeResource($cooperative))->additional([
-            'message' => __('You have :0 the invitation to become a member of :1.', [$status, $cooperative->name]),
-            'status' => 'success',
-            'response_code' => HttpStatus::ACCEPTED,
-        ])->response()->setStatusCode(HttpStatus::ACCEPTED);
-    }
-
-    /**
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\Cooperative  $cooperative
@@ -262,13 +159,13 @@ class CooperativeMemberController extends Controller
      */
     public function destroy(Cooperative $cooperative, $member)
     {
-        $this->authorize('manage', [$cooperative, 'manage_admins']);
+        \Gate::authorize('usable', 'cooperatives.manage');
 
         $member = $cooperative->members()->findOrFail($member);
 
         $deleted = $member->delete();
 
-        return $this->buildResponse([
+        return $this->responseBuilder([
             'message' => $deleted
                 ? __(':0 has been removed as a member of this cooperative.', [$member->user->fullname])
                 : __('Unable to remove :0 as a member of this cooperative.', [$member->user->fullname]),
