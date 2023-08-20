@@ -27,16 +27,18 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request)
     {
-        $cIso2 = 'NG';
-        if (($ipInpfo = \Illuminate\Support\Facades\Http::get('ipinfo.io/' . request()->ip() . '?token=' . config('settings.ipinfo_access_token')))->status() === 200) {
-            $cIso2 = $ipInpfo->json('country') ?? $cIso2;
-        }
+        // $cIso2 = 'NG';
+        // if (($ipInpfo = \Illuminate\Support\Facades\Http::get('ipinfo.io/' . request()->ip() . '?token=' . config('settings.ipinfo_access_token')))->status() === 200) {
+        //     $cIso2 = $ipInpfo->json('country') ?? $cIso2;
+        // }
 
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
             // 'lastname' => ['required', 'string', 'max:255'],
             'email' => [config('settings.verify_email', true) ? 'required' : 'nullable', 'string', 'email', 'max:255', 'unique:users'],
-            'phone' => config('settings.verify_phone', false) ? "required|phone:$cIso2" : 'nullable|string|max:255|unique:users',
+            // 'phone' => config('settings.verify_phone', false)
+                // ? "required|phone:$cIso2"
+                // : 'nullable|string|max:255|unique:users',
             // 'username' => ['required', 'string', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ], [], [
