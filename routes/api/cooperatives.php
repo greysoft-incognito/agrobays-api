@@ -47,6 +47,7 @@ Route::middleware(['auth:sanctum', 'admin'])
         Route::get('/', [AdminCooperativeController::class, 'index'])->name('index');
         Route::get('/{cooperative}', [AdminCooperativeController::class, 'show'])->name('show');
         Route::put('/{cooperative}', 'update')->name('update');
+        Route::delete('/{cooperative}', 'destroy')->name('destroy');
         Route::put('/{cooperative}/toggle/verification', 'toggleVerification')->name('toggle.verification');
         Route::put('/{cooperative}/wallet/topup', 'walletTopup')->name('wallet.topup');
 
