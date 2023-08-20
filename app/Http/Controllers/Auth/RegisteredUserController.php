@@ -60,7 +60,7 @@ class RegisteredUserController extends Controller
             'firstname' => ($firstname = $name->first(fn ($k) => $k !== null, $request->name)),
             'lastname' => $name->last(fn ($k) => $k !== $firstname, ''),
             'email' => $request->email,
-            'phone' => $request->phone,
+            // 'phone' => $request->phone,
             'password' => Hash::make($request->password),
         ]);
 

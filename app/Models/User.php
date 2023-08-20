@@ -254,7 +254,6 @@ class User extends Authenticatable implements MustVerifyEmail
                 }
             },
             set: function ($value) use ($cIso2) {
-                echo $value;
                 if (!empty($value)) {
                     $token = config('settings.ipinfo_access_token');
                     $ipInpfo = \Illuminate\Support\Facades\Http::get('ipinfo.io/' . request()->ip() . '?token=' . $token);
