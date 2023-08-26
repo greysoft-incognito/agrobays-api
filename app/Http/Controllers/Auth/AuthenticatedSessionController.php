@@ -33,7 +33,7 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
         $dev = new DeviceDetector($request->userAgent());
-        $device = $dev->getBrandName() ? ($dev->getBrandName().$dev->getDeviceName()) : $request->userAgent();
+        $device = $dev->getBrandName() ? ($dev->getBrandName() . $dev->getDeviceName()) : $request->userAgent();
 
         $user = $request->user();
 

@@ -213,7 +213,7 @@ class PaymentController extends Controller
             // Calculate the global shipping fee
             $delivery_method = $request->delivery_method ?? 'delivery';
             $globalSshippingFee = config('settings.paid_shipping', false) || $delivery_method == 'delivery'
-                ? config('settings.shipping_fee')
+                ? config('settings.shipping_fee', 0)
                 : 0;
 
             if ($user && $request->address && $request->address !== ($user->address->shipping ?? '')) {
