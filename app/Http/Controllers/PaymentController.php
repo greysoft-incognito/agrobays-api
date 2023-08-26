@@ -320,7 +320,7 @@ class PaymentController extends Controller
             'items' => $cart ?? [$subscription ?? null],
             'amount' => $real_due,
             'shipping_fees' => $shipping_fees,
-            'globalSshippingFee' => $globalSshippingFee,
+            'globalSshippingFee' => $globalSshippingFees,
             'delivery_method' => $delivery_method,
         ]);
     }
