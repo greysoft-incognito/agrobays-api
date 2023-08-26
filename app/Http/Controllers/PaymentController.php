@@ -192,6 +192,7 @@ class PaymentController extends Controller
             return $this->validatorFails($validator, 'cart');
         }
 
+        $shipping_fees = 0;
         $real_due = 0;
         $code = 403;
 
@@ -318,6 +319,8 @@ class PaymentController extends Controller
             'payload' => $tranx ?? [],
             'items' => $cart ?? [$subscription ?? null],
             'amount' => $real_due,
+            'shipping_fees' => $shipping_fees,
+            'globalSshippingFee' => $globalSshippingFee,
             'delivery_method' => $delivery_method,
         ]);
     }
