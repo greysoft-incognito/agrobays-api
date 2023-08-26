@@ -322,6 +322,7 @@ class PaymentController extends Controller
             'shipping_fees' => $shipping_fees,
             'globalSshippingFee' => $globalSshippingFee,
             'delivery_method' => $delivery_method,
+            'total_due' => $due + $shipping_fees,
         ]);
     }
 
