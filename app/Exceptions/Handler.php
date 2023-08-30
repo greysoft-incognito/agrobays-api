@@ -19,6 +19,8 @@ use Throwable;
 
 class Handler extends ExceptionHandler
 {
+    protected $request;
+
     /**
      * A list of exception types with their corresponding custom log levels.
      *
@@ -50,6 +52,8 @@ class Handler extends ExceptionHandler
 
     public function render($request, Throwable $e)
     {
+        $this->request = $request;
+
         if (! config('app.testing')) {
             if ($request->isXmlHttpRequest() || request()->is('api/*')) {
                 $line = method_exists($e, 'getFile') ? ' in ' . $e->getFile() : '';
@@ -119,11 +123,17 @@ class Handler extends ExceptionHandler
 
     protected function renderException(string $msg, $code = 404, array $misc = [])
     {
-        return (new Controller())->buildResponse(collect([
+        $response = collect([
             'message' => $msg,
             'status' => 'error',
             'response_code' => $code,
-        ])->merge($misc));
+        ]);
+
+        if ($this->request->version < 2) {
+            return (new Controller())->buildResponse($response, $misc);
+        } else {
+            return (new Controller())->responseBuilder($response, ['response' => []]);
+        }
     }
 
     /**

@@ -21,7 +21,8 @@ class FruitbayCategoryCollection extends ResourceCollection
     {
         return ['api' => [
             'name' => env('APP_NAME', 'Agrobays API'),
-            'version' => env('API_VERSION', '1.0.6-beta'),
+            'version' => config('api.api_version'),
+            'app_version' => config('api.app_version'),
             'author' => 'Greysoft Limited',
             'updated' => now(),
         ]];

@@ -85,6 +85,7 @@ Route::controller(AccountController::class)
                     Route::get('{subscription?}', 'index')->name('index');
                     Route::post('/activate-plan/{id}', 'store');
                     Route::post('/terminate-plan', 'terminate');
+                    Route::post('/cancel-plan', 'cancel');
                 });
         });
     });

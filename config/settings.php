@@ -30,6 +30,9 @@ return [
     'shipping_fee' => 5000,
     'paid_shipping' => false,
     'feedback_system' => true,
+    'referral_system' => true,
+    'referral_bonus' => 1000.0,
+    'referral_mode' => 3,
     'require_org_approval' => false,
     'foodbag_locktime' => 0.5,
     'withdraw_to' => 'wallet',
@@ -43,7 +46,7 @@ return [
     'contact_email' => 'hi@greysoft.ng',
     'contact_address' => '31 Gwari Avenue, Barnawa, Kaduna',
     'office_address' => '31 Gwari Avenue, Barnawa, Kaduna',
-    'last_setting_time' => '2023-07-02 10:45:50',
+    'last_setting_time' => '2023-08-30 15:37:26',
     'permissions' => [
         'manage_guests' => 'View, manage and get notifications for guest and bootcamp registrations',
         'manage_users' => 'Create, view, manage and get notifications for user access',

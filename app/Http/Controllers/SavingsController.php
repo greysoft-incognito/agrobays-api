@@ -7,6 +7,7 @@ use App\Http\Resources\FoodBagCollection;
 use App\Http\Resources\FoodBagResource;
 use App\Http\Resources\PlanCollection;
 use App\Http\Resources\SavingCollection;
+use App\Http\Resources\SubscriptionResource;
 use App\Models\Cooperative;
 use App\Models\FoodBag;
 use App\Models\Plan;
@@ -231,7 +232,11 @@ class SavingsController extends Controller
         }
 
         // Delete user's current subscription
-        Subscription::where('user_id', Auth::id())->where('status', 'pending')->delete();
+        if ($request->cooperative_id) {
+            Subscription::where('cooperative_id', $request->cooperative_id)->where('status', 'pending')->delete();
+        } else {
+            Subscription::where('user_id', Auth::id())->where('status', 'pending')->delete();
+        }
 
         // Create the new plan
         $userPlan = new Subscription();
@@ -256,46 +261,63 @@ class SavingsController extends Controller
     }
 
     /**
-     * Subscribe to a new saving's plan.
+     * Terminate new saving's plan.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function terminate(Request $request, $id = null)
     {
-        $userPlan = Subscription::find($request->plan_id);
+        // dd($request->route());
 
-        if ($userPlan->cooperative) {
-            $this->authorize('manage', [$userPlan->cooperative, 'manage_plans']);
-        } else {
-            $this->authorize('be-owner', [$userPlan->user_id]);
-        }
+        /** @var \App\Models\Subscription */
+        $sub = Subscription::find($request->subscription_id ?? $request->plan_id);
 
-        if (! $userPlan) {
+        if (! $sub) {
             return $this->responseBuilder([
-                'message' => 'You do not have an active subscription.',
+                'message' => 'You are not subscribed to this plan.',
                 'status' => 'error',
                 'response_code' => 404,
             ]);
         }
 
-        if (config('settings.withdraw_to') === 'wallet') {
-            $userPlan->status = 'closed';
-            $userPlan->save();
-            $userPlan->user->wallet()->firstOrNew()->topup('Refunds', $userPlan->saved_amount, __('Refunds for :0.', [$userPlan->plan->title]));
-            $userPlan->user->notify(new SubStatus($userPlan, 'closed'));
-            $message = __('Your subscription for the :0 has been terminated, your savings will be withdrawn to your wallet.', [$userPlan->plan->title]);
+        if ($sub?->cooperative || $sub->status === 'closed') {
+            $msg = $sub->cooperative
+                ? 'You cannot terminate an active subscription to a cooperative plan.'
+                : 'You already terminated this subscription.';
+            return $this->responseBuilder([
+                'message' => $msg,
+                'status' => 'error',
+                'response_code' => 406,
+            ]);
         } else {
-            $userPlan->status = 'withdraw';
-            $userPlan->save();
-            $message = __('You have successfully terminated your saving for the :0, your withdrawal request has been logged and will be proccessed along with the next batch.', [$userPlan->plan->title]);
+            $this->authorize('be-owner', [$sub->user_id]);
+        }
+
+        if (config('settings.withdraw_to') === 'wallet') {
+            $sub->status = 'closed';
+            $sub->save();
+            $sub->user->wallet()->firstOrNew()->topup(
+                'Refunds',
+                $sub->saved_amount,
+                __('Refunds for :0.', [$sub->plan->title])
+            );
+            $sub->user->notify(new SubStatus($sub, 'closed'));
+            $message = __('Your subscription to the :0 has been terminated, :1.', [
+                $sub->plan->title,
+                'your savings will be withdrawn to your wallet.'
+            ]);
+        } else {
+            $sub->status = 'withdraw';
+            $sub->save();
+            $message = __('You have successfully terminated your saving for the :0, your withdrawal request has been logged and will be proccessed along with the next batch.', [$sub->plan->title]);
         }
 
         return $this->buildResponse([
             'message' => $message,
             'status' => 'success',
             'response_code' => 201,
-            'data' => $userPlan,
+            'data' => $sub,
         ]);
     }
 }

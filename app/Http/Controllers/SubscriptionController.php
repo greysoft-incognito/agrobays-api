@@ -115,7 +115,7 @@ class SubscriptionController extends Controller
         return (new SubscriptionResource($subscription))
             ->additional([
                 'message' => 'OK',
-                'status' => 'error',
+                'status' => 'success',
                 'response_code' => 200,
             ]);
     }

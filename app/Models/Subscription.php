@@ -49,7 +49,6 @@ class Subscription extends Model
     {
         static::deleting(function (Subscription $org) {
             $org->allSavings()->delete();
-            $org->bag()->delete();
             $org->dispatch()->delete();
         });
 
@@ -228,6 +227,7 @@ class Subscription extends Model
     public function feesSplit(): Attribute
     {
         // Divide the fees by the number of days left
+        $this->bag->fees = $this->bag->fees ?? 0;
         return Attribute::make(
             get: fn () => $this->bag->fees && $this->paid_days > 0 ? ($this->bag->fees / $this->paid_days) : 0
         );

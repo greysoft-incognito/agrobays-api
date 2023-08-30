@@ -61,7 +61,7 @@ class PaymentController extends Controller
                     'days.max' => "You cannot save for more than {$subscription->days_left} days.",
                     ]))->stopOnFirstFailure()->fails()
             ) {
-                        return $this->validatorFails($validator, 'email');
+                        return $this->validatorFails($validator, 'days');
             }
 
             $method = $request->get('method', $method);

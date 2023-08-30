@@ -28,10 +28,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        config(['auth.providers.users.model' => \App\Models\v2\User::class]);
+
         // Load Custom Helpers
         array_filter(File::files(app_path('Helpers')), function ($file) {
             if ($file->getExtension() === 'php' && stripos($file->getFileName(), 'helper') !== false) {
-                require_once app_path('Helpers/'.$file->getFileName());
+                require_once app_path('Helpers/' . $file->getFileName());
             }
         });
 

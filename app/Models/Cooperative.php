@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use ToneflixCode\LaravelFileable\Traits\Fileable;
 
@@ -214,6 +215,16 @@ class Cooperative extends Model
     public function needsToApproveFollowRequests(): bool
     {
         return (bool) isset($this->settings['require_join_approval']) && $this->settings['require_join_approval'] === true;
+    }
+
+    /**
+     * Get all of the savings for the Cooperative
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
+     */
+    public function savings(): HasManyThrough
+    {
+        return $this->hasManyThrough(Saving::class, Subscription::class);
     }
 
     /**

@@ -35,6 +35,11 @@ class RouteServiceProvider extends ServiceProvider
                 ->middleware('api')
                 ->group(base_path('routes/api.php'));
 
+            Route::prefix('api/v2')
+                ->name('v2.')
+                ->middleware('api')
+                ->group(base_path('routes/api.v2.php'));
+
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
         });
@@ -64,7 +69,7 @@ class RouteServiceProvider extends ServiceProvider
 
             return (! $datetime || $datetime->diffInMinutes(now()) >= config('settings.token_lifespan', 30))
                 ? Limit::none()
-                : (new Controller)->buildResponse([
+                : (new Controller())->buildResponse([
                     'message' => __("We already sent a message to help you {$action}, you can try again :0 minutes.", [config('settings.token_lifespan', 30) - $datetime->diffInMinutes(now())]),
                     'status' => 'success',
                     'response_code' => 429,

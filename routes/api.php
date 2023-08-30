@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\Route;
 if (file_exists(base_path('routes/api'))) {
     array_filter(File::files(base_path('routes/api')), function (Symfony\Component\Finder\SplFileInfo $file) {
         if ($file->getExtension() === 'php') {
-            require_once $file->getPathName();
+            Route::middleware('api')->group($file->getPathName());
         }
     });
 }

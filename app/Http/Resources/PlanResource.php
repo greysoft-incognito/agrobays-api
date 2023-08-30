@@ -14,6 +14,8 @@ class PlanResource extends JsonResource
      */
     public function toArray($request)
     {
+        $v = $request->version;
+
         return [
             'id' => $this->id,
             'slug' => $this->slug,
@@ -24,7 +26,14 @@ class PlanResource extends JsonResource
             'amount' => $this->amount,
             'status' => $this->status,
             'image_url' => $this->image_url,
-            'food_bags' => new FoodBagCollection($this->food_bag),
+            $this->mergeWhen($v >= 2, [
+                'food_bags' => $this->when($request->with_foodbags, function () {
+                    return new FoodBagCollection($this->food_bag);
+                }),
+            ]),
+            'food_bags' => $this->when($v < 2, function () {
+                return new FoodBagCollection($this->food_bag);
+            }),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
@@ -34,7 +43,8 @@ class PlanResource extends JsonResource
     {
         return ['api' => [
             'name' => env('APP_NAME', 'Agrobays API'),
-            'version' => env('API_VERSION', '1.0.6-beta'),
+            'version' => config('api.api_version'),
+            'app_version' => config('api.app_version'),
             'author' => 'Greysoft Limited',
             'updated' => now(),
         ]];

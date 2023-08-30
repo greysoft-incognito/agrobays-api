@@ -14,6 +14,8 @@ class FoodBagResource extends JsonResource
      */
     public function toArray($request)
     {
+        $v = $request->version;
+
         return [
             'id' => $this->id,
             'plan_id' => $this->plan_id,
@@ -22,8 +24,15 @@ class FoodBagResource extends JsonResource
             'description' => $this->description,
             'image' => $this->image,
             'price' => $this->price,
-            'weight' => $this->weight.($this->weight_unit ?? 'kg'),
-            'foods' => new FoodCollection($this->whenLoaded('foods')),
+            'weight' => $this->weight . ($this->weight_unit ?? 'kg'),
+            $this->mergeWhen($v >= 2, [
+                'foods' => $this->when($request->with_foods, function () {
+                    return new FoodCollection($this->whenLoaded('foods'));
+                }),
+            ]),
+            'foods' => $this->when($v < 2, function () {
+                return new FoodCollection($this->whenLoaded('foods'));
+            }),
             'plan' => $this->whenLoaded('plan'),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
@@ -34,7 +43,8 @@ class FoodBagResource extends JsonResource
     {
         return ['api' => [
             'name' => env('APP_NAME', 'Agrobays API'),
-            'version' => env('API_VERSION', '1.0.6-beta'),
+            'version' => config('api.api_version'),
+            'app_version' => config('api.app_version'),
             'author' => 'Greysoft Limited',
             'updated' => now(),
         ]];

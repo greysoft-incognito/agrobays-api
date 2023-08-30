@@ -15,7 +15,7 @@ trait Extendable
      * Prepare the API response
      *
      * @param  array  $data
-     * @return void
+     * @return \Illuminate\Http\Response|\Illuminate\Contracts\Routing\ResponseFactory
      */
     public function responseBuilder($data = [], $extra_data = null)
     {
@@ -25,7 +25,8 @@ trait Extendable
         $info = [
             'api' => [
                 'name' => 'Agrobays',
-                'version' => config('api.api_version', '1.0.6-beta'),
+                'version' => config('api.api_version'),
+                'app_version' => config('api.app_version'),
                 'author' => 'Greysoft Technologies Limited',
                 'updated' => now(),
             ],
@@ -72,7 +73,7 @@ trait Extendable
      *
      * @deprecated version 1.0.6-beta use responseBuilder instead
      *
-     * @return void
+     * @return \Illuminate\Http\Response|\Illuminate\Contracts\Routing\ResponseFactory
      */
     public function buildResponse($data = [], $extra_data = null)
     {
@@ -88,7 +89,8 @@ trait Extendable
         $response = [
             'api' => [
                 'name' => 'Agrobays',
-                'version' => env('API_VERSION', '1.0.6-beta'),
+                'version' => config('api.api_version'),
+                'app_version' => config('api.app_version'),
                 'author' => 'Greysoft Limited',
                 'updated' => now(),
             ],
@@ -184,7 +186,7 @@ trait Extendable
             $info = $user->access_data;
         } else {
             if (config('settings.system.ipinfo.access_token') && config('settings.collect_user_data', true)) {
-                $ipInfo = \Illuminate\Support\Facades\Http::get('ipinfo.io/'.$this->ip(), [
+                $ipInfo = \Illuminate\Support\Facades\Http::get('ipinfo.io/' . $this->ip(), [
                     'token' => config('settings.system.ipinfo.access_token'),
                 ]);
                 if ($ipInfo->status() === 200) {

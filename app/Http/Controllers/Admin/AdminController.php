@@ -32,6 +32,9 @@ class AdminController extends Controller
         'verify_email' => 'boolean',
         'verify_phone' => 'boolean',
         'feedback_system' => 'boolean',
+        'referral_system' => 'boolean',
+        'referral_bonus' => 'decimal',
+        'referral_mode' => 'integer',
         'foodbag_locktime' => 'decimal',
     ];
 

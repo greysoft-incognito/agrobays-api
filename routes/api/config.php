@@ -32,7 +32,7 @@ Route::get('/check/update/{version}', function (Request $request, $version) {
     return (new Controller())->buildResponse([
         'message' => $has_update ? 'New version available' : 'No update available',
         'link' => $has_update ? env('APP_UPDATE_URL') : null,
-        'version' => env('APP_VERSION'),
+        'version' => config('api.app_version'),
         'status' => 'success',
         'response_code' => 200,
     ]);
