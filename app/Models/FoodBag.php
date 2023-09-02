@@ -67,7 +67,7 @@ class FoodBag extends Model
     public function price(): Attribute
     {
         return Attribute::make(
-            get: fn () => (float)$this->foods->sum(fn ($food) => $food->price * $food->pivot->quantity),
+            get: fn () => (float) $this->foods->sum(fn ($food) => $food->price * $food->pivot->quantity),
         );
     }
 

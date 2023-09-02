@@ -35,7 +35,7 @@ class Permissions
             'feedback.manage',
             'mealplans.manage',
             'cooperatives.manage',
-            'cooperatives.wallet'
+            'cooperatives.wallet',
         ],
         'manager' => [
             'users.user',

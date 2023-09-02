@@ -25,8 +25,8 @@ class CooperativeMgtController extends CooperativeController
 
         $this->validate($request, [
             'name' => 'required|string|min:3',
-            'email' => 'required|email|unique:cooperatives,email,' . $cooperative->id,
-            'phone' => 'nullable|string|unique:cooperatives,phone,' . $cooperative->id,
+            'email' => 'required|email|unique:cooperatives,email,'.$cooperative->id,
+            'phone' => 'nullable|string|unique:cooperatives,phone,'.$cooperative->id,
             'about' => 'nullable|string|min:10',
             'website' => 'nullable|url',
             'address' => 'nullable|string',
@@ -69,7 +69,7 @@ class CooperativeMgtController extends CooperativeController
     public function toggleVerification(Request $request, Cooperative $cooperative)
     {
         \Gate::authorize('usable', 'cooperatives.manage');
-        $cooperative->verified = !$cooperative->verified;
+        $cooperative->verified = ! $cooperative->verified;
         $cooperative->save();
 
         return (new CooperativeResource($cooperative))->additional([
@@ -114,7 +114,6 @@ class CooperativeMgtController extends CooperativeController
      *
      * @param  Request  $request
      * @param  \App\Models\Cooperative  $cooperative
-     *
      * @return \Illuminate\Http\Response
      */
     public function wallet(Request $request, Cooperative $cooperative)

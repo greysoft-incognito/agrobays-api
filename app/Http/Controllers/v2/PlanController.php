@@ -112,7 +112,7 @@ class PlanController extends Controller
             ->additional([
                 'message' => __('You have successfully subscribed to the :0:1', [
                     $plan->title,
-                    $request->cooperative_id ? ' for ' . $subscription->cooperative->name . '.' : null,
+                    $request->cooperative_id ? ' for '.$subscription->cooperative->name.'.' : null,
                 ]),
                 'status' => 'success',
                 'response_code' => HttpStatus::CREATED,

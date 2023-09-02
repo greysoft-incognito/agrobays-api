@@ -8,21 +8,23 @@ use PhpParser\Node\Expr\ConstFetch;
 use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Name;
 use PhpParser\Node\Scalar\DNumber;
-use PhpParser\Node\Scalar\String_;
 use PhpParser\Node\Scalar\LNumber;
+use PhpParser\Node\Scalar\String_;
 use Winter\LaravelConfigWriter\ArrayFile as ArrayFileBase;
 
 class ArrayFile extends ArrayFileBase
 {
     public const SORT_ASC = 'asc';
+
     public const SORT_DESC = 'desc';
 
     /**
      * Generate an AST node, using `PhpParser` classes, for a value
      *
-     * @param mixed $value
-     * @throws \RuntimeException If $type is not one of 'string', 'boolean', 'integer', 'function', 'const', 'null', or 'array'
+     * @param  mixed  $value
      * @return ConstFetch|LNumber|String_|Array_|FuncCall
+     *
+     * @throws \RuntimeException If $type is not one of 'string', 'boolean', 'integer', 'function', 'const', 'null', or 'array'
      */
     protected function makeAstNode(string $type, $value)
     {

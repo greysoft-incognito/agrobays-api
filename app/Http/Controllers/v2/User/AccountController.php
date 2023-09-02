@@ -92,7 +92,7 @@ class AccountController extends Controller
                 $vals .= '|min:8|confirmed';
             }
             if (is_array($filled[$field])) {
-                return [$field . '.*' => 'required'];
+                return [$field.'.*' => 'required'];
             }
 
             return [$field => "required|$vals"];
@@ -108,7 +108,7 @@ class AccountController extends Controller
             return ! Str::contains($k, '_confirmation');
         });
 
-        if (!$request->hasFile('image')) {
+        if (! $request->hasFile('image')) {
             foreach ($fields as $_field) {
                 if (Str::contains($_field, ':image')) {
                     $_field = current(explode(':image', (string) $_field));
@@ -145,12 +145,12 @@ class AccountController extends Controller
             'firstname' => ['required', 'string', 'max:255'],
             'lastname' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'phone' => ['required', 'string', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'phone' => ['nullable', 'string', 'max:255', 'phone:INTERNATIONAL,BE', Rule::unique('users')->ignore($user->id)],
             'username' => ['nullable', 'string', 'max:255', Rule::unique('users')->ignore($user->id)],
             'gender' => ['in:male,female,non-binary,transgender,bisexual,other'],
-            'nextofkin' => ['required', 'string', 'max:255'],
-            'nextofkin_relationship' => ['required', 'string', 'max:255'],
-            'nextofkin_phone' => ['required', 'string', 'max:255'],
+            'nextofkin' => ['nullable', 'string', 'max:255'],
+            'nextofkin_relationship' => ['required_with:nextofkin', 'string', 'max:255'],
+            'nextofkin_phone' => ['required_with:nextofkin', 'string', 'max:255', 'phone:INTERNATIONAL,BE'],
             'address.home' => ['required', 'string', 'max:255'],
             'address.shipping' => ['nullable', 'string', 'max:255'],
             'country.name' => ['required', 'string', 'max:255'],
@@ -162,6 +162,10 @@ class AccountController extends Controller
             'city.name' => 'City',
             'address.home' => 'Home Address',
             'address.shipping' => 'Shipping Address',
+            'phone' => 'Phone Number',
+            'nextofkin' => 'Next of Kin',
+            'nextofkin_relationship' => 'Next of Kin Relationship',
+            'nextofkin_phone' => 'Next of Kin Phone Number',
         ]);
 
         $user->firstname = $request->firstname;

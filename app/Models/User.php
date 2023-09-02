@@ -12,10 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use libphonenumber\NumberParseException as LibphonenumberNumberParseException;
 use Overtrue\LaravelFavorite\Traits\Favoriter;
-use Propaganistas\LaravelPhone\Exceptions\NumberParseException;
-use Propaganistas\LaravelPhone\PhoneNumber;
 use ToneflixCode\LaravelFileable\Traits\Fileable;
 
 class User extends Authenticatable implements MustVerifyEmail
@@ -38,7 +35,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'phone',
         'username',
         'password',
-        'address'
+        'address',
     ];
 
     /**
@@ -81,10 +78,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'permissions',
         'image_url',
         'fullname',
-        'address',
-        'country',
-        'city',
-        'state',
     ];
 
     /**
@@ -125,12 +118,12 @@ class User extends Authenticatable implements MustVerifyEmail
     public static function registerEvents()
     {
         static::creating(function ($user) {
-            if (!$user->username) {
+            if (! $user->username) {
                 $u = str($user->email
                     ? str($user->email)->explode('@')->first()
                     : str($user->name ?? $user->firstname)->slug())->replace('.', '_')->toString();
 
-                $user->username = User::where('username', $u)->exists() ? $u . rand(100, 999) : $u;
+                $user->username = User::where('username', $u)->exists() ? $u.rand(100, 999) : $u;
             }
         });
 
@@ -144,148 +137,6 @@ class User extends Authenticatable implements MustVerifyEmail
             $org->orders()->delete();
             $org->wallet()->delete();
         });
-    }
-
-    /**
-     * Interact with the user's address.
-     *
-     * @return  \Illuminate\Database\Eloquent\Casts\Attribute
-     */
-    public function address(): Attribute
-    {
-        return Attribute::make(
-            get: function ($value, $attributes) {
-                if (! $value || ! is_string($value) || is_null($val = json_decode($value))) {
-                    return [
-                        'shipping' => '',
-                        'home' => '',
-                    ];
-                }
-
-                return $val;
-            },
-            set: fn ($value) => ['address' => json_encode([
-                'shipping' => $value->shipping ?? $value['shipping'] ?? '',
-                'home' => $value->home ?? $value['home'] ?? '',
-            ])]
-        );
-    }
-
-    /**
-     * Interact with the user's country.
-     *
-     * @return  \Illuminate\Database\Eloquent\Casts\Attribute
-     */
-    public function country(): Attribute
-    {
-        return Attribute::make(
-            get: function ($value, $attributes) {
-                if (! $value || ! is_string($value) || is_null($val = json_decode($value))) {
-                    return [
-                        'name' => '',
-                        'iso2' => '',
-                        'emoji' => '',
-                    ];
-                }
-
-                return $val;
-            },
-            set: fn ($value) => ['country' => json_encode([
-                'name' => $value->name ?? $value['name'] ?? '',
-                'iso2' => $value->iso2 ?? $value['iso2'] ?? '',
-                'emoji' => $value->emoji ?? $value['emoji'] ?? '',
-            ])]
-        );
-    }
-
-    /**
-     * Interact with the user's state.
-     *
-     * @return  \Illuminate\Database\Eloquent\Casts\Attribute
-     */
-    public function state(): Attribute
-    {
-        return Attribute::make(
-            get: function ($value, $attributes) {
-                if (! $value || ! is_string($value) || is_null($val = json_decode($value))) {
-                    return [
-                        'name' => '',
-                        'iso2' => '',
-                    ];
-                }
-
-                return $val;
-            },
-            set: fn ($value) => ['state' => json_encode([
-                'name' => $value->name ?? $value['name'] ?? '',
-                'iso2' => $value->iso2 ?? $value['iso2'] ?? '',
-            ])]
-        );
-    }
-
-    /**
-     * Interact with the user's city.
-     *
-     * @return  \Illuminate\Database\Eloquent\Casts\Attribute
-     */
-    public function city(): Attribute
-    {
-        return Attribute::make(
-            get: function ($value, $attributes) {
-                if (! $value || ! is_string($value) || is_null($val = json_decode($value))) {
-                    return [
-                        'name' => '',
-                    ];
-                }
-
-                return $val;
-            },
-            set: fn ($value) => ['city' => json_encode([
-                'name' => $value->name ?? $value['name'] ?? $value ?? '',
-            ])]
-        );
-    }
-
-    /**
-     * Interact with the user's phone.
-     *
-     * @return  \Illuminate\Database\Eloquent\Casts\Attribute
-     */
-    public function phone(): Attribute
-    {
-        $cIso2 = 'NG';
-
-        return Attribute::make(
-            get: function ($value) use ($cIso2) {
-                // return $value;
-                try {
-                    if (! empty($this->country->iso2 ?? $this->country['iso2']) && $value) {
-                        return (string) PhoneNumber::make($value, $this->country->iso2 ?? $this->country['iso2'])->formatE164();
-                    }
-
-                    return $value ? (string) PhoneNumber::make($value, $cIso2)->formatE164() : $value;
-                } catch (NumberParseException | LibphonenumberNumberParseException $th) {
-                    return $value;
-                }
-            },
-            set: function ($value) use ($cIso2) {
-                if (!empty($value)) {
-                    $token = config('settings.ipinfo_access_token');
-                    $ipInpfo = \Illuminate\Support\Facades\Http::get('ipinfo.io/' . request()->ip() . '?token=' . $token);
-
-                    if ($ipInpfo->status() === 200) {
-                        $cIso2 = $ipInpfo->json('country') ?? $cIso2;
-                    }
-                    $value = str_ireplace('-', '', $value);
-                    if (! empty($this->country->iso2 ?? $this->country['iso2']) && $value) {
-                        return ['phone' => (string) PhoneNumber::make($value, $this->country->iso2 ?? $this->country['iso2'])->formatE164()];
-                    }
-
-                    return ['phone' => $value ? (string) PhoneNumber::make($value, $cIso2)->formatE164() : $value];
-                }
-                return ['phone' => $value];
-            }
-        );
     }
 
     /**
@@ -315,12 +166,22 @@ class User extends Authenticatable implements MustVerifyEmail
     public function fullname(): Attribute
     {
         $name = isset($this->firstname) ? ucfirst($this->firstname) : '';
-        $name .= isset($this->lastname) ? ' ' . ucfirst($this->lastname) : '';
+        $name .= isset($this->lastname) ? ' '.ucfirst($this->lastname) : '';
         $name .= ! isset($this->lastname) && ! isset($this->firstname) && isset($this->username) ? ucfirst($this->username) : '';
 
         return new Attribute(
             get: fn () => $name,
         );
+    }
+
+    /**
+     * Get the user's affiliates (users they referred).
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function affiliates(): HasMany
+    {
+        return $this->hasMany(User::class, 'referrer_id');
     }
 
     /**

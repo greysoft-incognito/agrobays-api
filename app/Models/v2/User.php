@@ -3,21 +3,31 @@
 namespace App\Models\v2;
 
 use App\Models\User as ModelsUser;
-use Illuminate\Database\Eloquent\Casts\Attribute;
+use App\Traits\Extendable;
+use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
 
 class User extends ModelsUser
 {
+    use Extendable;
+
     /**
-     * Interact with the user's country.
+     * The attributes that should be cast.
      *
-     * @return  \Illuminate\Database\Eloquent\Casts\Attribute
+     * @var array<string, string>
      */
-    public function country(): Attribute
-    {
-        return Attribute::make(
-            get: function ($value, $attributes) {
-                return Country::find($value);
-            },
-        );
-    }
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'phone_verified_at' => 'datetime',
+        'last_refreshed' => 'datetime',
+        'last_attempt' => 'datetime',
+        'last_seen' => 'datetime',
+        'address' => 'collection',
+        'country' => 'collection',
+        'state' => 'collection',
+        'city' => 'collection',
+        'bank' => 'collection',
+        'data' => 'collection',
+        // 'phone' => E164PhoneNumberCast::class . ':NG',
+        // 'nextofkin_phone' => E164PhoneNumberCast::class . ':NG',
+    ];
 }

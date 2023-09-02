@@ -30,7 +30,7 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         ResetPassword::createUrlUsing(function ($notifiable, $token) {
-            return config('app.frontend_url') . "/password-reset/$token?email={$notifiable->getEmailForPasswordReset()}";
+            return config('app.frontend_url')."/password-reset/$token?email={$notifiable->getEmailForPasswordReset()}";
         });
 
         Gate::define('usable', function (User $user, $permission) {
@@ -59,16 +59,16 @@ class AuthServiceProvider extends ServiceProvider
             $isManager = method_exists($item, 'members')
                 ? $item->members()->isAccepted($accepted)->forUser($user)
                        ->where(function ($q) use ($permission) {
-                        if ($permission === 'any' || ! $permission) {
-                            // User should have at least one ability
-                            $q->whereJsonLength('abilities', '>', 0);
-                        } elseif ($permission === 'exists') {
-                            // User should exist in the members table
-                            $q->whereNotNull('id');
-                        } else {
-                            $q->whereJsonContains('abilities', $permission);
-                            $q->orWhereJsonContains('abilities', 'all');
-                        }
+                           if ($permission === 'any' || ! $permission) {
+                               // User should have at least one ability
+                               $q->whereJsonLength('abilities', '>', 0);
+                           } elseif ($permission === 'exists') {
+                               // User should exist in the members table
+                               $q->whereNotNull('id');
+                           } else {
+                               $q->whereJsonContains('abilities', $permission);
+                               $q->orWhereJsonContains('abilities', 'all');
+                           }
                        })->exists()
                 : false;
 

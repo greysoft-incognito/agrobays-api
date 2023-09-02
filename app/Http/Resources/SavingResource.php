@@ -15,6 +15,10 @@ class SavingResource extends JsonResource
     public function toArray($request)
     {
         $with = is_array($request->with) ? $request->with : explode(',', $request->with);
+        if (!$request->subscription || $request->subscription == 'all' || $request->boolean('subscription')) {
+            $with[] = 'subscription';
+        }
+
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
@@ -47,7 +51,7 @@ class SavingResource extends JsonResource
                 ],
             ],
             'transaction' => $this->transaction,
-            'subscription' => $this->when(! $request->subscription, $this->subscription),
+            'subscription' => $this->when(in_array('subscription', $with), $this->subscription),
         ];
     }
 }

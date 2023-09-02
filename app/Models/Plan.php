@@ -56,7 +56,7 @@ class Plan extends Model
     {
         $image = $this->image
             ? img($this->image, 'banner', 'large')
-            : 'https://loremflickr.com/320/320/' . urlencode($this->title ?? 'fruit');
+            : 'https://loremflickr.com/320/320/'.urlencode($this->title ?? 'fruit');
 
         return Attribute::make(
             get: fn () => $image,

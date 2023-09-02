@@ -211,7 +211,7 @@ class Subscription extends Model
     public function leftAmount(): Attribute
     {
         return Attribute::make(
-            get: fn () => (float)($this->plan->amount - $this->saved_amount)
+            get: fn () => (float) ($this->plan->amount - $this->saved_amount)
         );
     }
 
@@ -228,6 +228,7 @@ class Subscription extends Model
     {
         // Divide the fees by the number of days left
         $this->bag->fees = $this->bag->fees ?? 0;
+
         return Attribute::make(
             get: fn () => $this->bag->fees && $this->paid_days > 0 ? ($this->bag->fees / $this->paid_days) : 0
         );
@@ -261,8 +262,10 @@ class Subscription extends Model
         } else {
             if (str($status)->contains('!')) {
                 $status = str_replace('!', '', $status);
+
                 return $query->where('status', '!=', $status);
             }
+
             return $query->where('status', $status);
         }
     }

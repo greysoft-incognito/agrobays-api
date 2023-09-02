@@ -29,6 +29,8 @@ class FruitBay extends Model
         'bag' => 'array',
         'fees' => 'double',
         'price' => 'double',
+        'weight' => 'double',
+        'available' => 'boolean',
     ];
 
     /**
@@ -39,7 +41,23 @@ class FruitBay extends Model
     protected $attributes = [
         'bag' => '[]',
         'fees' => 0.00,
+        'weight' => 0.00,
+        'unit' => 'kg',
     ];
+
+    /**
+     * Retrieve the model for a bound value.
+     *
+     * @param  mixed  $value
+     * @param  string|null  $field
+     * @return \Illuminate\Database\Eloquent\Model|null
+     */
+    public function resolveRouteBinding($value, $field = null)
+    {
+        return $this->where('id', $value)
+            ->orWhere('slug', $value)
+            ->firstOrFail();
+    }
 
     public static function boot()
     {

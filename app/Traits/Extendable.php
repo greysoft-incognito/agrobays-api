@@ -177,20 +177,17 @@ trait Extendable
     {
         $info['country'] = 'US';
 
-        // Check if request is cli
-        if (php_sapi_name() === 'cli') {
-            return $info;
-        }
-
-        if (($user = Auth::user()) && $user->access_data) {
-            $info = $user->access_data;
-        } else {
-            if (config('settings.system.ipinfo.access_token') && config('settings.collect_user_data', true)) {
-                $ipInfo = \Illuminate\Support\Facades\Http::get('ipinfo.io/' . $this->ip(), [
-                    'token' => config('settings.system.ipinfo.access_token'),
-                ]);
-                if ($ipInfo->status() === 200) {
-                    $info = $ipInfo->json() ?? $info;
+        if (! $this->isLocalHosted()) {
+            if (($user = Auth::user()) && $user->access_data) {
+                $info = $user->access_data;
+            } else {
+                if (config('settings.system.ipinfo.access_token') && config('settings.collect_user_data', true)) {
+                    $ipInfo = \Illuminate\Support\Facades\Http::get('ipinfo.io/'.$this->ip(), [
+                        'token' => config('settings.system.ipinfo.access_token'),
+                    ]);
+                    if ($ipInfo->status() === 200) {
+                        $info = $ipInfo->json() ?? $info;
+                    }
                 }
             }
         }

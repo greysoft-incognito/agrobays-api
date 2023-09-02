@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers\v2\Auth;
 
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
@@ -34,7 +34,7 @@ class RegisteredUserController extends Controller
                 'string',
                 'email',
                 'max:255',
-                'unique:users'
+                'unique:users',
             ],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'referral_code' => 'nullable|exists:users,referral_code',
@@ -46,20 +46,19 @@ class RegisteredUserController extends Controller
         $lastname = $name->last(fn ($k) => $k !== $firstname, '');
 
         // Create the user
-        $user = User::create([
-            'firstname' => $firstname,
-            'lastname' => $lastname,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        $user = new User();
+        $user->firstname = $firstname;
+        $user->lastname = $lastname;
+        $user->email = $request->email;
+        $user->password = Hash::make($request->password);
 
         // Assign a referral code to the user
         $referrer = User::where('referral_code', $request->referral_code)->first();
         // Add the referrer id to the user
         if ($referrer) {
             $user->referrer_id = $referrer->id;
-            $user->save();
         }
+        $user->save();
 
         event(new Registered($user));
 

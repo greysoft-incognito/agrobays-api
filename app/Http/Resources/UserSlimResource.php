@@ -40,6 +40,8 @@ class UserSlimResource extends JsonResource
             'email_verified_at' => $this->email_verified_at,
             'phone_verified_at' => $this->phone_verified_at,
             'last_seen' => $this->last_seen ?? $this->created_at,
+            'referral_code' => $this->referral_code,
+            'referrer_id' => $this->referrer_id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

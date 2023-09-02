@@ -21,6 +21,8 @@ class Handler extends ExceptionHandler
 {
     protected $request;
 
+    protected $message;
+
     /**
      * A list of exception types with their corresponding custom log levels.
      *
@@ -56,17 +58,21 @@ class Handler extends ExceptionHandler
 
         if (! config('app.testing')) {
             if ($request->isXmlHttpRequest() || request()->is('api/*')) {
-                $line = method_exists($e, 'getFile') ? ' in ' . $e->getFile() : '';
-                $line .= method_exists($e, 'getLine') ? ' on line ' . $e->getLine() : '';
-                $getMessage = method_exists($e, 'getMessage') ? $e->getMessage() . $line : 'An error occured' . $line;
+                $line = method_exists($e, 'getFile') ? ' in '.$e->getFile() : '';
+                $line .= method_exists($e, 'getLine') ? ' on line '.$e->getLine() : '';
+                $getMessage = method_exists($e, 'getMessage') ? $e->getMessage().$line : 'An error occured'.$line;
                 $plainMessage = method_exists($e, 'getMessage') ? $e->getMessage() : null;
 
-                $prefix = $e instanceof ModelNotFoundException ? str($e->getModel())->afterLast('\\')->title() . ' ' : '';
+                if ((bool) collect($e?->getTrace())->firstWhere('function', 'abort')) {
+                    $this->message = $e->getMessage();
+                }
+
+                $prefix = $e instanceof ModelNotFoundException ? str($e->getModel())->afterLast('\\')->title().' ' : '';
 
                 return match (true) {
                     $e instanceof NotFoundHttpException ||
                         $e instanceof ModelNotFoundException => $this->renderException(
-                            $prefix . HttpStatus::message(HttpStatus::NOT_FOUND),
+                            $prefix.HttpStatus::message(HttpStatus::NOT_FOUND),
                             HttpStatus::NOT_FOUND
                         ),
                     $e instanceof AuthorizationException ||
@@ -124,15 +130,15 @@ class Handler extends ExceptionHandler
     protected function renderException(string $msg, $code = 404, array $misc = [])
     {
         $response = collect([
-            'message' => $msg,
+            'message' => $this->message ?? $msg,
             'status' => 'error',
             'response_code' => $code,
         ]);
 
         if ($this->request->version < 2) {
-            return (new Controller())->buildResponse($response, $misc);
+            return (new Controller())->buildResponse($response, array_merge($misc, ['data' => []]));
         } else {
-            return (new Controller())->responseBuilder($response, ['response' => []]);
+            return (new Controller())->responseBuilder($response, array_merge($misc, ['response' => []]));
         }
     }
 

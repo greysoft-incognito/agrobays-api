@@ -8,10 +8,8 @@ use App\Http\Resources\CooperativeResource;
 use App\Http\Resources\ModelMemberCollection;
 use App\Models\Cooperative;
 use App\Models\User;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
 class CooperativeMemberController extends Controller
 {
@@ -27,7 +25,7 @@ class CooperativeMemberController extends Controller
 
         if ($request->search) {
             $query->whereHas('user', function ($query) use ($request) {
-                $query->whereRaw('concat_ws(" ", firstname, lastname) like ?', ['%' . $request->search . '%']);
+                $query->whereRaw('concat_ws(" ", firstname, lastname) like ?', ['%'.$request->search.'%']);
             });
         }
 

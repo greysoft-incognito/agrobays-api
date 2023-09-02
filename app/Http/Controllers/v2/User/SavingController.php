@@ -13,7 +13,6 @@ use App\Services\Payment\PaystackProcessor;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use stdClass;
 
 class SavingController extends Controller
 {
@@ -29,6 +28,12 @@ class SavingController extends Controller
         /** @var \App\Models\User */
         $user = $request->user();
 
+        // Set default period
+        $period_placeholder = Carbon::now()->subDays(30)->format('Y/m/d') . '-' . Carbon::now()->format('Y/m/d');
+
+        // Get period
+        $period = explode('-', urldecode($request->get('period', $period_placeholder)));
+
         $cooperative = null;
         if ($request->cooperative_id) {
             /** @var \App\Models\Cooperative */
@@ -36,23 +41,33 @@ class SavingController extends Controller
                 ->orWhere('slug', $request->cooperative_id)
                 ->firstOrFail();
 
-            /** @var \App\Models\Subscription */
-            $subscription = $cooperative->subscriptions()->whereId($subscription_id)->firstOrFail();
-            $query = $subscription->allSavings();
+            if ($subscription_id !== 'all') {
+                /** @var \App\Models\Subscription */
+                $subscription = $cooperative->subscriptions()->whereId($subscription_id)->firstOrFail();
+                $query = $subscription->allSavings();
+            } else {
+                $query = $cooperative->savings();
+            }
         } else {
-            /** @var \App\Models\Subscription */
-            $subscription = $user->subscriptions()->whereId($subscription_id)->firstOrFail();
-            $query = $subscription->allSavings();
+            if ($subscription_id !== 'all') {
+                /** @var \App\Models\Subscription */
+                $subscription = $user->subscriptions()->whereId($subscription_id)->firstOrFail();
+                $query = $subscription->allSavings();
+            } else {
+                $query = $user->savings();
+            }
         }
 
-        if (in_array($request->status, ['rejected', 'pending', 'complete'])) {
-            $query->where('status', $request->status);
-        }
+        // Filter by status
+        $query->when(
+            $request->status && in_array($request->status, ['rejected', 'pending', 'complete']),
+            function ($query) use ($request) {
+                $query->where('status', $request->get('status'));
+            }
+        );
 
-        if ($p = $request->get('period')) {
-            $period = explode('-', $p);
-            $query->whereBetween('created_at', [new Carbon($period[0]), new Carbon($period[1])]);
-        }
+        // Filter by period
+        $query->whereBetween('created_at', [new Carbon($period[0]), new Carbon($period[1])]);
 
         $query->orderBy('id', 'DESC');
 
@@ -60,18 +75,13 @@ class SavingController extends Controller
         $savings = $query->paginate($request->get('limit', 30));
 
         $msg = $savings->isEmpty() ? 'You have not made any savings.' : HttpStatus::message(HttpStatus::OK);
-        $last = $savings->last();
-        $first = $savings->first();
-
-        $_period = $savings->isNotEmpty()
-            ? ($last->created_at->format('Y/m/d') . '-' . $first->created_at->format('Y/m/d'))
-            : '';
 
         return (new SavingCollection($savings))->additional([
             'message' => $msg,
             'status' => $savings->isEmpty() ? 'info' : 'success',
             'response_code' => HttpStatus::OK,
-            'period' => $p ? urldecode($p) : $_period,
+            'period' => implode(' to ', $period),
+            'date_range' => $period,
         ])->response()->setStatusCode(HttpStatus::OK);
     }
 
@@ -167,6 +177,7 @@ class SavingController extends Controller
             }
         } else {
             $paystack = new PaystackProcessor($request, $user);
+
             return $paystack->initialize(
                 $amount,
                 function ($reference, $tranx, $real_due, $msg) use ($subscription, $request, $user, $due, $fees, $savings) {
@@ -216,7 +227,7 @@ class SavingController extends Controller
 
         /** @var \App\Models\Saving */
         $saving = $user->savings()
-            ->when($request->cooperative_id && !$request->get_all, function (Builder $query) use ($request) {
+            ->when($request->cooperative_id && ! $request->get_all, function (Builder $query) use ($request) {
                 $query->where('savings.user_id', $request->user()->id);
             })
             ->where('savings.id', $id)
@@ -417,7 +428,7 @@ class SavingController extends Controller
                         $subscription->status = 'active';
                         $plantitle = $subscription->plan->title . (stripos($subscription->plan->title, 'plan') !== false ? '' : ' plan');
                         $msg = __(
-                            "You have successfully made :days day(s) savings of :amount for the :plan, you now have only :left days left to save up.",
+                            'You have successfully made :days day(s) savings of :amount for the :plan, you now have only :left days left to save up.',
                             [
                                 'days' => $saving->days,
                                 'amount' => $_amount,

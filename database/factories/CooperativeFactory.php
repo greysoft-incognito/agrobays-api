@@ -20,7 +20,7 @@ class CooperativeFactory extends Factory
     public function definition()
     {
         return [
-            'slug' => 'fake-' . $this->faker->slug, // This is the super admin user id
+            'slug' => 'fake-'.$this->faker->slug, // This is the super admin user id
             'user_id' => User::inRandomOrder()->first()->id, // This is the super admin user id
             'name' => $this->faker->company,
             'about' => $this->faker->paragraph,

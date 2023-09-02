@@ -24,7 +24,7 @@ class FoodBagResource extends JsonResource
             'description' => $this->description,
             'image' => $this->image,
             'price' => $this->price,
-            'weight' => $this->weight . ($this->weight_unit ?? 'kg'),
+            'weight' => $this->weight.($this->weight_unit ?? 'kg'),
             $this->mergeWhen($v >= 2, [
                 'foods' => $this->when($request->with_foods, function () {
                     return new FoodCollection($this->whenLoaded('foods'));

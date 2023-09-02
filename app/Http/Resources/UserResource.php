@@ -52,6 +52,8 @@ class UserResource extends JsonResource
                 'auth_date' => $this->data['payment_method']['auth_date'] ?? null,
             ]),
             'last_seen' => $this->last_seen ?? $this->created_at,
+            'referral_code' => $this->referral_code,
+            'referrer_id' => $this->referrer_id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

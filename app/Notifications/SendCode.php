@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notification;
 use NotificationChannels\Twilio\TwilioChannel;
 use NotificationChannels\Twilio\TwilioSmsMessage;
 
-class SendCode extends Notification //implements ShouldQueue
+class SendCode extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -77,8 +77,9 @@ class SendCode extends Notification //implements ShouldQueue
         ];
 
         if (isset($message[$this->type])) {
-            return (new MailMessage)->view(
-                ['email', 'email-plain'], $message[$this->type]
+            return (new MailMessage())->view(
+                ['email', 'email-plain'],
+                $message[$this->type]
             )
             ->subject(__($this->type === 'reset' ? 'Reset your :0 password.' : 'Verify your account at :0', [config('settings.site_name')]));
         }
@@ -103,5 +104,16 @@ class SendCode extends Notification //implements ShouldQueue
             return (new TwilioSmsMessage())
                 ->content($message);
         }
+    }
+
+    /**
+     * Get the database representation of the notification.
+     *
+     * @param  mixed  $n    notifiable
+     * @return array
+     */
+    public function toArray($n)
+    {
+        return [];
     }
 }

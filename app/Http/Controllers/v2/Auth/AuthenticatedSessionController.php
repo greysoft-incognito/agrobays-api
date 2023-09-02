@@ -1,10 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers\v2\Auth;
 
+use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Resources\UserResource;
+use App\Traits\Extendable;
 use DeviceDetector\DeviceDetector;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,6 +14,8 @@ use Illuminate\Support\Facades\Broadcast;
 
 class AuthenticatedSessionController extends Controller
 {
+    use Extendable;
+
     public function index()
     {
         if ($user = Auth::user()) {
@@ -31,22 +35,37 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request)
     {
-        $request->authenticate();
-        $dev = new DeviceDetector($request->userAgent());
-        $device = $dev->getBrandName() ? ($dev->getBrandName().$dev->getDeviceName()) : $request->userAgent();
+        try {
+            $request->authenticate();
+            $user = $request->user();
 
-        $user = $request->user();
-
-        if (! $request->ajax()) {
-            return response()->redirectToRoute('web.user');
+            return $this->setUserData($request, $user);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->responseBuilder([
+                'message' => $e->getMessage(),
+                'status' => 'error',
+                'response_code' => HttpStatus::UNPROCESSABLE_ENTITY,
+                'errors' => [
+                    'email' => $e->getMessage(),
+                ],
+            ]);
         }
+    }
+
+    public function setUserData(Request|LoginRequest $request, $user)
+    {
+        $device = $request->userAgent();
+        $token = $user->createToken($device)->plainTextToken;
+
+        // $user->access_data = $this->ipInfo();
+        $user->save();
 
         return (new UserResource($user))->additional([
             'message' => 'Login was successfull',
             'status' => 'success',
-            'response_code' => 200,
-            'token' => $user->createToken($device)->plainTextToken,
-        ])->response()->setStatusCode(200);
+            'response_code' => HttpStatus::OK,
+            'token' => $token,
+        ])->response()->setStatusCode(HttpStatus::OK);
     }
 
     public function getTokens(Request $request)
@@ -73,11 +92,11 @@ class AuthenticatedSessionController extends Controller
             return (object) [
                 'id' => $token->id,
                 'name' => collect([$dev->getBrandName(), $name, "(v{$version})"])->implode(' '),
-                'platform' => $platform,
-                'platform_id' => str($platform)->slug('-')->toString(),
+                'platform' => $platform ?: 'Unknown Platform',
+                'platform_id' => str($platform ?: 'question')->slug('-')->toString(),
                 'current' => $token->id === $request->user()->currentAccessToken()->id,
                 'last_used' => $token->last_used_at?->diffInHours() > 24
-                    ? $token->last_used_at->format('d M Y')
+                    ? $token->last_used_at?->format('d M Y')
                     : $token->last_used_at?->diffForHumans(),
             ];
         });
@@ -85,7 +104,7 @@ class AuthenticatedSessionController extends Controller
         return $this->responseBuilder([
             'message' => 'Tokens retrieved successfully',
             'status' => 'success',
-            'response_code' => 200,
+            'response_code' => HttpStatus::OK,
             'data' => $data,
         ]);
     }
@@ -102,13 +121,13 @@ class AuthenticatedSessionController extends Controller
             'last_seen' => now(),
         ]);
 
+        $request->user()->currentAccessToken()->delete();
+
         if (! $request->isXmlHttpRequest()) {
             session()->flush();
 
             return response()->redirectToRoute('web.login');
         }
-
-        $request->user()->currentAccessToken()->delete();
 
         return $this->responseBuilder([
             'message' => 'You have been successfully logged out',
@@ -143,10 +162,10 @@ class AuthenticatedSessionController extends Controller
                 $dev = new DeviceDetector($name);
                 $dev->parse();
                 $os = $dev->getOs();
-                $osName = $os['name'] ?? 'Unknown Device';
-                $osVersion = $os['version'] ?? '0.00';
 
-                return collect([$dev->getBrandName(), $osName, "(v{$osVersion})"])->implode(' ');
+                $osname = $os['name'] ?? 'Unknown Device';
+                $osversion = $os['version'] ?? '0.00';
+                return collect([$dev->getBrandName(), $osname, "(v{$osversion})"])->implode(' ');
             })->implode(', ');
 
             $tokens->each->delete();

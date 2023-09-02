@@ -45,11 +45,11 @@ class UserFactory extends Factory
             ],
             'bank' => json_encode([
                 'bank' => $this->faker->company,
-                'nuban' => rand(201, 299) . rand(1000000, 9999999),
+                'nuban' => rand(201, 299).rand(1000000, 9999999),
                 'account_name' => $name,
             ]),
             'role' => [
-                'dispatch','manager','user','user','user',
+                'dispatch', 'manager', 'user', 'user', 'user',
             ][rand(0, 4)],
             'email' => $this->faker->unique()->safeEmail,
             'phone' => $this->faker->unique()->e164PhoneNumber,

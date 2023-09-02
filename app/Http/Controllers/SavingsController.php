@@ -7,7 +7,6 @@ use App\Http\Resources\FoodBagCollection;
 use App\Http\Resources\FoodBagResource;
 use App\Http\Resources\PlanCollection;
 use App\Http\Resources\SavingCollection;
-use App\Http\Resources\SubscriptionResource;
 use App\Models\Cooperative;
 use App\Models\FoodBag;
 use App\Models\Plan;
@@ -35,7 +34,6 @@ class SavingsController extends Controller
         $limit = $request->limit;
         $status = $request->status;
 
-
         if ($request->cooperative_id) {
             $query = Saving::query();
             $query->whereHas('subscription', function (Builder $q) use ($request) {
@@ -62,7 +60,7 @@ class SavingsController extends Controller
             $query->whereBetween('created_at', [new Carbon($period[0]), new Carbon($period[1])]);
         }
 
-        if ($limit > 0 && !$request->paginate) {
+        if ($limit > 0 && ! $request->paginate) {
             $query->limit($limit);
         }
 
@@ -78,7 +76,7 @@ class SavingsController extends Controller
         $first = $savings->first();
 
         $_period = $savings->isNotEmpty()
-            ? ($last->created_at->format('Y/m/d') . '-' . $first->created_at->format('Y/m/d'))
+            ? ($last->created_at->format('Y/m/d').'-'.$first->created_at->format('Y/m/d'))
             : '';
 
         return (new SavingCollection($savings))->additional([
@@ -252,7 +250,7 @@ class SavingsController extends Controller
         return $this->responseBuilder([
             'message' => __('You have successfully activated the :0:1', [
                 $plan->title,
-                $request->cooperative_id ? ' for ' . $userPlan->cooperative->name : null,
+                $request->cooperative_id ? ' for '.$userPlan->cooperative->name : null,
             ]),
             'status' => 'success',
             'response_code' => 201,
@@ -285,6 +283,7 @@ class SavingsController extends Controller
             $msg = $sub->cooperative
                 ? 'You cannot terminate an active subscription to a cooperative plan.'
                 : 'You already terminated this subscription.';
+
             return $this->responseBuilder([
                 'message' => $msg,
                 'status' => 'error',
@@ -305,7 +304,7 @@ class SavingsController extends Controller
             $sub->user->notify(new SubStatus($sub, 'closed'));
             $message = __('Your subscription to the :0 has been terminated, :1.', [
                 $sub->plan->title,
-                'your savings will be withdrawn to your wallet.'
+                'your savings will be withdrawn to your wallet.',
             ]);
         } else {
             $sub->status = 'withdraw';

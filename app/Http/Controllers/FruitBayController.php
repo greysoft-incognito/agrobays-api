@@ -106,32 +106,32 @@ class FruitBayController extends Controller
      */
     public function buyItem(Request $request, $item)
     {
-        $item = FruitBay::whereId($item)->orWhere(['slug' => $item])->first();
+        // $item = FruitBay::whereId($item)->orWhere(['slug' => $item])->first();
 
-        if (! $item) {
-            return $this->buildResponse([
-                'message' => 'The requested item no longer exists',
-                'status' => 'error',
-                'response_code' => 404,
-            ]);
-        }
+        // if (! $item) {
+        //     return $this->buildResponse([
+        //         'message' => 'The requested item no longer exists',
+        //         'status' => 'error',
+        //         'response_code' => 404,
+        //     ]);
+        // }
 
-        $trans = $item->transaction();
-        $transaction = $trans->create([
-            'user_id' => Auth::id(),
-            'reference' => config('settings.trx_prefix', 'AGB-').Str::random(12),
-            'method' => 'direct',
-            'amount' => $item->price,
-            'due' => $item->price,
-        ]);
+        // $trans = $item->transaction();
+        // $transaction = $trans->create([
+        //     'user_id' => Auth::id(),
+        //     'reference' => config('settings.trx_prefix', 'AGB-') . Str::random(12),
+        //     'method' => 'direct',
+        //     'amount' => $item->price,
+        //     'due' => $item->price,
+        // ]);
 
-        return $this->buildResponse([
-            'message' => 'Transaction successful',
-            'status' => 'success',
-            'response_code' => 200,
-            'response_data' => [[]],
-            'transaction' => $transaction,
-        ]);
+        // return $this->buildResponse([
+        //     'message' => 'Transaction successful',
+        //     'status' => 'success',
+        //     'response_code' => 200,
+        //     'response_data' => [[]],
+        //     'transaction' => $transaction,
+        // ]);
     }
 
     /**

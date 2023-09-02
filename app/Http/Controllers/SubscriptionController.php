@@ -47,7 +47,7 @@ class SubscriptionController extends Controller
         $first = $subscriptions->first();
         $last = $subscriptions->last();
         $_period = $subscriptions->isNotEmpty()
-            ? ($last->created_at->format('Y/m/d') . '-' . $first->created_at->format('Y/m/d'))
+            ? ($last->created_at->format('Y/m/d').'-'.$first->created_at->format('Y/m/d'))
             : '';
 
         return (new SubscriptionCollection($subscriptions))->additional([
@@ -87,7 +87,7 @@ class SubscriptionController extends Controller
             })
             ->addColumn('action', function (Subscription $item) {
                 return implode([
-                    Html::el('a', ['onclick' => "hotLink('/savings/plan/" . $item->id . "')", 'href' => 'javascript:void(0)'])->title(__('View Savings'))->setHtml(Html::el('i')->class('ri-eye-fill ri-2x text-primary')),
+                    Html::el('a', ['onclick' => "hotLink('/savings/plan/".$item->id."')", 'href' => 'javascript:void(0)'])->title(__('View Savings'))->setHtml(Html::el('i')->class('ri-eye-fill ri-2x text-primary')),
                 ]);
             })
             ->removeColumn('updated_at')->toJson();
@@ -142,7 +142,7 @@ class SubscriptionController extends Controller
             ->additional([
                 'message' => __('You have successfully :0 the :1 automatic savings program for this plan.', [
                     $request->interval ? 'activated' : 'deactivated',
-                    $request->interval ? $request->interval . ' ' : '',
+                    $request->interval ? $request->interval.' ' : '',
                 ]),
                 'status' => 'error',
                 'response_code' => 200,
@@ -197,7 +197,7 @@ class SubscriptionController extends Controller
                     'subscription_id' => $sub->id,
                 ], [
                     'food_bag_id' => $bag->id,
-                    'approved' => (bool)$cooperative->settings['auto_approve_foodbags'] ?? false,
+                    'approved' => (bool) $cooperative->settings['auto_approve_foodbags'] ?? false,
                 ]);
             } else {
                 $plan = $sub;

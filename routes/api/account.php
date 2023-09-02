@@ -4,12 +4,12 @@
  * Account Routes
  */
 
-use App\Http\Controllers\User\AccountController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\SavingsController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\User\AccountController;
 use App\Http\Controllers\User\WalletController;
 use Illuminate\Support\Facades\Route;
 
@@ -29,7 +29,6 @@ Route::controller(AccountController::class)
         Route::prefix('transactions')->name('transactions.')
             ->controller(TransactionController::class)
             ->group(function () {
-                Route::get('/{transaction_id?}', 'index')->name('index');
                 Route::get('/invoice/{transaction_id?}', 'invoice')->name('invoice');
                 Route::get('/limit/{limit?}/{status?}', 'transactions')->name('limited');
             });

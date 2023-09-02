@@ -55,13 +55,13 @@ class PaymentController extends Controller
         } else {
             if (
                 ($validator = Validator::make($request->all(), [
-                    'days' => ['required', 'numeric', 'min:1', 'max:' . $subscription->days_left],
+                    'days' => ['required', 'numeric', 'min:1', 'max:'.$subscription->days_left],
                 ], [
                     'days.min' => 'You have to save for at least 1 day.',
                     'days.max' => "You cannot save for more than {$subscription->days_left} days.",
-                    ]))->stopOnFirstFailure()->fails()
+                ]))->stopOnFirstFailure()->fails()
             ) {
-                        return $this->validatorFails($validator, 'days');
+                return $this->validatorFails($validator, 'days');
             }
 
             $method = $request->get('method', $method);
@@ -70,7 +70,7 @@ class PaymentController extends Controller
             $fees = ($subscription->bag->fees / $subscription->plan->duration) * $request->days;
 
             try {
-                $reference = config('settings.trx_prefix', 'AGB-') . Str::random(12);
+                $reference = config('settings.trx_prefix', 'AGB-').Str::random(12);
                 if ($request->get('method', $method) === 'wallet') {
                     /** @var Cooperative|User */
                     $handler = $request->cooperative_id ? $cooperative : $request->user();
@@ -90,7 +90,7 @@ class PaymentController extends Controller
                     } else {
                         return $this->buildResponse([
                             'message' => __(':0 not have enough funds in :1 wallet', [
-                                $request->cooperative_id ? $handler->name . ' does' : 'You do',
+                                $request->cooperative_id ? $handler->name.' does' : 'You do',
                                 $request->cooperative_id ? 'the cooperative' : 'your',
                             ]),
                             'status' => 'error',
@@ -114,11 +114,11 @@ class PaymentController extends Controller
                         $real_due = $due;
                     } else {
                         $callback_url = config('settings.frontend_link')
-                                ? config('settings.frontend_link') . '/payment/verify'
+                                ? config('settings.frontend_link').'/payment/verify'
                                 : config('settings.payment_verify_url', route('payment.paystack.verify'));
 
                         if ($request->cooperative_id) {
-                            $callback_url .= '?cooperative_id=' . $request->cooperative_id;
+                            $callback_url .= '?cooperative_id='.$request->cooperative_id;
                         }
 
                         $tranx = $paystack->transaction->initialize([
@@ -233,7 +233,7 @@ class PaymentController extends Controller
                 $method = $request->get('method', $method);
 
                 try {
-                    $reference = config('settings.trx_prefix', 'AGB-') . Str::random(15);
+                    $reference = config('settings.trx_prefix', 'AGB-').Str::random(15);
                     if ($request->get('method', $method) === 'wallet') {
                         if ($request->user()->wallet_balance >= $due) {
                             $tranx = [
@@ -448,10 +448,10 @@ class PaymentController extends Controller
                     $msg = 'You have completed the saving circle for this subscription, you would be notified when your food bag is ready for pickup or delivery.';
                 } else {
                     $subscription->status = 'active';
-                    $plantitle = $subscription->plan->title . (stripos($subscription->plan->title, 'plan') !== false ? '' : ' plan');
+                    $plantitle = $subscription->plan->title.(stripos($subscription->plan->title, 'plan') !== false ? '' : ' plan');
                     $msg = __(
-                        "You have successfully made :days day(s) savings of :amount for
-                        the :plan, you now have only :left days left to save up.",
+                        'You have successfully made :days day(s) savings of :amount for
+                        the :plan, you now have only :left days left to save up.',
                         [
                             'days' => $saving->days,
                             'amount' => $_amount,
@@ -548,7 +548,7 @@ class PaymentController extends Controller
 
         $key = 'subscription';
         $validator = Validator::make($request->all(), [
-            'days' => ['required', 'numeric', 'min:1', 'max:' . $subscription->plan->duration],
+            'days' => ['required', 'numeric', 'min:1', 'max:'.$subscription->plan->duration],
         ], [
             'days.min' => 'You have to save for at least 1 day.',
             'days.max' => "You cannot save for more than {$subscription->plan->duration} days.",

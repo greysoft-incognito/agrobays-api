@@ -33,7 +33,7 @@ class AppServiceProvider extends ServiceProvider
         // Load Custom Helpers
         array_filter(File::files(app_path('Helpers')), function ($file) {
             if ($file->getExtension() === 'php' && stripos($file->getFileName(), 'helper') !== false) {
-                require_once app_path('Helpers/' . $file->getFileName());
+                require_once app_path('Helpers/'.$file->getFileName());
             }
         });
 

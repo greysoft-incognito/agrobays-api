@@ -16,6 +16,7 @@ class AppendApiVersion
      */
     public function handle(Request $request, Closure $next)
     {
+        // dd($request->route());
         // Get the API version from the url (e.g. /api/v1/...)
         if (str($request->path())->match("/api\/v\d+/")) {
             $version = str($request->path())->match("/api\/v\d+/")->after('api/v')->toInteger();

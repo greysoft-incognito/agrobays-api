@@ -48,7 +48,7 @@ class CooperativeSubscriptionController extends Controller
         $first = $subscriptions->first();
         $last = $subscriptions->last();
         $_period = $subscriptions->isNotEmpty()
-            ? ($last->created_at->format('Y/m/d') . '-' . $first->created_at->format('Y/m/d'))
+            ? ($last->created_at->format('Y/m/d').'-'.$first->created_at->format('Y/m/d'))
             : '';
 
         return (new SubscriptionCollection($subscriptions))->additional([
@@ -85,7 +85,6 @@ class CooperativeSubscriptionController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\Cooperative  $cooperative
      * @param  int  $subscription_id
-     *
      * @return \Illuminate\Http\Response
      */
     public function owners(Request $request, Cooperative $cooperative, $subscription_id)
@@ -138,8 +137,8 @@ class CooperativeSubscriptionController extends Controller
             ]);
             collect($request->items)->each(function ($item) use ($cooperative) {
                 $foodbag = $cooperative->foodbags()->find($item['id']);
-                if ($foodbag && (bool)$item['approved'] != $foodbag->approved) {
-                    $foodbag->approved = (bool)$item['approved'];
+                if ($foodbag && (bool) $item['approved'] != $foodbag->approved) {
+                    $foodbag->approved = (bool) $item['approved'];
                     $foodbag->save();
                 }
             });
@@ -164,7 +163,6 @@ class CooperativeSubscriptionController extends Controller
                 $foodbag->save();
             }
         }
-
 
         if ($request->has('items')) {
             return (new MembersFoodbagCollection(

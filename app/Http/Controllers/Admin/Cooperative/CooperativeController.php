@@ -57,7 +57,7 @@ class CooperativeController extends Controller
 
         // Search and filter columns
         if ($request->search) {
-            $query = $query->where('name', 'like', '%' . $request->search . '%');
+            $query = $query->where('name', 'like', '%'.$request->search.'%');
         }
 
         if (! $request->search) {

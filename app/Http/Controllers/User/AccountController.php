@@ -5,10 +5,8 @@ namespace App\Http\Controllers\User;
 use App\Actions\Greysoft\Charts;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
-use App\Http\Resources\WalletCollection;
 use App\Models\Saving;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -142,7 +140,7 @@ class AccountController extends Controller
                 $vals .= '|min:8|confirmed';
             }
             if (is_array($filled[$field])) {
-                return [$field . '.*' => 'required'];
+                return [$field.'.*' => 'required'];
             }
 
             return [$field => "required|$vals"];
@@ -167,7 +165,7 @@ class AccountController extends Controller
             return ! Str::contains($k, '_confirmation');
         });
 
-        if (!$request->hasFile('image')) {
+        if (! $request->hasFile('image')) {
             foreach ($fields as $_field) {
                 if (Str::contains($_field, ':image')) {
                     $_field = current(explode(':image', (string) $_field));

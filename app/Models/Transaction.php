@@ -33,11 +33,11 @@ class Transaction extends Model
      * @var array
      */
     protected $appends = [
-        'content',
         'type',
     ];
 
     protected $casts = [
+        'taxq1' => 'float',
         'due' => 'float',
         'fees' => 'float',
         'amount' => 'float',

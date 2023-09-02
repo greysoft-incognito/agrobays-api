@@ -4,9 +4,9 @@ use App\Http\Controllers\Admin\Cooperative\CooperativeController as AdminCoopera
 use App\Http\Controllers\Admin\Cooperative\CooperativeMemberController as AdminCooperativeMemberController;
 use App\Http\Controllers\Admin\Cooperative\CooperativeMgtController as AdminCooperativeMgtController;
 use App\Http\Controllers\Cooperative\CooperativeController;
-use App\Http\Controllers\Cooperative\CooperativeSubscriptionController;
-use App\Http\Controllers\Cooperative\CooperativeMgtController;
 use App\Http\Controllers\Cooperative\CooperativeMemberController;
+use App\Http\Controllers\Cooperative\CooperativeMgtController;
+use App\Http\Controllers\Cooperative\CooperativeSubscriptionController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum'])->prefix('cooperatives')->name('cooperatives.')
@@ -38,7 +38,6 @@ Route::middleware(['auth:sanctum'])->prefix('cooperatives')->name('cooperatives.
         Route::put('invitations/{member}/request/{status}', 'appprove')->name('appprove.request'); //Approve Or Decline
     });
 });
-
 
 Route::middleware(['auth:sanctum', 'admin'])
     ->prefix('admin/cooperatives')

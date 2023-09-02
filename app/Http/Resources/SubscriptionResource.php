@@ -33,12 +33,12 @@ class SubscriptionResource extends JsonResource
             'user_id' => $this->user_id,
             'plan_id' => $this->plan_id,
             'food_bag_id' => $this->food_bag_id,
-            'food_bag_approved' => (bool)$cooperative_foodbag?->approved ?? true,
+            'food_bag_approved' => (bool) $cooperative_foodbag?->approved ?? true,
             $this->mergeWhen($this->cooperative, function () {
                 return [
                     'count_owners' => $this->cooperative->foodbags()->whereSubscriptionId($this->id)->count(),
                     'count_approved_owners' => $this->cooperative->foodbags()
-                                                    ->isApproved()->whereSubscriptionId($this->id)->count()
+                                                    ->isApproved()->whereSubscriptionId($this->id)->count(),
                 ];
             }),
             'paid_days' => $this->paid_days,

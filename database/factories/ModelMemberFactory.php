@@ -28,7 +28,7 @@ class ModelMemberFactory extends Factory
             'model_id' => 1,
             'accepted' => $accepted,
             'requesting' => $requesting,
-            'abilities' => !$requesting ? $abilities : null,
+            'abilities' => ! $requesting ? $abilities : null,
         ];
     }
 }

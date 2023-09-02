@@ -22,7 +22,7 @@ class UsersController extends Controller
      */
     public function index(Request $request, $limit = '15', $role = 'user')
     {
-        \Gate::authorize('usable', 'users.' . $role);
+        \Gate::authorize('usable', 'users.'.$role);
         $query = User::query();
 
         if ($role !== 'all') {
@@ -71,7 +71,7 @@ class UsersController extends Controller
     public function getUser(Request $request, $id)
     {
         $user = User::find($id);
-        $user && \Gate::authorize('usable', 'users.' . $user->role);
+        $user && \Gate::authorize('usable', 'users.'.$user->role);
 
         return $this->buildResponse([
             'message' => ! $user ? 'The requested user no longer exists' : 'OK',
@@ -83,7 +83,7 @@ class UsersController extends Controller
 
     public function show(Request $request, User $user)
     {
-        \Gate::authorize('usable', 'users.' . $user->role);
+        \Gate::authorize('usable', 'users.'.$user->role);
 
         return (new UserResource($user))->additional([
             'message' => 'OK',
@@ -95,7 +95,7 @@ class UsersController extends Controller
     public function store(Request $request, $id = '', $skip = false, $legacy = false)
     {
         $user = User::find($id);
-        $user && \Gate::authorize('usable', 'users.' . $user->role);
+        $user && \Gate::authorize('usable', 'users.'.$user->role);
         if ($id && ! $user) {
             return $legacy ? $this->buildResponse([
                 'message' => 'The requested user no longer exists',
@@ -184,7 +184,7 @@ class UsersController extends Controller
 
     public function updatePassword(Request $request, User $user)
     {
-        $user && \Gate::authorize('usable', 'users.' . $user->role);
+        $user && \Gate::authorize('usable', 'users.'.$user->role);
 
         $request->validate([
             'password' => ['required', 'string', 'min:8', 'confirmed'],
@@ -213,7 +213,7 @@ class UsersController extends Controller
         // Delete multiple users
         if ($request->users) {
             $count = User::whereIn('id', $request->users)->with(['transactions', 'subscription'])->get()->map(function ($user) {
-                $user && \Gate::authorize('usable', 'users.' . $user->role);
+                $user && \Gate::authorize('usable', 'users.'.$user->role);
                 // Delete Transactions
                 if ($user->transactions) {
                     $user->transactions->map(function ($transaction) {
@@ -242,7 +242,7 @@ class UsersController extends Controller
             ]);
         } else {
             $user = User::whereId($id)->first();
-            $user && \Gate::authorize('usable', 'users.' . $user->role);
+            $user && \Gate::authorize('usable', 'users.'.$user->role);
         }
 
         // Delete single user

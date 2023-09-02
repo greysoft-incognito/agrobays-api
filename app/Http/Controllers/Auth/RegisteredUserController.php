@@ -39,8 +39,8 @@ class RegisteredUserController extends Controller
                 // 'lastname' => ['required', 'string', 'max:255'],
                 'email' => [config('settings.verify_email', true) ? 'required' : 'nullable', 'string', 'email', 'max:255', 'unique:users'],
                 // 'phone' => config('settings.verify_phone', false)
-                    // ? "required|phone:$cIso2"
-                    // : 'nullable|string|max:255|unique:users',
+                // ? "required|phone:$cIso2"
+                // : 'nullable|string|max:255|unique:users',
                 // 'username' => ['required', 'string', 'max:255', 'unique:users'],
                 'password' => ['required', 'confirmed', Rules\Password::defaults()],
             ],
@@ -67,7 +67,7 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
 
         $dev = new DeviceDetector($request->userAgent());
-        $device = $dev->getBrandName() ? ($dev->getBrandName() . $dev->getDeviceName()) : $request->userAgent();
+        $device = $dev->getBrandName() ? ($dev->getBrandName().$dev->getDeviceName()) : $request->userAgent();
 
         $token = $user->createToken($device)->plainTextToken;
 
