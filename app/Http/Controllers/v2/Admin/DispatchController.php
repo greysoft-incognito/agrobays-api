@@ -24,7 +24,9 @@ class DispatchController extends Controller
      */
     public function index(Request $request)
     {
-        \Gate::authorize('usable', 'orders');
+        $status = $request->get('status', 'pending');
+
+        \Gate::authorize('usable', 'dispatch.' . $status);
 
         $query = Dispatch::orderBy('id', 'DESC');
 
@@ -40,11 +42,24 @@ class DispatchController extends Controller
         });
 
         // Set the dispatch Status
-        $status = $request->get('status', 'pending');
-
         if (in_array($status, ['pending', 'confirmed', 'dispatched', 'delivered'])) {
             $query->whereStatus($status);
         };
+
+        // Search For an dispatched order
+        $query->when($request->has('search'), function ($query) use ($request) {
+            $query->where(function ($query) use ($request) {
+                $query->where('reference', 'like', "%{$request->search}%");
+                $query->orWhereHas('user', function ($query) use ($request) {
+                    $query->orWhereRaw("CONCAT_WS(' ', firstname, lastname) LIKE '%$request->search%'");
+                });
+                $query->orWhereHas('dispatchable', function ($query) use ($request) {
+                    $query->whereHas('user', function ($query) use ($request) {
+                        $query->orWhereRaw("CONCAT_WS(' ', firstname, lastname) LIKE '%$request->search%'");
+                    });
+                });
+            });
+        });
 
         $dispatches = $query->paginate();
 
@@ -64,8 +79,6 @@ class DispatchController extends Controller
      */
     public function show(Dispatch $dispatched)
     {
-        \Gate::authorize('usable', 'dispatch.' . $dispatched->status);
-
         return (new DispatchResource($dispatched))->additional([
             'status' => 'success',
             'response_code' => HttpStatus::OK,
