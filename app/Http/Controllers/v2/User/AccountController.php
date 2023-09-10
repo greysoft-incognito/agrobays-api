@@ -6,6 +6,7 @@ use App\Actions\Greysoft\Charts;
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
+use App\Models\v2\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -68,13 +69,6 @@ class AccountController extends Controller
         $fields = collect($request->all())->only($this->fillable)->keys();
 
         $updated = [];
-        if (! $user) {
-            return $this->responseBuilder([
-                'message' => 'The requested user does not exists',
-                'status' => 'error',
-                'response_code' => HttpStatus::NOT_FOUND,
-            ]);
-        }
 
         $valid = $fields->mapWithKeys(function ($field) use ($filled) {
             if (Str::contains($field, ':image')) {
@@ -92,7 +86,7 @@ class AccountController extends Controller
                 $vals .= '|min:8|confirmed';
             }
             if (is_array($filled[$field])) {
-                return [$field.'.*' => 'required'];
+                return [$field . '.*' => 'required'];
             }
 
             return [$field => "required|$vals"];
@@ -173,7 +167,7 @@ class AccountController extends Controller
         $user->username = $request->username ?? $user->username;
         $user->email = $request->email;
         $user->phone = $request->phone;
-        $user->gender = $request->gender;
+        $user->gender = $request->gender ?? $user->gender ?? 'male';
         $user->nextofkin = $request->nextofkin;
         $user->nextofkin_relationship = $request->nextofkin_relationship;
         $user->nextofkin_phone = $request->nextofkin_phone;
@@ -197,7 +191,7 @@ class AccountController extends Controller
             'message' => 'OK',
             'status' => 'success',
             'response_code' => 200,
-            'charts' => [
+            'data' => [
                 'pie' => (new Charts())->getPie('user'),
                 'bar' => (new Charts())->getBar('user'),
                 'transactions' => (new Charts())->totalTransactions('user', 'all'),

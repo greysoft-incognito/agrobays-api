@@ -81,7 +81,7 @@ class AdminFruitBayController extends Controller
             ]);
         }
 
-        $fruitbay = FruitBay::whereId($item)->orWhere(['slug' => $item])->first() ?? new FruitBay;
+        $fruitbay = FruitBay::whereId($item)->orWhere(['slug' => $item])->first() ?? new FruitBay();
 
         $fruitbay->fees = $request->fees ?? 0.00;
         $fruitbay->name = $request->name;
@@ -93,7 +93,8 @@ class AdminFruitBayController extends Controller
         if ($request->hasFile('image')) {
             $fruitbay->image && Storage::delete($fruitbay->image ?? '');
             $fruitbay->image = $request->file('image')->storeAs(
-                'public/uploads/images', rand().'_'.rand().'.'.$request->file('image')->extension()
+                'public/uploads/images',
+                rand().'_'.rand().'.'.$request->file('image')->extension()
             );
         }
         $fruitbay->save();

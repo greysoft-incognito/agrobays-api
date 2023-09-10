@@ -1,10 +1,10 @@
 <?php
 
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\EmailPhoneVerificationNotificationController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\VerifyEmailPhoneController;
+use App\Http\Controllers\v2\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\v2\Auth\RegisteredUserController;
 use Illuminate\Support\Facades\Route;
 

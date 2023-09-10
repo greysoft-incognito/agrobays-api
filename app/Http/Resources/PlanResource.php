@@ -15,6 +15,7 @@ class PlanResource extends JsonResource
     public function toArray($request)
     {
         $v = $request->version;
+        $with = is_array($request->with) ? $request->with : explode(',', $request->with);
 
         return [
             'id' => $this->id,
@@ -27,7 +28,7 @@ class PlanResource extends JsonResource
             'status' => $this->status,
             'image_url' => $this->image_url,
             $this->mergeWhen($v >= 2, [
-                'food_bags' => $this->when($request->with_foodbags, function () {
+                'foodbags' => $this->when(in_array('foodbags', $with), function () {
                     return new FoodBagCollection($this->food_bag);
                 }),
             ]),

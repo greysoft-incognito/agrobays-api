@@ -251,22 +251,28 @@ class Subscription extends Model
     public function scopeCurrentStatus(Builder $query, $status = 'active')
     {
         if (is_array($status)) {
-            foreach ($status as $stat) {
-                if (str($stat)->contains('!')) {
-                    $stat = str_replace('!', '', $stat);
-                    $query->where('status', '!=', $stat);
-                } else {
-                    $query->orWhere('status', $stat);
+            $query->where(function ($q) use ($status) {
+                foreach ($status as $stat) {
+                    if (in_array(str_ireplace('!', '', $stat), ['active', 'pending', 'complete', 'withdraw', 'closed'])) {
+                        if (str($stat)->contains('!')) {
+                            $stat = str_replace('!', '', $stat);
+                            $q->where('status', '!=', $stat);
+                        } else {
+                            $q->orWhere('status', $stat);
+                        }
+                    }
                 }
-            }
+            });
         } else {
-            if (str($status)->contains('!')) {
-                $status = str_replace('!', '', $status);
+            if (in_array(str_ireplace('!', '', $status), ['active', 'pending', 'complete', 'withdraw', 'closed'])) {
+                if (str($status)->contains('!')) {
+                    $status = str_replace('!', '', $status);
 
-                return $query->where('status', '!=', $status);
+                    return $query->where('status', '!=', $status);
+                }
+
+                return $query->where('status', $status);
             }
-
-            return $query->where('status', $status);
         }
     }
 }

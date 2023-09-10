@@ -21,7 +21,7 @@ class TransactionResource extends JsonResource
             'user_id' => $this->user_id,
             'type' => $this->type,
             'items' => $this->when($load->contains(fn ($i) => $i == 'items'), $this->content ?? $this->items ?? []),
-            'user' => $this->when($load->contains(fn ($i) => $i == 'user'), new UserSlimResource($this->user)),
+            'user' => $this->when($load->contains(fn ($i) => $i == 'user'), new UserBasicDataResource($this->user)),
             'reference' => $this->reference,
             'method' => $this->method,
             'due' => $this->due,
@@ -41,5 +41,16 @@ class TransactionResource extends JsonResource
         }
 
         return $load;
+    }
+
+    public function with($request)
+    {
+        return ['api' => [
+            'name' => env('APP_NAME', 'Agrobays API'),
+            'version' => config('api.api_version'),
+            'app_version' => config('api.app_version'),
+            'author' => 'Greysoft Limited',
+            'updated' => now(),
+        ]];
     }
 }

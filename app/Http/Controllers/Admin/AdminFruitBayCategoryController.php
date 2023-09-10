@@ -13,6 +13,7 @@ class AdminFruitBayCategoryController extends Controller
 {
     public function index(Request $request, $limit = '15')
     {
+        \Gate::authorize('usable', 'fruitbay');
         $query = FruitBayCategory::query();
 
         // Search and filter columns
@@ -46,6 +47,7 @@ class AdminFruitBayCategoryController extends Controller
 
     public function getItem(Request $request, $item)
     {
+        \Gate::authorize('usable', 'fruitbay');
         $item = FruitBayCategory::whereId($item)->orWhere(['slug' => $item])->first();
 
         return $this->buildResponse([
@@ -58,6 +60,7 @@ class AdminFruitBayCategoryController extends Controller
 
     public function store(Request $request, $item = null)
     {
+        \Gate::authorize('usable', 'fruitbay');
         $validator = Validator::make($request->all(), [
             'title' => 'required|min:3|max:25',
             'description' => 'nullable|min:10|max:550',
@@ -100,6 +103,7 @@ class AdminFruitBayCategoryController extends Controller
      */
     public function destroy(Request $request, $item = null)
     {
+        \Gate::authorize('usable', 'fruitbay');
         if ($request->items) {
             $count = collect($request->items)->map(function ($item) {
                 $item = FruitBayCategory::whereId($item)->first();

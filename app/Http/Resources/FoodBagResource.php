@@ -15,6 +15,7 @@ class FoodBagResource extends JsonResource
     public function toArray($request)
     {
         $v = $request->version;
+        $with = is_array($request->with) ? $request->with : explode(',', $request->with);
 
         return [
             'id' => $this->id,
@@ -26,7 +27,7 @@ class FoodBagResource extends JsonResource
             'price' => $this->price,
             'weight' => $this->weight.($this->weight_unit ?? 'kg'),
             $this->mergeWhen($v >= 2, [
-                'foods' => $this->when($request->with_foods, function () {
+                'foods' => $this->when(in_array('foods', $with), function () {
                     return new FoodCollection($this->whenLoaded('foods'));
                 }),
             ]),

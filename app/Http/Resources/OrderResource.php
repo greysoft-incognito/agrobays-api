@@ -27,11 +27,23 @@ class OrderResource extends JsonResource
             'payment' => $this->payment,
             'reference' => $this->reference,
             'delivery_method' => $this->delivery_method,
-            'transaction' => $this->transaction,
+            'transaction' => new TransactionResource($this->transaction),
             'items' => $this->items,
-            'user' => $this->when(in_array('user', $with), new UserSlimResource($this->user)),
+            'user' => $this->when(in_array('user', $with), new UserBasicDataResource($this->user)),
+            'model' => 'order',
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
+    }
+
+    public function with($request)
+    {
+        return ['api' => [
+            'name' => env('APP_NAME', 'Agrobays API'),
+            'version' => config('api.api_version'),
+            'app_version' => config('api.app_version'),
+            'author' => 'Greysoft Limited',
+            'updated' => now(),
+        ]];
     }
 }

@@ -15,7 +15,7 @@ class SavingResource extends JsonResource
     public function toArray($request)
     {
         $with = is_array($request->with) ? $request->with : explode(',', $request->with);
-        if (!$request->subscription || $request->subscription == 'all' || $request->boolean('subscription')) {
+        if (! $request->subscription || $request->subscription == 'all' || $request->boolean('subscription')) {
             $with[] = 'subscription';
         }
 
@@ -33,14 +33,14 @@ class SavingResource extends JsonResource
             'qty' => $this->days,
             'status' => $this->status,
             'payment_ref' => $this->payment_ref,
-            'user' => $this->when(in_array('user', $with), new UserSlimResource($this->user)),
+            'user' => $this->when(in_array('user', $with), function () {
+                return new UserBasicDataResource($this->user);
+            }),
             'through' => str($this->subscription->paid_days ?? 0)
                 ->append('/')
                 ->append(($this->subscription->days_left ?? 0) + ($this->subscription->paid_days ?? 0)),
             'date' => $this->created_at->format('Y-m-d H:i'),
             'title' => $this->subscription?->plan?->title,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
             'items' => [
                 [
                     'id' => $this->id,
@@ -51,7 +51,23 @@ class SavingResource extends JsonResource
                 ],
             ],
             'transaction' => $this->transaction,
-            'subscription' => $this->when(in_array('subscription', $with), $this->subscription),
+            'subscription' => $this->when(in_array('subscription', $with), function () {
+                return $this->subscription;
+            }),
+            'model' => 'saving',
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
+    }
+
+    public function with($request)
+    {
+        return ['api' => [
+            'name' => env('APP_NAME', 'Agrobays API'),
+            'version' => config('api.api_version'),
+            'app_version' => config('api.app_version'),
+            'author' => 'Greysoft Limited',
+            'updated' => now(),
+        ]];
     }
 }

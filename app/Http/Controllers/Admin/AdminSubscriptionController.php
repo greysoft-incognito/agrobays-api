@@ -33,9 +33,7 @@ class AdminSubscriptionController extends Controller
             }
         }
 
-        if ($request->status && in_array($request->status, [
-            'active', 'pending', 'complete', 'withdraw', 'closed',
-        ])) {
+        if (in_array($request->status, ['active', 'pending', 'complete', 'withdraw', 'closed'])) {
             $query->where('status', $request->status);
         } else {
             $query->where('status', '!=', 'closed');

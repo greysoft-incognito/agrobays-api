@@ -17,11 +17,12 @@ class Charts
         if (empty($data['legend']) || empty($data['data'])) {
             return [];
         }
+        // $cs = config('settings.currency_symbol');
 
         return [
             'tooltip' => [
                 'trigger' => 'item',
-                // "formatter" => "{a} <br/>{b}: {$currency_symbol}{c} ({d}%)",
+                // "formatter" => "{a} <br/>{b}: {$cs}{c} ({d}%)",
             ],
             'legend' => [
                 'bottom' => '10',
@@ -32,7 +33,8 @@ class Charts
                 [
                     'name' => 'Transactions',
                     'type' => 'pie',
-                    'radius' => ['50%', '70%'],
+                    'radius' => ['50%', '73%'],
+                    'roseType' => 'radius',
                     'avoidLabelOverlap' => false,
                     'label' => [
                         'show' => false,
@@ -64,12 +66,12 @@ class Charts
 
     protected function bar(array $data)
     {
-        $cs = config('settings.currency_symbol');
+        // $cs = config('settings.currency_symbol');
 
         return [
             'tooltip' => [
                 'trigger' => 'axis',
-                'valueFormatter' => "(value) => $cs + value.toFixed(2)",
+                // "formatter" => "{a} <br/>{b}: {$cs}{c} ({d}%)",
                 'axisPointer' => [
                     'type' => 'shadow', // The default is a straight line, optional:'line' |'shadow'
                 ],
@@ -134,7 +136,7 @@ class Charts
             $end = Carbon::now()->endOfWeek();
         }
 
-        return (($for === 'user') ? Auth::user()->transactions() : Transaction::query())
+        return (float)(($for === 'user') ? Auth::user()->transactions() : Transaction::query())
             ->when($period !== 'all', function ($q) use ($start, $end) {
                 $q->whereBetween('created_at', [$start, $end]);
             })->sum('amount');
@@ -153,7 +155,7 @@ class Charts
             $end = Carbon::now()->endOfWeek();
         }
 
-        return (($for === 'user') ? Auth::user()->orders() : Order::query())
+        return (float)(($for === 'user') ? Auth::user()->orders() : Order::query())
             ->when($period !== 'all', function ($q) use ($start, $end) {
                 $q->whereBetween('created_at', [$start, $end]);
             })->sum('amount');
@@ -172,7 +174,7 @@ class Charts
             $end = Carbon::now()->endOfWeek();
         }
 
-        return (($for === 'user') ? Auth::user()->transactions() : Transaction::query())
+        return (float)(($for === 'user') ? Auth::user()->transactions() : Transaction::query())
             ->when($period !== 'all', function ($q) use ($start, $end) {
                 $q->whereBetween('created_at', [$start, $end]);
             })->sum('amount');
@@ -191,7 +193,7 @@ class Charts
             $end = Carbon::now()->endOfWeek();
         }
 
-        return User::when($period !== 'all', function ($q) use ($start, $end) {
+        return (int)User::when($period !== 'all', function ($q) use ($start, $end) {
             $q->whereBetween('created_at', [$start, $end]);
         })->count('id');
     }
@@ -204,12 +206,12 @@ class Charts
      */
     public function getPie($for = 'user')
     {
-        $savings = (($for === 'user') ? Auth::user()->savings() : Saving::query())
+        $savings = (float)(($for === 'user') ? Auth::user()->savings() : Saving::query())
         ->get()->map(function ($value, $key) {
             return $value->total ?? 0;
         })->sum();
 
-        $orders = (($for === 'user') ? Auth::user()->orders() : Order::query())
+        $orders = (float)(($for === 'user') ? Auth::user()->orders() : Order::query())
         ->get()->map(function ($value, $key) {
             return $value->amount;
         })->sum();

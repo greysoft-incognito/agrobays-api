@@ -36,6 +36,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'username',
         'password',
         'address',
+        'has_pending_updates',
     ];
 
     /**
@@ -110,9 +111,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function registerFileable()
     {
-        $this->fileableLoader([
-            'image' => 'avatar',
-        ], 'default', true);
+        $this->fileableLoader('image', 'avatar', 'default', true, true);
     }
 
     public static function registerEvents()
@@ -123,7 +122,7 @@ class User extends Authenticatable implements MustVerifyEmail
                     ? str($user->email)->explode('@')->first()
                     : str($user->name ?? $user->firstname)->slug())->replace('.', '_')->toString();
 
-                $user->username = User::where('username', $u)->exists() ? $u.rand(100, 999) : $u;
+                $user->username = User::where('username', $u)->exists() ? $u . rand(100, 999) : $u;
             }
         });
 
@@ -166,7 +165,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function fullname(): Attribute
     {
         $name = isset($this->firstname) ? ucfirst($this->firstname) : '';
-        $name .= isset($this->lastname) ? ' '.ucfirst($this->lastname) : '';
+        $name .= isset($this->lastname) ? ' ' . ucfirst($this->lastname) : '';
         $name .= ! isset($this->lastname) && ! isset($this->firstname) && isset($this->username) ? ucfirst($this->username) : '';
 
         return new Attribute(
@@ -416,13 +415,13 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         // Sum wallet credit transactions and subtract wallet debit transactions
         return new Attribute(
-            get: fn () => $this->wallet()
+            get: fn () => (float)$this->wallet()
                 ->selectRaw('sum(case when type = "credit" then amount else -amount end) as balance')
                 ->value('balance'),
         );
     }
 
-    public function refresh($updates = [
+    public function refreshUi($updates = [
         'user' => true,
         'savings' => true,
         'subscriptions' => true,

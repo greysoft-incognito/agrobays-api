@@ -9,9 +9,9 @@ use App\Http\Resources\SubscriptionResource;
 use App\Models\Cooperative;
 use App\Models\Subscription;
 use App\Notifications\SubStatus;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 
 class SubscriptionController extends Controller
 {
@@ -25,12 +25,6 @@ class SubscriptionController extends Controller
     {
         $cooperative = null;
 
-        // Set default period
-        $period_placeholder = Carbon::now()->subDays(30)->format('Y/m/d') . '-' . Carbon::now()->format('Y/m/d');
-
-        // Get period
-        $period = explode('-', urldecode($request->get('period', $period_placeholder)));
-
         if ($request->cooperative_id) {
             $cooperative = Cooperative::whereId($request->cooperative_id)
                 ->orWhere('slug', $request->cooperative_id)
@@ -41,21 +35,27 @@ class SubscriptionController extends Controller
         }
 
         // Filter by status
-        $query->when(
-            $request->status && in_array($request->status, ['active', 'pending', 'complete', 'withdraw', 'closed']),
-            function ($query) use ($request) {
-                $query->where('status', $request->get('status'));
-            }
-        );
+        $query->when($request->status, function ($query) use ($request) {
+            $status = is_array($request->status) ? $request->status : explode(',', $request->status);
+            $query->currentStatus($status);
+        });
 
-        // Filter by period
-        $query->whereBetween('created_at', [new Carbon($period[0]), new Carbon($period[1])]);
+        // Set default period
+        $period_placeholder = Carbon::now()->subDays(30)->format('Y/m/d').'-'.Carbon::now()->addDay()->format('Y/m/d');
+
+        // Get period
+        $period = $request->period == '0' ? [] : explode('-', urldecode($request->get('period', $period_placeholder)));
+
+        $query->when(isset($period[0]), function ($query) use ($period) {
+            // Filter by period
+            $query->whereBetween('created_at', [new Carbon($period[0]), (new Carbon($period[1]))->addDay()]);
+        });
 
         $subscriptions = $query->paginate($request->get('limit', 15));
 
         $msg = $subscriptions->isEmpty()
             ? __(':0 not have an active subscription', [
-                $cooperative ? $cooperative->name . ' does' : 'You do',
+                $cooperative ? $cooperative->name.' does' : 'You do',
             ])
             : HttpStatus::message(HttpStatus::OK);
 

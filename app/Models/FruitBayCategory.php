@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use ToneflixCode\LaravelFileable\Traits\Fileable;
 
 class FruitBayCategory extends Model
 {
     use HasFactory;
+    use Fileable;
 
     /**
      * The accessors to append to the model's array form.
@@ -35,9 +37,8 @@ class FruitBayCategory extends Model
             ->firstOrFail();
     }
 
-    public static function boot()
+    public static function registerEvents()
     {
-        parent::boot();
         static::creating(function ($category) {
             $slug = Str::of($category->title)->slug();
             $category->slug = (string) FruitBayCategory::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
@@ -48,6 +49,13 @@ class FruitBayCategory extends Model
         });
     }
 
+    public function registerFileable()
+    {
+        $this->fileableLoader([
+            'image' => 'products',
+        ], 'default', true, true);
+    }
+
     /**
      * Get the URL to the fruit bay category's photo.
      *
@@ -55,13 +63,19 @@ class FruitBayCategory extends Model
      */
     protected function imageUrl(): Attribute
     {
-        $image = $this->image
-            ? img($this->image, 'banner', 'large')
-            : 'https://loremflickr.com/320/320/'.urlencode($this->title ?? 'fruit').'?random='.rand();
+        if (request()->version > 1) {
+            return Attribute::make(
+                get: fn () => $this->media_file,
+            );
+        } else {
+            $image = $this->image
+                ? img($this->image, 'banner', 'large')
+                : 'https://loremflickr.com/320/320/'.urlencode($this->title ?? 'fruit').'?random='.rand();
 
-        return Attribute::make(
-            get: fn () => $image,
-        );
+            return Attribute::make(
+                get: fn () => $image,
+            );
+        }
     }
 
     /**

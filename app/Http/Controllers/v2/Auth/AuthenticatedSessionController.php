@@ -165,6 +165,7 @@ class AuthenticatedSessionController extends Controller
 
                 $osname = $os['name'] ?? 'Unknown Device';
                 $osversion = $os['version'] ?? '0.00';
+
                 return collect([$dev->getBrandName(), $osname, "(v{$osversion})"])->implode(' ');
             })->implode(', ');
 

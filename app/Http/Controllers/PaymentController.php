@@ -217,9 +217,9 @@ class PaymentController extends Controller
                 ? config('settings.shipping_fee', 0)
                 : 0;
 
-            if ($user && $request->address && $request->address !== ($user->address->shipping ?? '')) {
+            if ($request->address && $request->address !== ($user->address['shipping'] ?? '')) {
                 $address = $user->address;
-                $address->shipping = $request->address;
+                $address['shipping'] = $request->address;
                 $user->address = $address;
                 $user->save();
             }

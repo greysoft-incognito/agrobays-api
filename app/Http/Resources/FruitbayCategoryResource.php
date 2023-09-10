@@ -19,7 +19,8 @@ class FruitbayCategoryResource extends JsonResource
             'slug' => $this->slug,
             'title' => $this->title,
             'description' => $this->description,
-            'image_url' => $this->image_url,
+            'image_url' => $this->media_file,
+            'responsive_images' => $this->responsive_images['image'] ?? new \stdClass(),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

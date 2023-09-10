@@ -49,7 +49,7 @@ class CooperativeResource extends JsonResource
             'meta' => $this->meta,
             'publishing' => $this->when($is_admin, $this->publishing),
             'wallet_bal' => $this->when($is_admin, $this->wallet_balance),
-            'user' => $this->when($is_admin, new UserSlimResource($this->user)),
+            'user' => $this->when($is_admin, new UserBasicDataResource($this->user)),
             'abilities' => $this->abilities,
             'verified' => $this->verified,
             'settings' => $this->settings,
@@ -57,5 +57,16 @@ class CooperativeResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
+    }
+
+    public function with($request)
+    {
+        return ['api' => [
+            'name' => env('APP_NAME', 'Agrobays API'),
+            'version' => config('api.api_version'),
+            'app_version' => config('api.app_version'),
+            'author' => 'Greysoft Limited',
+            'updated' => now(),
+        ]];
     }
 }

@@ -24,10 +24,12 @@ class FoodResource extends JsonResource
             'weight' => $this->when(
                 $request->editing,
                 $this->weight,
-                ($this->weight ?? 0).($this->unit ?? 'kg')
+                ($this->weight ?? 0) . ($this->unit ?? 'kg')
             ),
             'quantity' => $this->pivot?->quantity ?? 0,
-            'image' => $this->image_url,
+            'image' => $this->when($request->version < 1, $this->image_url),
+            'image_url' => $this->when($request->version > 1, $this->image_url),
+            'responsive_images' => $this->responsive_images['image'] ?? new \stdClass(),
             'foodbags' => new FoodBagCollection($this->whenLoaded('foodbags')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

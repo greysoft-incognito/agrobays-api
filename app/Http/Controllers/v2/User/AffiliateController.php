@@ -5,7 +5,6 @@ namespace App\Http\Controllers\v2\User;
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserSlimCollection;
-use App\Http\Resources\UserSlimResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -48,7 +47,7 @@ class AffiliateController extends Controller
             $message = __('You have successfully joined the :0 affiliate program.', [config('app.name')]);
         }
 
-        return (new UserSlimResource($user))->additional([
+        return (new UserBasicDataResource($user))->additional([
             'message' => $message,
             'status' => 'success',
             'response_code' => HttpStatus::OK,

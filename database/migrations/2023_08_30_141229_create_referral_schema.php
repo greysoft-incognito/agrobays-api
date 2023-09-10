@@ -14,6 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
+            $table->boolean('has_pending_updates')->default(false);
             $table->string('referral_code')
                 ->nullable()
                 ->after('remember_token');
@@ -34,6 +35,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('has_pending_updates');
             $table->dropColumn('referral_code');
             $table->dropForeign('users_referrer_id_foreign');
             $table->dropColumn('referrer_id');

@@ -54,11 +54,13 @@ class SubscriptionResource extends JsonResource
             'fees_split' => $this->fees_split,
             'delivery_method' => $this->delivery_method,
             'items' => $request->subscription
-            ? new SavingCollection($this->savings)
-            : new FoodCollection($this->items),
+                ? new SavingCollection($this->savings)
+                : new FoodCollection($this->items),
             'bag' => new FoodBagResource($bag),
             'plan' => new PlanResource($this->plan),
-            'user' => $this->when(in_array('user', $with), new UserSlimResource($this->user)),
+            'user' => $this->when(in_array('user', $with), function () {
+                return new UserBasicDataResource($this->user);
+            }),
             'transaction' => [
                 'reference' => str($this->plan->title)->camel() . '-' . $this->id . $this->plan_id,
                 'amount' => $this->saved_amount,

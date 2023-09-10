@@ -9,6 +9,7 @@ use App\Http\Resources\SavingResource;
 use App\Models\Cooperative;
 use App\Models\Saving;
 use App\Models\Transaction;
+use App\Models\Wallet;
 use App\Services\Payment\PaystackProcessor;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -27,12 +28,6 @@ class SavingController extends Controller
     {
         /** @var \App\Models\User */
         $user = $request->user();
-
-        // Set default period
-        $period_placeholder = Carbon::now()->subDays(30)->format('Y/m/d') . '-' . Carbon::now()->format('Y/m/d');
-
-        // Get period
-        $period = explode('-', urldecode($request->get('period', $period_placeholder)));
 
         $cooperative = null;
         if ($request->cooperative_id) {
@@ -66,8 +61,16 @@ class SavingController extends Controller
             }
         );
 
-        // Filter by period
-        $query->whereBetween('created_at', [new Carbon($period[0]), new Carbon($period[1])]);
+        // Set default period
+        $period_placeholder = Carbon::now()->subDays(30)->format('Y/m/d') . '-' . Carbon::now()->addDays(2)->format('Y/m/d');
+
+        // Get period
+        $period = $request->period == '0' ? [] : explode('-', urldecode($request->get('period', $period_placeholder)));
+
+        $query->when(isset($period[0]), function ($query) use ($period) {
+            // Filter by period
+            $query->whereBetween('created_at', [new Carbon($period[0]), (new Carbon($period[1]))->addDay()]);
+        });
 
         $query->orderBy('id', 'DESC');
 
@@ -96,6 +99,7 @@ class SavingController extends Controller
     {
         // Validate this request
         $this->validate($request, [
+            'inline' => ['nullable', 'boolean'],
             'cooperative_id' => 'nullable|exists:cooperatives,id',
         ], [
             'cooperative_id.exists' => 'The selected cooperative does not exist.',
@@ -132,14 +136,18 @@ class SavingController extends Controller
         ]);
 
         // Set the payment info
-        $method = $request->get('method', 'paystack');
+        $method = $request->get('payment_method', 'paystack');
+
+        // Add the method to the request
+        $request->merge(['method' => $method]);
+
         $due = round(($subscription->plan->amount / $subscription->plan->duration) * $request->days, 2);
         $fees = round(($subscription->bag->fees / $subscription->plan->duration) * $request->days, 2);
         $amount = round($due + $fees, 2);
         $reference = config('settings.trx_prefix', 'AGB-') . \Str::random(15);
 
         // Pay with wallet
-        if ($request->get('method', $method) === 'wallet') {
+        if ($method === 'wallet') {
             if ($handler->wallet_balance >= $amount) {
                 $tranx = [
                     'reference' => $reference,
@@ -156,15 +164,14 @@ class SavingController extends Controller
 
                 $transaction = $this->initialize($user, $due, $fees, $amount, $reference, $savings, $request);
 
-                return $this->responseBuilder([
+                return (new SavingResource($transaction->transactable))->additional([
                     'message' => $msg ?? HttpStatus::message(HttpStatus::ACCEPTED),
                     'status' => ! $subscription ? 'info' : 'success',
                     'response_code' => $code ?? HttpStatus::ACCEPTED,
                     'payload' => $tranx ?? [],
-                    'transaction' => $transaction,
                     'amount' => $amount,
                     'cooperative_id' => $request->cooperative_id,
-                ]);
+                ])->response()->setStatusCode($response['code'] ?? HttpStatus::ACCEPTED);
             } else {
                 return $this->responseBuilder([
                     'message' => __(':0 not have enough funds in :1 wallet', [
@@ -183,15 +190,14 @@ class SavingController extends Controller
                 function ($reference, $tranx, $real_due, $msg) use ($subscription, $request, $user, $due, $fees, $savings) {
                     $transaction = $this->initialize($user, $due, $fees, $real_due / 100, $reference, $savings, $request);
 
-                    return $this->responseBuilder([
+                    return (new SavingResource($transaction->transactable))->additional([
                         'message' => $msg ?? HttpStatus::message(HttpStatus::ACCEPTED),
                         'status' => ! $subscription ? 'info' : 'success',
                         'response_code' => $code ?? HttpStatus::ACCEPTED,
                         'payload' => $tranx ?? [],
-                        'transaction' => $transaction ?? new \stdClass(),
                         'amount' => $real_due / 100,
                         'cooperative_id' => $request->cooperative_id,
-                    ]);
+                    ])->response()->setStatusCode($response['code'] ?? HttpStatus::ACCEPTED);
                 },
                 function ($error, $code) {
                     return $this->responseBuilder([
@@ -258,20 +264,17 @@ class SavingController extends Controller
             'cooperative_id.exists' => 'The selected cooperative does not exist.',
         ]);
 
-        // Validate this request
-        $this->validate($request, [
-            'payment_method' => 'nullable|in:wallet,paystack',
-        ], [
-        ]);
-
-        // Add the reference to the request
-        $request->merge(['reference' => $reference]);
-
         /** @var \App\Models\User */
         $user = $request->user();
 
+        $transaction = Transaction::where('reference', $reference)->where('status', 'pending')->first();
+        !$transaction && abort(404, 'We are unable to find this transaction.');
+
         // Set the payment info
-        $method = $request->get('method', 'paystack');
+        $method = strtolower($transaction->method ?? 'wallet');
+
+        // Add the reference to the request
+        $request->merge(['reference' => $reference, 'method' => $method]);
 
         if ($method === 'wallet') {
             $tranx = new \stdClass();
@@ -290,58 +293,44 @@ class SavingController extends Controller
                 $tranx->data->status = 'success';
             }
 
-            $transaction = Transaction::where('reference', $reference)->where('status', 'pending')->first();
             $response = $this->verify($request, $tranx, $transaction);
 
-            return $this->responseBuilder([
+            return (new SavingResource($response['saving']))->additional([
                 'message' => $response['msg'] ?? $msg ?? HttpStatus::message(HttpStatus::ACCEPTED),
                 'status' => $response['status'] ?? 'success',
                 'response_code' => $response['code'] ?? HttpStatus::ACCEPTED,
                 'payload' => $response['payload'] ?? $tranx ?? new \stdClass(),
-                'saving' => $response['saving'] ?? new \stdClass(),
                 'subscription' => $response['data'] ?? new \stdClass(),
                 'reference' => $reference,
-            ]);
+            ])->response()->setStatusCode($response['code'] ?? HttpStatus::ACCEPTED);
         } else {
             $paystack = new PaystackProcessor($request, $user);
 
             return $paystack->verify(
-                function ($reference, $tranx, $msg, $code) use ($request) {
-                    $transaction = Transaction::where('reference', $reference)->where('status', 'pending')->first();
+                function ($reference, $tranx, $msg, $code) use ($request, $transaction) {
                     $response = $this->verify($request, $tranx, $transaction);
 
-                    return $this->responseBuilder([
+                    return (new SavingResource($response['saving']))->additional([
                         'message' => $response['msg'] ?? $msg ?? HttpStatus::message(HttpStatus::ACCEPTED),
                         'status' => $response['status'] ?? 'success',
-                        'response_code' => $response['code'] ?? $code ?? HttpStatus::ACCEPTED,
+                        'response_code' => $response['code'] ?? HttpStatus::ACCEPTED,
                         'payload' => $response['payload'] ?? $tranx ?? new \stdClass(),
-                        'saving' => $response['saving'] ?? new \stdClass(),
                         'subscription' => $response['data'] ?? new \stdClass(),
                         'reference' => $reference,
-                    ]);
+                    ])->response()->setStatusCode($response['code'] ?? HttpStatus::ACCEPTED);
                 },
                 function ($msg, $code, $tranx) {
                     return $this->responseBuilder([
                         'message' => $msg ?? HttpStatus::message(HttpStatus::UNPROCESSABLE_ENTITY),
                         'status' => 'error',
                         'response_code' => $code,
+                    ], [
                         'payload' => $tranx ?? new \stdClass(),
                     ]);
                 },
                 true
             );
         }
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
     }
 
     /** Initialize the saving and transaction.
@@ -369,7 +358,7 @@ class SavingController extends Controller
         return $saving->transaction()->create([
             'user_id' => $user->id,
             'reference' => $reference,
-            'method' => 'Paystack',
+            'method' => ucfirst($request->payment_method ?? 'paystack'),
             'status' => 'pending',
             'amount' => $amount,
             'fees' => $fees,
@@ -410,7 +399,7 @@ class SavingController extends Controller
                 }
 
                 if ($subscription) {
-                    $_amount = money($tranx->data->amount / 100);
+                    $_amount = money($transaction->amount);
                     $_left = $subscription->days_left - $saving->days;
                 } else {
                     $tranx->data->status = 'failed';
@@ -460,7 +449,33 @@ class SavingController extends Controller
             'status' => $status,
             'payload' => $tranx ?? new \stdClass(),
             'data' => $subscription,
-            'saving' => $saving ?? new \stdClass(),
+            'saving' => $saving,
         ];
+    }
+
+    /**
+     * Delete a transaction and related models
+     * The most appropriate place to use this is when a user cancels a transaction without
+     * completing payments, although there are limitless use cases.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response|\Illuminate\Contracts\Routing\ResponseFactory
+     */
+    public function destroy(Request $request, $reference)
+    {
+        $user = $request->user();
+        $transaction = $user->transactions()->whereStatus('pending')->whereReference($reference)->first();
+        !$transaction && abort(404, 'We are unable to find this transaction.');
+
+        if ($transaction->transactable) {
+            $transaction->transactable->delete();
+        }
+        $transaction->delete();
+
+        return $this->responseBuilder([
+            'message' => "Transaction with reference: {$reference} successfully deleted.",
+            'status' => 'success',
+            'response_code' => HttpStatus::ACCEPTED,
+        ]);
     }
 }

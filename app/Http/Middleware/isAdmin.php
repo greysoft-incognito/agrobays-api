@@ -2,9 +2,11 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Controllers\Controller;
+use App\Http\Resources\UserSlimResource;
 use Closure;
 
-class isAdmin
+class IsAdmin
 {
     /**
      * Handle an incoming request.
@@ -17,7 +19,21 @@ class isAdmin
     public function handle($request, Closure $next, $redirectToRoute = null)
     {
         if (! $request->user() || $request->user()->role === 'user') {
-            return response()->json(['message' => 'You do not have permision to view this page.', 'user' => $request->user()], 403);
+            if ($request->version > 1) {
+                return (new Controller())->responseBuilder(
+                    [
+                        'data' => UserSlimResource::make($request->user()),
+                        'status' => 'error',
+                        'message' => 'You do not have permision to view this page.',
+                        'response_code' => 403,
+                    ],
+                    [
+                        'response' => [],
+                    ]
+                );
+            } else {
+                return response()->json(['message' => 'You do not have permision to view this page.', 'user' => $request->user()], 403);
+            }
         }
 
         return $next($request);

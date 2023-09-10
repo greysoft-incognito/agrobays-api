@@ -35,4 +35,15 @@ class MealPlanResource extends JsonResource
             'updated_at' => $this->updated_at,
         ];
     }
+
+    public function with($request)
+    {
+        return ['api' => [
+            'name' => env('APP_NAME', 'Agrobays API'),
+            'version' => config('api.api_version'),
+            'app_version' => config('api.app_version'),
+            'author' => 'Greysoft Limited',
+            'updated' => now(),
+        ]];
+    }
 }

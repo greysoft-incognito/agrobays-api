@@ -7,33 +7,33 @@ namespace App\EnumsAndConsts;
  */
 class HttpStatus
 {
-    const OK = '200';                   // OK
+    public const OK = '200';                   // OK
 
-    const CREATED = '201';              // Created
+    public const CREATED = '201';              // Created
 
-    const ACCEPTED = '202';             // Accepted
+    public const ACCEPTED = '202';             // Accepted
 
-    const NO_CONTENT = '204';           // No Content
+    public const NO_CONTENT = '204';           // No Content
 
-    const BAD_REQUEST = '400';          // Bad Request
+    public const BAD_REQUEST = '400';          // Bad Request
 
-    const UNAUTHORIZED = '401';         // Unauthenticated
+    public const UNAUTHORIZED = '401';         // Unauthenticated
 
-    const NOT_FOUND = '404';            // Not Found
+    public const NOT_FOUND = '404';            // Not Found
 
-    const FORBIDDEN = '403';            // Access Denied
+    public const FORBIDDEN = '403';            // Access Denied
 
-    const METHOD_NOT_ALLOWED = '405';   // Method Not Allowed
+    public const METHOD_NOT_ALLOWED = '405';   // Method Not Allowed
 
-    const UNPROCESSABLE_ENTITY = '422'; // Unprocessable Entity
+    public const UNPROCESSABLE_ENTITY = '422'; // Unprocessable Entity
 
-    const TOO_MANY_REQUESTS = '429';    // Too Many Requests
+    public const TOO_MANY_REQUESTS = '429';    // Too Many Requests
 
-    const SERVER_ERROR = '500';         // Internal Server Error
+    public const SERVER_ERROR = '500';         // Internal Server Error
 
     public static function message(string $code, $default = 'Not found.')
     {
-        return (new self)->getMessage($code, $default);
+        return (new self())->getMessage($code, $default);
     }
 
     public function getMessage($code = self::OK, $default = 'Not found.')

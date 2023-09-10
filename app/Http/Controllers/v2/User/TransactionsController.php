@@ -27,12 +27,6 @@ class TransactionsController extends Controller
         /** @var \App\Models\User $user */
         $user = $request->user();
 
-        // Set default period
-        $period_placeholder = Carbon::now()->subDays(30)->format('Y/m/d').'-'.Carbon::now()->format('Y/m/d');
-
-        // Get period
-        $period = explode('-', urldecode($request->get('period', $period_placeholder)));
-
         /** @var \Illuminate\Database\Eloquent\Builder $query */
         $query = $user->transactions();
 
@@ -44,8 +38,16 @@ class TransactionsController extends Controller
             }
         );
 
-        // Filter by period
-        $query->whereBetween('created_at', [new Carbon($period[0]), new Carbon($period[1])]);
+        // Set default period
+        $period_placeholder = Carbon::now()->subDays(30)->format('Y/m/d') . '-' . Carbon::now()->addDay()->format('Y/m/d');
+
+        // Get period
+        $period = $request->period == '0' ? [] : explode('-', urldecode($request->get('period', $period_placeholder)));
+
+        $query->when(isset($period[0]), function ($query) use ($period) {
+            // Filter by period
+            $query->whereBetween('created_at', [new Carbon($period[0]), (new Carbon($period[1]))->addDay()]);
+        });
 
         /** @var \App\Models\Transaction $transactions */
         $transactions = $query->paginate($request->get('limit', 15));

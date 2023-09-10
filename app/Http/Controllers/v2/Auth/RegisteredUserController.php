@@ -63,7 +63,7 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
 
         $dev = new DeviceDetector($request->userAgent());
-        $device = $dev->getBrandName() ? ($dev->getBrandName() . $dev->getDeviceName()) : $request->userAgent();
+        $device = $dev->getBrandName() ? ($dev->getBrandName().$dev->getDeviceName()) : $request->userAgent();
 
         $token = $user->createToken($device)->plainTextToken;
 

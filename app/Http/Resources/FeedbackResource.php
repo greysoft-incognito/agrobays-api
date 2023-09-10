@@ -39,7 +39,18 @@ class FeedbackResource extends JsonResource
             ),
             'issue_url' => $this->when($isAdmin && $canShow, $this->issue_url),
             'thread' => $this->replies()->count(),
-            'user' => $this->whenLoaded('user', new UserSlimResource($this->user)),
+            'user' => $this->whenLoaded('user', new UserBasicDataResource($this->user)),
         ];
+    }
+
+    public function with($request)
+    {
+        return ['api' => [
+            'name' => env('APP_NAME', 'Agrobays API'),
+            'version' => config('api.api_version'),
+            'app_version' => config('api.app_version'),
+            'author' => 'Greysoft Limited',
+            'updated' => now(),
+        ]];
     }
 }

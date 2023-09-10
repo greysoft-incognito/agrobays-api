@@ -10,7 +10,9 @@ use Illuminate\Queue\SerializesModels;
 
 class ActionComplete implements ShouldBroadcast
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
     public $data;
 
@@ -34,7 +36,7 @@ class ActionComplete implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new PrivateChannel('actions.'.$this->user->id);
+        return new PrivateChannel('actions.' . $this->user->id);
     }
 
     public function broadcastAs()

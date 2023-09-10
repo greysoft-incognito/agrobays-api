@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Controller;
 use App\Http\Controllers\v2\FruitBayCategoryController;
 use App\Http\Controllers\v2\FruitBayController;
 use App\Http\Controllers\v2\PlanController;
@@ -31,18 +30,6 @@ Route::middleware(['auth:sanctum'])
     ->group(function () {
         // Plans Route
         Route::apiResource('fruitbay/categories', FruitBayCategoryController::class)->only(['index', 'show']);
-        Route::apiResource('fruitbay', FruitBayController::class)->only(['index', 'show']);
+        Route::apiResource('fruitbay', FruitBayController::class);
         Route::apiResource('plans', PlanController::class)->only(['index', 'show', 'store']);
     });
-
-Route::get('/check/update/{version}', function (Request $request, $version) {
-    $has_update = version_compare($version, env('APP_VERSION'), '<');
-
-    return (new Controller())->responseBuilder([
-        'message' => $has_update ? 'New version available' : 'No update available',
-        'link' => $has_update ? env('APP_UPDATE_URL') : null,
-        'version' => config('api.app_version'),
-        'status' => 'success',
-        'response_code' => 200,
-    ]);
-});

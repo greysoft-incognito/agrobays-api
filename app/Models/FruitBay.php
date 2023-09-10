@@ -6,10 +6,12 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use ToneflixCode\LaravelFileable\Traits\Fileable;
 
 class FruitBay extends Model
 {
     use HasFactory;
+    use Fileable;
 
     /**
      * The accessors to append to the model's array form.
@@ -59,9 +61,8 @@ class FruitBay extends Model
             ->firstOrFail();
     }
 
-    public static function boot()
+    public static function registerEvents()
     {
-        parent::boot();
         static::creating(function ($item) {
             $slug = Str::of($item->name)->slug();
             $item->slug = (string) FruitBay::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
@@ -72,20 +73,33 @@ class FruitBay extends Model
         });
     }
 
+    public function registerFileable()
+    {
+        $this->fileableLoader([
+            'image' => 'products',
+        ], 'default', true, true);
+    }
+
     /**
-     * Get the URL to the fruit bay item's photo.
+     * Get the fruit bay item's image url.
      *
      * @return string
      */
-    protected function imageUrl(): Attribute
+    public function imageUrl(): Attribute
     {
-        $image = $this->image
+        if (request()->version != 1) {
+            $image = $this->image
             ? img($this->image, 'banner', 'large')
-            : 'https://loremflickr.com/320/320/' . urlencode($this->name ?? 'fruit') . '?random=' . rand();
+            : 'https://loremflickr.com/320/320/'.urlencode($this->name ?? 'fruit').'?random='.rand();
 
-        return Attribute::make(
-            get: fn () => $image,
-        );
+            return Attribute::make(
+                get: fn () => $image,
+            );
+        } else {
+            return Attribute::make(
+                get: fn () => $this->media_file,
+            );
+        }
     }
 
     /**

@@ -21,6 +21,11 @@ return [
             'default' => 'default.png',
             'size' => [400, 400],
         ],
+        'products' => [
+            'path' => 'uploads/images/',
+            'default' => 'default.png',
+            'size' => [400, 400],
+        ],
         'private' => [
             'files' => [
                 'path' => 'files/',
