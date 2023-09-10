@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\v2\User;
+namespace App\Http\Controllers\v2\Admin;
 
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
@@ -24,16 +24,9 @@ class DispatchController extends Controller
      */
     public function index(Request $request)
     {
-        /** @var \App\Models\User $user */
-        $user = $request->user();
+        \Gate::authorize('usable', 'orders');
 
-        $query = Dispatch::whereHasMorph(
-            'dispatchable',
-            [Order::class, Subscription::class],
-            function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            }
-        )->orderBy('id', 'DESC');
+        $query = Dispatch::orderBy('id', 'DESC');
 
         // Set default period
         $period_placeholder = Carbon::now()->subDays(30)->format('Y/m/d') . '-' . Carbon::now()->addDays(2)->format('Y/m/d');
@@ -45,6 +38,13 @@ class DispatchController extends Controller
             // Filter by period
             $query->whereBetween('created_at', [new Carbon($period[0]), (new Carbon($period[1]))->addDay()]);
         });
+
+        // Set the dispatch Status
+        $status = $request->get('status', 'pending');
+
+        if (in_array($status, ['pending', 'confirmed', 'dispatched', 'delivered'])) {
+            $query->whereStatus($status);
+        };
 
         $dispatches = $query->paginate();
 
@@ -59,24 +59,14 @@ class DispatchController extends Controller
      * Get a particular dispatched item.
      *
      * @param  Request  $request
-     * @param  string  $id
+     * @param  \App\Models\Dispatch  $dispatched
      * @return void
      */
-    public function show(Request $request, $id)
+    public function show(Dispatch $dispatched)
     {
-        $user = $request->user();
+        \Gate::authorize('usable', 'dispatch.' . $dispatched->status);
 
-        $dispatch = Dispatch::whereHasMorph(
-            'dispatchable',
-            [Order::class, Subscription::class],
-            function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            }
-        )->find($id);
-
-        !$dispatch && abort(HttpStatus::NOT_FOUND, 'The requested item no longer exists.');
-
-        return (new DispatchResource($dispatch))->additional([
+        return (new DispatchResource($dispatched))->additional([
             'status' => 'success',
             'response_code' => HttpStatus::OK,
         ]);

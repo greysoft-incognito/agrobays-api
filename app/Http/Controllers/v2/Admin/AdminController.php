@@ -6,7 +6,6 @@ use App\Actions\ArrayFile;
 use App\Actions\Greysoft\Charts;
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
-use App\Jobs\MassUpdateUsers;
 use App\Models\Subscription;
 use Illuminate\Http\Request;
 
