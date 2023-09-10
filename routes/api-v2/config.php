@@ -16,6 +16,7 @@ Route::get('/check/update/{version}/{platform?}', function ($version, $platform 
         'status' => 'success',
         'message' => $has_update ? 'New version available' : 'No update available',
         'version' => config("api.{$prefix}_version"),
+        'upgrade' => config("api.{$prefix}_upgrade"),
         'response_code' => 200,
     ]);
 });
