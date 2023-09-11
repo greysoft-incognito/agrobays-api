@@ -18,7 +18,10 @@ class AdminSubscriptionController extends Controller
         // Search and filter columns
         if ($request->search) {
             $query->where(function ($query) use ($request) {
-                $query->where('status', 'like', "%$request->search%");
+                $query->where('status', 'like', "%$request->search%")
+                    ->orWhereHas('user', function ($query) use ($request) {
+                        $query->whereRaw("CONCAT_WS(' ', firstname, lastname) LIKE '%$request->search%'");
+                    });
             });
         }
 

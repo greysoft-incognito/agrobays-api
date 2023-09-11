@@ -12,14 +12,17 @@ class AdminSavingController extends Controller
     public function index(Request $request, $limit = '15')
     {
         \Gate::authorize('usable', 'savings');
-        $query = Saving::query()->with('user');
+        $query = Saving::query()->with(['user', 'subscription']);
 
         // Search and filter columns
         if ($request->search) {
             $query->where(function ($query) use ($request) {
                 $query->where('payment_ref', 'like', "%$request->search%")
                     ->orWhere('status', 'like', "%$request->search%")
-                    ->orWhere('amount', 'like', "%$request->search%");
+                    ->orWhere('amount', 'like', "%$request->search%")
+                    ->orWhereHas('user', function ($query) use ($request) {
+                        $query->whereRaw("CONCAT_WS(' ', firstname, lastname) LIKE '%$request->search%'");
+                    });
             });
         }
 
