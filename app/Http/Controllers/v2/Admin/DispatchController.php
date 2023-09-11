@@ -47,15 +47,15 @@ class DispatchController extends Controller
         };
 
         // Search For an dispatched order
-        $query->when($request->has('search'), function ($query) use ($request) {
+        $query->when($request->search, function ($query) use ($request) {
             $query->where(function ($query) use ($request) {
-                $query->where('reference', 'like', "%{$request->search}%");
+                $query->where('reference', $request->search);
                 $query->orWhereHas('user', function ($query) use ($request) {
                     $query->orWhereRaw("CONCAT_WS(' ', firstname, lastname) LIKE '%$request->search%'");
                 });
                 $query->orWhereHas('dispatchable', function ($query) use ($request) {
                     $query->whereHas('user', function ($query) use ($request) {
-                        $query->orWhereRaw("CONCAT_WS(' ', firstname, lastname) LIKE '%$request->search%'");
+                        $query->whereRaw("CONCAT_WS(' ', firstname, lastname) LIKE '%$request->search%'");
                     });
                 });
             });

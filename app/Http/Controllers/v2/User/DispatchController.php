@@ -81,38 +81,4 @@ class DispatchController extends Controller
             'response_code' => HttpStatus::OK,
         ]);
     }
-
-    /**
-     * Get a particular dispatch
-     *
-     * @param  Request  $request
-     * @param  string  $id
-     * @return void
-     */
-    public function getDispatch(Request $request, $id)
-    {
-        $query = Dispatch::where('user_id', '!=', null)->whereHasMorph(
-            'dispatchable',
-            [Order::class, Subscription::class],
-            function ($query) {
-                $query->where('user_id', Auth::id());
-            }
-        );
-
-        $item = $query->with(['dispatchable', 'user', 'dispatchable.user'])->find($id);
-
-        if ($item->type === 'order') {
-            $item->load('dispatchable.transaction', 'dispatchable.user');
-        } elseif ($item->type === 'foodbag') {
-            $item->load('dispatchable.bag', 'dispatchable.user');
-        }
-        $item && \Gate::authorize('usable', 'dispatch.' . $item->status);
-
-        return $this->buildResponse([
-            'message' => ! $item ? 'The requested item no longer exists' : 'OK',
-            'status' => ! $item ? 'info' : 'success',
-            'response_code' => ! $item ? 404 : 200,
-            'item' => $item ?? (object) [],
-        ]);
-    }
 }

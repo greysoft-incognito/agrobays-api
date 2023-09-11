@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources;
 
-use App\Models\FoodBag;
 use App\Models\Subscription;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -26,15 +25,14 @@ class DispatchResource extends JsonResource
             'type' => $this->type,
             'item_type' => $this->item_type,
             'last_location' => $this->last_location,
-            'user' => $this->user,
             $this->mergeWhen($v < 2, function () {
                 return [
                     'user_id' => $this->user_id,
                     'dispatchable' => $this->dispatchable,
                     'dispatchable_id' => $this->dispatchable_id,
                     'dispatchable_type' => $this->dispatchable_type,
-                    'user' => new UserBasicDataResource($this->user),
-                    'owner' => new UserBasicDataResource($this->dispatchable->user),
+                    'user' => new UserSlimResource($this->user),
+                    'owner' => new UserSlimResource($this->dispatchable->user),
                 ];
             }),
             $this->mergeWhen($v > 1, function () {
@@ -45,8 +43,8 @@ class DispatchResource extends JsonResource
                             ? new OrderResource($this->dispatchable)
                             : $this->dispatchable
                      ),
-                    'user' => new UserBasicDataResource($this->dispatchable->user),
-                    'handler' => new UserBasicDataResource($this->user),
+                    'user' => new UserSlimResource($this->dispatchable->user),
+                    'handler' => new UserSlimResource($this->user),
                 ];
 
                 return $data;
