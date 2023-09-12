@@ -4,6 +4,7 @@ namespace App\Http\Controllers\v2\User;
 
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserBasicDataResource;
 use App\Http\Resources\UserSlimCollection;
 use App\Models\User;
 use Illuminate\Http\Request;
