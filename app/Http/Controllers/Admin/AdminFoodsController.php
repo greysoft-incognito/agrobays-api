@@ -82,25 +82,18 @@ class AdminFoodsController extends Controller
             ]);
         }
 
-        $food = Food::whereId($item)->first() ?? new Food;
+        $food = Food::whereId($item)->first() ?? new Food();
 
         $food->name = $request->name;
         $food->weight = $request->weight ?? $food->weight ?? 1;
         $food->unit = $request->unit ?? $food->unit ?? 'kg';
         $food->price = $request->price ?? $food->price ?? 1;
-        $food->image = $request->image ?? $food->image ?? '';
         $food->description = $request->description;
 
-        if ($request->hasFile('image')) {
-            $food->image && Storage::delete($food->image ?? '');
-            $food->image = $request->file('image')->storeAs(
-                'public/uploads/images', rand().'_'.rand().'.'.$request->file('image')->extension()
-            );
-        }
         $food->save();
 
         return $this->buildResponse([
-            'message' => $item ? Str::of($food->name)->append(' Has been updated!') : 'New food has been added.',
+            'message' => $item ? __(':0 Has been updated!', [$food->name]) : 'New food has been added.',
             'status' => 'success',
             'response_code' => 200,
             'food' => $food,

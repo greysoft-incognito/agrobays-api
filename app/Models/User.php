@@ -7,6 +7,7 @@ use App\Notifications\SendCode;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -181,6 +182,16 @@ class User extends Authenticatable implements MustVerifyEmail
     public function affiliates(): HasMany
     {
         return $this->hasMany(User::class, 'referrer_id');
+    }
+
+    /**
+     * Get the user's referrer
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function referrer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'referrer_id');
     }
 
     /**

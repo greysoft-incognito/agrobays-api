@@ -35,8 +35,8 @@ class Wallet extends Model
         });
 
         static::creating(function (Wallet $wallet) {
-            $reference = config('settings.trx_prefix', 'AGB-') . Str::random(12);
             if (! $wallet->reference) {
+                $reference = config('settings.trx_prefix', 'AGB-') . Str::random(12);
                 $wallet->reference = $reference;
             }
         });

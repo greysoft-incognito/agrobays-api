@@ -410,6 +410,18 @@ class SavingController extends Controller
                     $saving->status = 'complete';
                     $transaction->status = 'complete';
 
+                    $canPayRef = in_array(config('settings.referral_mode', 2), [1, 2]) &&
+                        config('settings.referral_system', false);
+
+                    if ($canPayRef && $saving->user->referrer && $saving->days < 1) {
+                        $saving->user->referrer->wallet()->create([
+                            'amount' => config('settings.referral_bonus', 1),
+                            'type' => 'credit',
+                            'source' => 'Referral Bonus',
+                            'detail' => __('Referral bonus for :0\'s first saving.', [$saving->user->fullname]),
+                        ]);
+                    }
+
                     if ($_left <= 1) {
                         $subscription->status = 'complete';
                         $msg = 'You have completed the saving circle for this subscription, you would be notified when your food bag is ready for pickup or delivery.';

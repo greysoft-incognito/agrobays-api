@@ -47,7 +47,7 @@ class PaystackProcessor
         $due = $amount;
         $msg = 'Transaction Failed';
 
-        $reference = config('settings.trx_prefix', 'TRX-').$this->generateString(20, 3);
+        $reference = config('settings.trx_prefix', 'TRX-') . $this->generateString(20, 3);
         $real_due = round($due * 100, 2);
 
         $response = new \stdClass();
@@ -69,7 +69,7 @@ class PaystackProcessor
                     'callback_url' => $this->request->get(
                         'redirect',
                         config('settings.frontend_link')
-                            ? config('settings.frontend_link').'/payment/verify'
+                            ? config('settings.frontend_link') . '/payment/verify'
                             : config('settings.payment_verify_url', route('payment.paystack.verify'))
                     ),
                 ]);
@@ -172,8 +172,8 @@ class PaystackProcessor
     protected function generateString($strength = 16, $group = 0, $input = null)
     {
         $groups = [
-            '0123456789abcdefghi'.md5(time()).'jklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.time().rand(),
-            '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.time().rand(),
+            '0123456789abcdefghi' . md5(time()) . 'jklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' . time() . rand(),
+            '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' . time() . rand(),
             '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
             '01234567890123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
         ];

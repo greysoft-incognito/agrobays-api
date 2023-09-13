@@ -4,8 +4,8 @@ namespace App\Http\Controllers\v2\User;
 
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserBasicDataCollection;
 use App\Http\Resources\UserBasicDataResource;
-use App\Http\Resources\UserSlimCollection;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -23,7 +23,8 @@ class AffiliateController extends Controller
 
         $affiliates = $query->paginate($request->get('limit', 15));
 
-        return (new UserSlimCollection($affiliates))->additional([
+        return (new UserBasicDataCollection($affiliates))->additional([
+            'referrer' => new UserBasicDataResource($request->user()->referrer),
             'message' => HttpStatus::message(HttpStatus::OK),
             'status' => 'success',
             'response_code' => HttpStatus::OK,

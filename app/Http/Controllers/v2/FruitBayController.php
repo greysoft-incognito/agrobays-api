@@ -351,6 +351,20 @@ class FruitBayController extends Controller
                 $order->payment = 'complete';
                 $transaction->status = 'complete';
                 $msg = 'Your order has been placed successfully, you will be notified whenever it is ready for pickup or delivery.';
+
+                $canPayRef = in_array(config('settings.referral_mode', 2), [1, 3]) &&
+                    config('settings.referral_system', false);
+
+                $countUserOrders = $order->user->orders()->paymentStatus('complete')->count();
+
+                if ($canPayRef && $order->user->referrer && $countUserOrders < 1) {
+                    $order->user->referrer->wallet()->create([
+                        'amount' => config('settings.referral_bonus', 1),
+                        'type' => 'credit',
+                        'source' => 'Referral Bonus',
+                        'detail' => __('Referral bonus for :0\'s first order.', [$order->user->fullname]),
+                    ]);
+                }
             } else {
                 $order->payment = 'rejected';
                 $order->status = 'rejected';

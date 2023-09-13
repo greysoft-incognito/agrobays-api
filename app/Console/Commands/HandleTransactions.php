@@ -90,7 +90,7 @@ class HandleTransactions extends Command
                             $transaction->delete();
                         }
                     })->count();
-                    $this->info($count." $status transactions cleared.");
+                    $this->info($count . " $status transactions cleared.");
                 // List transactions
                 } elseif ($action === 'list') {
                     $this->info($transactions->message);

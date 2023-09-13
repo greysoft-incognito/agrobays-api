@@ -28,7 +28,7 @@ class FoodResource extends JsonResource
             ),
             'quantity' => $this->pivot?->quantity ?? 0,
             'image' => $this->when($request->version < 1, $this->image_url),
-            'image_url' => $this->when($request->version > 1, $this->image_url),
+            'image_url' => $this->image_url,
             'responsive_images' => $this->responsive_images['image'] ?? new \stdClass(),
             'foodbags' => new FoodBagCollection($this->whenLoaded('foodbags')),
             'created_at' => $this->created_at,

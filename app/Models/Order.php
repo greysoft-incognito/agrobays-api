@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -73,5 +74,21 @@ class Order extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Scoped the order query by status
+     */
+    public function scopeHasStatus(Builder $query, $status = 'pending')
+    {
+        $query->where('status', $status);
+    }
+
+    /**
+     * Scoped the order query by payment status
+     */
+    public function scopePaymentStatus(Builder $query, $status = 'complete')
+    {
+        $query->where('payment', $status);
     }
 }

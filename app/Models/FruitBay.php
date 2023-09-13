@@ -87,19 +87,9 @@ class FruitBay extends Model
      */
     public function imageUrl(): Attribute
     {
-        if (request()->version != 1) {
-            $image = $this->image
-            ? img($this->image, 'banner', 'large')
-            : 'https://loremflickr.com/320/320/'.urlencode($this->name ?? 'fruit').'?random='.rand();
-
-            return Attribute::make(
-                get: fn () => $image,
-            );
-        } else {
-            return Attribute::make(
-                get: fn () => $this->media_file,
-            );
-        }
+        return Attribute::make(
+            get: fn () => $this->media_file,
+        );
     }
 
     /**

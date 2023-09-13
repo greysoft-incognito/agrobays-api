@@ -3,7 +3,8 @@
 /**
  * Payment Routes
  */
-use App\Http\Controllers\PaymentController;
+
+use App\Http\Controllers\v2\PaymentController;
 use App\Http\Controllers\v2\User\PaymentMethodAuthoriseController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,3 +16,4 @@ Route::controller(PaymentController::class)
         Route::put('/authorize/{method}/verify', [PaymentMethodAuthoriseController::class, 'update'])
             ->name('autorize.method.verify');
     });
+Route::post('/paystack/webhook', [PaymentController::class, 'paystackWebhook'])->name('paystack.webhook');
