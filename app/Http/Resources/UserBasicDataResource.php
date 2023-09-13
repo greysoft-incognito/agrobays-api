@@ -30,7 +30,7 @@ class UserBasicDataResource extends JsonResource
             'state' => $this->state,
             'country' => $this->country,
             'last_seen' => $this->last_seen,
-            'referral_code' =>  $this->referral_code,
+            'referral_code' => $this->referral_code,
             'permissions' => $this->when($request->withPermissions, $this->permissions),
             'dispatches' => $this->when($request->role === 'dispatch', $this->dispatches),
         ];

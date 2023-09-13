@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Events\PhoneVerified;
 use App\Listeners\BroadcastNotification;
+use App\Listeners\DeliverableNotificationSent;
 use App\Listeners\SendEmailVerificationNotification;
 use App\Listeners\SendPhoneVerificationNotification;
 use App\Listeners\SendVerifiedEmailNotification;
@@ -34,6 +35,7 @@ class EventServiceProvider extends ServiceProvider
         ],
         NotificationSending::class => [
             BroadcastNotification::class,
+            DeliverableNotificationSent::class,
         ],
     ];
 

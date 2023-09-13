@@ -6,7 +6,6 @@ use App\Actions\Greysoft\Charts;
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
-use App\Models\v2\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -86,7 +85,7 @@ class AccountController extends Controller
                 $vals .= '|min:8|confirmed';
             }
             if (is_array($filled[$field])) {
-                return [$field . '.*' => 'required'];
+                return [$field.'.*' => 'required'];
             }
 
             return [$field => "required|$vals"];

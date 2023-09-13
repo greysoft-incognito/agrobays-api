@@ -11,7 +11,6 @@ use App\Models\Order;
 use App\Models\Subscription;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class DispatchController extends Controller
 {
@@ -36,7 +35,7 @@ class DispatchController extends Controller
         )->orderBy('id', 'DESC');
 
         // Set default period
-        $period_placeholder = Carbon::now()->subDays(30)->format('Y/m/d') . '-' . Carbon::now()->addDays(2)->format('Y/m/d');
+        $period_placeholder = Carbon::now()->subDays(30)->format('Y/m/d').'-'.Carbon::now()->addDays(2)->format('Y/m/d');
 
         // Get period
         $period = $request->period == '0' ? [] : explode('-', urldecode($request->get('period', $period_placeholder)));
@@ -74,7 +73,7 @@ class DispatchController extends Controller
             }
         )->find($id);
 
-        !$dispatch && abort(HttpStatus::NOT_FOUND, 'The requested item no longer exists.');
+        ! $dispatch && abort(HttpStatus::NOT_FOUND, 'The requested item no longer exists.');
 
         return (new DispatchResource($dispatch))->additional([
             'status' => 'success',

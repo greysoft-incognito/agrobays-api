@@ -62,7 +62,7 @@ class SavingController extends Controller
         );
 
         // Set default period
-        $period_placeholder = Carbon::now()->subDays(30)->format('Y/m/d') . '-' . Carbon::now()->addDays(2)->format('Y/m/d');
+        $period_placeholder = Carbon::now()->subDays(30)->format('Y/m/d').'-'.Carbon::now()->addDays(2)->format('Y/m/d');
 
         // Get period
         $period = $request->period == '0' ? [] : explode('-', urldecode($request->get('period', $period_placeholder)));
@@ -128,7 +128,7 @@ class SavingController extends Controller
 
         // Validate this request
         $this->validate($request, [
-            'days' => ['required', 'numeric', 'min:1', 'max:' . $subscription->days_left],
+            'days' => ['required', 'numeric', 'min:1', 'max:'.$subscription->days_left],
             'payment_method' => 'nullable|in:wallet,paystack',
         ], [
             'days.min' => 'You have to save for at least 1 day.',
@@ -144,7 +144,7 @@ class SavingController extends Controller
         $due = round(($subscription->plan->amount / $subscription->plan->duration) * $request->days, 2);
         $fees = round(($subscription->bag->fees / $subscription->plan->duration) * $request->days, 2);
         $amount = round($due + $fees, 2);
-        $reference = config('settings.trx_prefix', 'AGB-') . \Str::random(15);
+        $reference = config('settings.trx_prefix', 'AGB-').\Str::random(15);
 
         // Pay with wallet
         if ($method === 'wallet') {
@@ -175,7 +175,7 @@ class SavingController extends Controller
             } else {
                 return $this->responseBuilder([
                     'message' => __(':0 not have enough funds in :1 wallet', [
-                        $request->cooperative_id ? $handler->name . ' does' : 'You do',
+                        $request->cooperative_id ? $handler->name.' does' : 'You do',
                         $request->cooperative_id ? 'the cooperative' : 'your',
                     ]),
                     'status' => 'error',
@@ -268,7 +268,7 @@ class SavingController extends Controller
         $user = $request->user();
 
         $transaction = Transaction::where('reference', $reference)->where('status', 'pending')->first();
-        !$transaction && abort(404, 'We are unable to find this transaction.');
+        ! $transaction && abort(404, 'We are unable to find this transaction.');
 
         // Set the payment info
         $method = strtolower($transaction->method ?? 'wallet');
@@ -427,7 +427,7 @@ class SavingController extends Controller
                         $msg = 'You have completed the saving circle for this subscription, you would be notified when your food bag is ready for pickup or delivery.';
                     } else {
                         $subscription->status = 'active';
-                        $plantitle = $subscription->plan->title . (stripos($subscription->plan->title, 'plan') !== false ? '' : ' plan');
+                        $plantitle = $subscription->plan->title.(stripos($subscription->plan->title, 'plan') !== false ? '' : ' plan');
                         $msg = __(
                             'You have successfully made :days day(s) savings of :amount for the :plan, you now have only :left days left to save up.',
                             [
@@ -477,7 +477,7 @@ class SavingController extends Controller
     {
         $user = $request->user();
         $transaction = $user->transactions()->whereStatus('pending')->whereReference($reference)->first();
-        !$transaction && abort(404, 'We are unable to find this transaction.');
+        ! $transaction && abort(404, 'We are unable to find this transaction.');
 
         if ($transaction->transactable) {
             $transaction->transactable->delete();

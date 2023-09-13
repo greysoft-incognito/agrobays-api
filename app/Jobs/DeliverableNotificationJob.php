@@ -2,7 +2,9 @@
 
 namespace App\Jobs;
 
+use App\Models\DeliverableNotification;
 use App\Models\User;
+use App\Notifications\DeliverableNotification as NotificationsDeliverableNotification;
 use Illuminate\Bus\Queueable;
 // use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -10,23 +12,21 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class MassUpdateUsers implements ShouldQueue
+class DeliverableNotificationJob implements ShouldQueue
 {
     use Dispatchable;
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
 
-    public $data;
-
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($data)
-    {
-        $this->data = $data;
+    public function __construct(
+        public DeliverableNotification $deliverable
+    ) {
     }
 
     /**
@@ -36,8 +36,10 @@ class MassUpdateUsers implements ShouldQueue
      */
     public function handle()
     {
-        if (is_array($this->data) && count($this->data)) {
-            User::whereNotNull('id')->update($this->data);
-        }
+        $this->deliverable->recipients->each(function (User $user) {
+            $user->notify(new NotificationsDeliverableNotification(
+                $this->deliverable
+            ));
+        });
     }
 }

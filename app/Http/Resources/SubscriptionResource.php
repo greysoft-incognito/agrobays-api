@@ -62,7 +62,7 @@ class SubscriptionResource extends JsonResource
                 return new UserBasicDataResource($this->user);
             }),
             'transaction' => [
-                'reference' => str($this->plan->title)->camel() . '-' . $this->id . $this->plan_id,
+                'reference' => str($this->plan->title)->camel().'-'.$this->id.$this->plan_id,
                 'amount' => $this->saved_amount,
                 'fees' => $this->fees_paid,
                 'updated_at' => $this->updated_at,

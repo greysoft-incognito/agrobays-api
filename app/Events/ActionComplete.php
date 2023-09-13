@@ -36,7 +36,7 @@ class ActionComplete implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new PrivateChannel('actions.' . $this->user->id);
+        return new PrivateChannel('actions.'.$this->user->id);
     }
 
     public function broadcastAs()

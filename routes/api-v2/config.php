@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Resources\FoodBagCollection;
 use App\Http\Resources\FruitbayCategoryCollection;
 use App\Http\Resources\PlanCollection;
 use App\Models\FruitBayCategory;

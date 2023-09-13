@@ -9,10 +9,12 @@ class NotificationController extends Controller
 {
     public function index(Request $request, $type = 'unread')
     {
+        $user = $request->user();
+
         if ($type === 'unread') {
-            $list = \Auth::user()->unreadNotifications()->cursorPaginate(15);
+            $list = $user->unreadNotifications()->cursorPaginate(15);
         } else {
-            $list = \Auth::user()->notifications()->cursorPaginate(15);
+            $list = $user->notifications()->cursorPaginate(15);
         }
         $items = [];
         foreach ($list as $key => $item) {
@@ -46,6 +48,8 @@ class NotificationController extends Controller
 
     public function markAsRead(Request $request)
     {
+        $user = $request->user();
+
         $validator = Validator::make($request->all(), [
             'items' => 'required|array',
         ]);
@@ -59,7 +63,7 @@ class NotificationController extends Controller
             ]);
         }
         $items = $request->post('items');
-        $list = \Auth::user()->unreadNotifications()->whereIn('id', is_string($items) ? [$items] : $items);
+        $list = $user->unreadNotifications()->whereIn('id', is_string($items) ? [$items] : $items);
         $list->update(['read_at' => now()]);
 
         return (new Controller())->buildResponse([
@@ -67,7 +71,7 @@ class NotificationController extends Controller
             'status' => $list ? 'success' : 'info',
             'response_code' => 200,
             'data' => [
-                'unread' => \Auth::user()->unreadNotifications()->count(),
+                'unread' => $user->unreadNotifications()->count(),
             ],
         ]);
     }

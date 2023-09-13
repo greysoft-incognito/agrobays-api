@@ -36,7 +36,7 @@ class Wallet extends Model
 
         static::creating(function (Wallet $wallet) {
             if (! $wallet->reference) {
-                $reference = config('settings.trx_prefix', 'AGB-') . Str::random(12);
+                $reference = config('settings.trx_prefix', 'AGB-').Str::random(12);
                 $wallet->reference = $reference;
             }
         });
@@ -44,7 +44,7 @@ class Wallet extends Model
 
     public function topup($source, $amount, $detail = null): self
     {
-        $reference = config('settings.trx_prefix', 'TRX-') . Str::random(12);
+        $reference = config('settings.trx_prefix', 'TRX-').Str::random(12);
 
         return $this->create([
             'user_id' => $this->user_id,

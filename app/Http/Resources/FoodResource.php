@@ -24,7 +24,7 @@ class FoodResource extends JsonResource
             'weight' => $this->when(
                 $request->editing,
                 $this->weight,
-                ($this->weight ?? 0) . ($this->unit ?? 'kg')
+                ($this->weight ?? 0).($this->unit ?? 'kg')
             ),
             'quantity' => $this->pivot?->quantity ?? 0,
             'image' => $this->when($request->version < 1, $this->image_url),

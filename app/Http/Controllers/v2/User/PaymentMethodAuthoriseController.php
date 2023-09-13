@@ -30,13 +30,13 @@ class PaymentMethodAuthoriseController extends Controller
         $deauth = $request->boolean('deauthorize', false);
 
         try {
-            $reference = config('settings.trx_prefix', 'AGB-') . Str::random(15);
+            $reference = config('settings.trx_prefix', 'AGB-').Str::random(15);
             if ($deauth) {
                 // Remove the payment method
                 $userData['payment_method'] = [];
                 $msg = __('Your :0:1 has been deauthorized from processing automatic payments.', [
                     $user->data['payment_method']['channel'] ?? 'wallet',
-                    isset($user->data['payment_method']['last4']) ? ' ending in ' . $user->data['payment_method']['last4'] : '',
+                    isset($user->data['payment_method']['last4']) ? ' ending in '.$user->data['payment_method']['last4'] : '',
                 ]);
             } elseif ($request->get('method', $method) === 'wallet') {
                 // Authorize the wallet

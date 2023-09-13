@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\v2\Admin\AdminController;
+use App\Http\Controllers\v2\Admin\DeliverableNotificationController;
 use App\Http\Controllers\v2\Admin\DispatchController;
 use App\Http\Controllers\v2\Admin\FruitBayCategoryController;
 use App\Http\Controllers\v2\Admin\FruitBayController;
@@ -17,4 +18,6 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->name('admin.')->g
     // Orders Route
     Route::apiResource('orders', OrderController::class)->only(['index', 'show']);
     Route::apiResource('dispatched', DispatchController::class)->only(['index', 'show']);
+
+    Route::apiResource('deliverables', DeliverableNotificationController::class);
 });

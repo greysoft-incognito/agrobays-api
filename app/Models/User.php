@@ -123,19 +123,19 @@ class User extends Authenticatable implements MustVerifyEmail
                     ? str($user->email)->explode('@')->first()
                     : str($user->name ?? $user->firstname)->slug())->replace('.', '_')->toString();
 
-                $user->username = User::where('username', $u)->exists() ? $u . rand(100, 999) : $u;
+                $user->username = User::where('username', $u)->exists() ? $u.rand(100, 999) : $u;
             }
         });
 
-        static::deleting(function (User $org) {
-            $org->subscriptions()->delete();
-            $org->transactions()->delete();
-            $org->cooperatives()->delete();
-            $org->dispatches()->delete();
-            $org->feedbacks()->delete();
-            $org->savings()->delete();
-            $org->orders()->delete();
-            $org->wallet()->delete();
+        static::deleting(function (User $model) {
+            $model->subscriptions()->delete();
+            $model->transactions()->delete();
+            $model->cooperatives()->delete();
+            $model->dispatches()->delete();
+            $model->feedbacks()->delete();
+            $model->savings()->delete();
+            $model->orders()->delete();
+            $model->wallet()->delete();
         });
     }
 
@@ -166,7 +166,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function fullname(): Attribute
     {
         $name = isset($this->firstname) ? ucfirst($this->firstname) : '';
-        $name .= isset($this->lastname) ? ' ' . ucfirst($this->lastname) : '';
+        $name .= isset($this->lastname) ? ' '.ucfirst($this->lastname) : '';
         $name .= ! isset($this->lastname) && ! isset($this->firstname) && isset($this->username) ? ucfirst($this->username) : '';
 
         return new Attribute(
@@ -426,7 +426,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         // Sum wallet credit transactions and subtract wallet debit transactions
         return new Attribute(
-            get: fn () => (float)$this->wallet()
+            get: fn () => (float) $this->wallet()
                 ->selectRaw('sum(case when type = "credit" then amount else -amount end) as balance')
                 ->value('balance'),
         );

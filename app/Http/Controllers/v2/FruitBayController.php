@@ -81,7 +81,7 @@ class FruitBayController extends Controller
             'inline' => ['nullable', 'boolean'],
             'payment_method' => ['nullable', 'string', 'in:wallet,paystack'],
         ], [], [
-            'cart.*.item_id' => ';'
+            'cart.*.item_id' => ';',
         ]);
 
         $user = $request->user();
@@ -124,7 +124,7 @@ class FruitBayController extends Controller
                 $shipping_fees = $cart->sum('total_fees') + $globalSshippingFee;
                 $due = $cart->sum('total');
                 $amount = round($due + $shipping_fees, 2);
-                $reference = config('settings.trx_prefix', 'AGB-') . Str::random(15);
+                $reference = config('settings.trx_prefix', 'AGB-').Str::random(15);
 
                 try {
                     if ($method === 'wallet') {
@@ -141,7 +141,6 @@ class FruitBayController extends Controller
                                 'source' => 'Cart Checkout',
                                 'detail' => trans_choice('Payment for order of :0 items', $cart->count(), [$cart->count()]),
                             ]);
-
 
                             $transaction = $this->initialize(
                                 $user,
@@ -182,6 +181,7 @@ class FruitBayController extends Controller
                                     $cart,
                                     $request
                                 );
+
                                 return (new OrderResource($transaction->transactable))->additional([
                                     'message' => $msg ?? HttpStatus::message(HttpStatus::ACCEPTED),
                                     'status' => 'success',
@@ -238,7 +238,7 @@ class FruitBayController extends Controller
         $user = $request->user();
 
         $transaction = Transaction::where('reference', $reference)->where('status', 'pending')->first();
-        !$transaction && abort(404, 'We are unable to find this transaction.');
+        ! $transaction && abort(404, 'We are unable to find this transaction.');
 
         // Set the payment info
         $method = strtolower($transaction->method ?? 'wallet');
@@ -270,7 +270,7 @@ class FruitBayController extends Controller
             $paystack = new PaystackProcessor($request, $user);
 
             return $paystack->verify(
-                function ($reference, $tranx, $msg, $code) use ($request, $transaction) {
+                function ($reference, $tranx, $msg, $code) use ($transaction) {
                     $response = $this->verify($tranx, $transaction);
 
                     return (new OrderResource($response['data']))->additional([
@@ -397,7 +397,7 @@ class FruitBayController extends Controller
     {
         $user = $request->user();
         $transaction = $user->transactions()->whereStatus('pending')->whereReference($reference)->first();
-        !$transaction && abort(404, 'We are unable to find this transaction.');
+        ! $transaction && abort(404, 'We are unable to find this transaction.');
 
         if ($transaction->transactable) {
             $transaction->transactable->delete();

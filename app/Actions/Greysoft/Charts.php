@@ -136,7 +136,7 @@ class Charts
             $end = Carbon::now()->endOfWeek();
         }
 
-        return (float)(($for === 'user') ? Auth::user()->transactions() : Transaction::query())
+        return (float) (($for === 'user') ? Auth::user()->transactions() : Transaction::query())
             ->when($period !== 'all', function ($q) use ($start, $end) {
                 $q->whereBetween('created_at', [$start, $end]);
             })->sum('amount');
@@ -155,7 +155,7 @@ class Charts
             $end = Carbon::now()->endOfWeek();
         }
 
-        return (float)(($for === 'user') ? Auth::user()->orders() : Order::query())
+        return (float) (($for === 'user') ? Auth::user()->orders() : Order::query())
             ->when($period !== 'all', function ($q) use ($start, $end) {
                 $q->whereBetween('created_at', [$start, $end]);
             })->sum('amount');
@@ -174,7 +174,7 @@ class Charts
             $end = Carbon::now()->endOfWeek();
         }
 
-        return (float)(($for === 'user') ? Auth::user()->transactions() : Transaction::query())
+        return (float) (($for === 'user') ? Auth::user()->transactions() : Transaction::query())
             ->when($period !== 'all', function ($q) use ($start, $end) {
                 $q->whereBetween('created_at', [$start, $end]);
             })->sum('amount');
@@ -193,7 +193,7 @@ class Charts
             $end = Carbon::now()->endOfWeek();
         }
 
-        return (int)User::when($period !== 'all', function ($q) use ($start, $end) {
+        return (int) User::when($period !== 'all', function ($q) use ($start, $end) {
             $q->whereBetween('created_at', [$start, $end]);
         })->count('id');
     }
@@ -206,12 +206,12 @@ class Charts
      */
     public function getPie($for = 'user')
     {
-        $savings = (float)(($for === 'user') ? Auth::user()->savings() : Saving::query())
+        $savings = (float) (($for === 'user') ? Auth::user()->savings() : Saving::query())
         ->get()->map(function ($value, $key) {
             return $value->total ?? 0;
         })->sum();
 
-        $orders = (float)(($for === 'user') ? Auth::user()->orders() : Order::query())
+        $orders = (float) (($for === 'user') ? Auth::user()->orders() : Order::query())
         ->get()->map(function ($value, $key) {
             return $value->amount;
         })->sum();

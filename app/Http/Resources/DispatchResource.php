@@ -42,7 +42,7 @@ class DispatchResource extends JsonResource
                         : ($this->dispatchable instanceof Subscription
                             ? new OrderResource($this->dispatchable)
                             : $this->dispatchable
-                     ),
+                        ),
                     'user' => new UserSlimResource($this->dispatchable->user),
                     'handler' => new UserSlimResource($this->user),
                 ];

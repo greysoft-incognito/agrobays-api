@@ -39,7 +39,7 @@ class TransactionsController extends Controller
         );
 
         // Set default period
-        $period_placeholder = Carbon::now()->subDays(30)->format('Y/m/d') . '-' . Carbon::now()->addDay()->format('Y/m/d');
+        $period_placeholder = Carbon::now()->subDays(30)->format('Y/m/d').'-'.Carbon::now()->addDay()->format('Y/m/d');
 
         // Get period
         $period = $request->period == '0' ? [] : explode('-', urldecode($request->get('period', $period_placeholder)));

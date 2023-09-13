@@ -38,7 +38,7 @@ return [
     'withdraw_to' => 'wallet',
     'frontend_link' => 'http://localhost:8080',
     'payment_verify_url' => env('PAYMENT_VERIFY_URL', 'http://localhost:8080/payment/verify'),
-    'default_banner' => env('ASSETS_URL', 'http://localhost:8080') . '/media/default_banner.png',
+    'default_banner' => env('ASSETS_URL', 'http://localhost:8080').'/media/default_banner.png',
     'paystack_public_key' => env('PAYSTACK_PUBLIC_KEY', 'pk_'),
     'ipinfo_access_token' => env('IPINFO_ACCESS_TOKEN', 'a349_'),
     'trx_prefix' => 'AGB-',

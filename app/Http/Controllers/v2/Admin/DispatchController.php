@@ -26,12 +26,12 @@ class DispatchController extends Controller
     {
         $status = $request->get('status', 'pending');
 
-        \Gate::authorize('usable', 'dispatch.' . $status);
+        \Gate::authorize('usable', 'dispatch.'.$status);
 
         $query = Dispatch::orderBy('id', 'DESC');
 
         // Set default period
-        $period_placeholder = Carbon::now()->subDays(30)->format('Y/m/d') . '-' . Carbon::now()->addDays(2)->format('Y/m/d');
+        $period_placeholder = Carbon::now()->subDays(30)->format('Y/m/d').'-'.Carbon::now()->addDays(2)->format('Y/m/d');
 
         // Get period
         $period = $request->period == '0' ? [] : explode('-', urldecode($request->get('period', $period_placeholder)));
@@ -44,7 +44,7 @@ class DispatchController extends Controller
         // Set the dispatch Status
         if (in_array($status, ['pending', 'confirmed', 'dispatched', 'delivered'])) {
             $query->whereStatus($status);
-        };
+        }
 
         // Search For an dispatched order
         $query->when($request->search, function ($query) use ($request) {
@@ -109,7 +109,7 @@ class DispatchController extends Controller
         } elseif ($item->type === 'foodbag') {
             $item->load('dispatchable.bag', 'dispatchable.user');
         }
-        $item && \Gate::authorize('usable', 'dispatch.' . $item->status);
+        $item && \Gate::authorize('usable', 'dispatch.'.$item->status);
 
         return $this->buildResponse([
             'message' => ! $item ? 'The requested item no longer exists' : 'OK',

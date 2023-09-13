@@ -26,7 +26,7 @@ class OrderController extends Controller
         $query = $user->orders()->orderBy('id', 'DESC');
 
         // Set default period
-        $period_placeholder = Carbon::now()->subDays(30)->format('Y/m/d') . '-' . Carbon::now()->addDays(2)->format('Y/m/d');
+        $period_placeholder = Carbon::now()->subDays(30)->format('Y/m/d').'-'.Carbon::now()->addDays(2)->format('Y/m/d');
 
         // Get period
         $period = $request->period == '0' ? [] : explode('-', urldecode($request->get('period', $period_placeholder)));
@@ -59,7 +59,7 @@ class OrderController extends Controller
         $user = $request->user();
         $order = $user->orders()->find($id);
 
-        !$order && abort(HttpStatus::NOT_FOUND, 'The order you requested no longer exists.');
+        ! $order && abort(HttpStatus::NOT_FOUND, 'The order you requested no longer exists.');
 
         return (new OrderResource($order))->additional([
             'status' => 'success',

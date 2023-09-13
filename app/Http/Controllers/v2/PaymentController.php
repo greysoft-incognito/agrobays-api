@@ -37,9 +37,9 @@ class PaymentController extends Controller
         //     request()->header('HTTP_X_PAYSTACK_SIGNATURE') === hash_hmac('sha512', $event->raw, $my_keys['live'])
         // );
 
-        if (!$owner) {
+        if (! $owner) {
             // None of the keys matched the event's signature
-            die();
+            exit();
         }
 
         if ($event->obj->event === 'charge.success' && 'success' === $event->obj->data->status) {
@@ -59,10 +59,10 @@ class PaymentController extends Controller
 
                     if ($canPayRef && $transactable->user->referrer && $countUserOrders < 1) {
                         $transactable->user->referrer->wallet()->create([
-                        'amount' => config('settings.referral_bonus', 1),
-                        'type' => 'credit',
-                        'source' => 'Referral Bonus',
-                        'detail' => __('Referral bonus for :0\'s first order.', [$transactable->user->fullname]),
+                            'amount' => config('settings.referral_bonus', 1),
+                            'type' => 'credit',
+                            'source' => 'Referral Bonus',
+                            'detail' => __('Referral bonus for :0\'s first order.', [$transactable->user->fullname]),
                         ]);
                     }
 
@@ -81,10 +81,10 @@ class PaymentController extends Controller
 
                         if ($canPayRef && $transactable->user->referrer && $transactable->days < 1) {
                             $transactable->user->referrer->wallet()->create([
-                            'amount' => config('settings.referral_bonus', 1),
-                            'type' => 'credit',
-                            'source' => 'Referral Bonus',
-                            'detail' => __('Referral bonus for :0\'s first saving.', [$transactable->user->fullname]),
+                                'amount' => config('settings.referral_bonus', 1),
+                                'type' => 'credit',
+                                'source' => 'Referral Bonus',
+                                'detail' => __('Referral bonus for :0\'s first saving.', [$transactable->user->fullname]),
                             ]);
                         }
 
@@ -119,8 +119,8 @@ class PaymentController extends Controller
         //false is bool value to check whether the method works or not
         $hash_it = hash_hmac('sha512', $data, $secret, false);
 
-        if (!$hash_it) { //checks true or false
-            echo "Data was not encrypted!";
+        if (! $hash_it) { //checks true or false
+            echo 'Data was not encrypted!';
         }
         echo "Your encrypted signature is:<b> \"$hash_it\" </b>";
     }

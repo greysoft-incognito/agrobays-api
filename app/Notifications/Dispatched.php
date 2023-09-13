@@ -94,8 +94,9 @@ class Dispatched extends Notification
             ],
         ];
 
-        return (new MailMessage)->view(
-            ['email', 'email-plain'], $message[$type] ?? $message['order']
+        return (new MailMessage())->view(
+            ['email', 'email-plain'],
+            $message[$type] ?? $message['order']
         )
         ->subject(__($type === 'order' ? "Order {$status} - :0" : "Food Bag {$status} - :0", [config('settings.site_name')]));
     }

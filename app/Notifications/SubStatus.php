@@ -24,7 +24,7 @@ class SubStatus extends Notification //implements ShouldQueue
         $this->action = [
             'closed' => 'has been closed and your savings have been sent to your provided bank account details.',
             'withdraw' => 'has been changed to withdrawn.',
-        ][$status] ?? 'has been changed to '.str($status)->replace('_', ' ');
+        ][$status] ?? 'has been changed to ' . str($status)->replace('_', ' ');
     }
 
     /**
@@ -58,12 +58,13 @@ class SubStatus extends Notification //implements ShouldQueue
     {
         $message = [
             'name' => $notifiable->firstname,
-            'message_line1' => __("Your subscription for {$this->item->plan->title} ".$this->action),
-            'close_greeting' => 'Regards, <br/>'.config('settings.site_name'),
+            'message_line1' => __("Your subscription for {$this->item->plan->title} " . $this->action),
+            'close_greeting' => 'Regards, <br/>' . config('settings.site_name'),
         ];
 
-        return (new MailMessage)->view(
-            ['email', 'email-plain'], $message
+        return (new MailMessage())->view(
+            ['email', 'email-plain'],
+            $message
         )
         ->subject(__(':0 Subscription Updated', [config('settings.site_name')]));
     }
@@ -76,9 +77,9 @@ class SubStatus extends Notification //implements ShouldQueue
      */
     public function toTwilio($n)
     {
-        $message = __("Your :0 subscription for {$this->item->plan->title} ".$this->action, [config('settings.site_name')]);
+        $message = __("Your :0 subscription for {$this->item->plan->title} " . $this->action, [config('settings.site_name')]);
 
-        $message = __('Hi :0, ', [$n->firstname]).$message;
+        $message = __('Hi :0, ', [$n->firstname]) . $message;
 
         return (new TwilioSmsMessage())
             ->content($message);
@@ -97,7 +98,7 @@ class SubStatus extends Notification //implements ShouldQueue
         return [
             'type' => 'Subscription',
             'title' => 'Subscription Updated',
-            'message' => __("Your subscription for {$this->item->plan->title} ".$this->action),
+            'message' => __("Your subscription for {$this->item->plan->title} " . $this->action),
         ];
     }
 }

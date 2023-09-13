@@ -22,7 +22,7 @@ class DispatchController extends Controller
      */
     public function index(Request $request, $limit = '15', $status = 'pending')
     {
-        \Gate::authorize('usable', 'dispatch.' . $status);
+        \Gate::authorize('usable', 'dispatch.'.$status);
         $query = Dispatch::query()->with(['dispatchable', 'user']);
 
         if (Auth::user()->role === 'dispatch') {
@@ -84,7 +84,7 @@ class DispatchController extends Controller
         } elseif ($item->type === 'foodbag') {
             $item->load('dispatchable.bag', 'dispatchable.user');
         }
-        $item && \Gate::authorize('usable', 'dispatch.' . $item->status);
+        $item && \Gate::authorize('usable', 'dispatch.'.$item->status);
 
         return $this->buildResponse([
             'message' => ! $item ? 'The requested item no longer exists' : 'OK',
@@ -111,7 +111,7 @@ class DispatchController extends Controller
         }
 
         $item = $query->find($request->id);
-        $item && \Gate::authorize('usable', 'dispatch.' . $item->status);
+        $item && \Gate::authorize('usable', 'dispatch.'.$item->status);
         if (! $item) {
             return $this->buildResponse([
                 'message' => 'The requested item no longer exists',
@@ -256,7 +256,7 @@ class DispatchController extends Controller
         if ($request->items) {
             $count = collect($request->items)->map(function ($id) use ($query) {
                 $item = $query->whereId($id)->first();
-                $item && \Gate::authorize('usable', 'dispatch.' . $item->status);
+                $item && \Gate::authorize('usable', 'dispatch.'.$item->status);
                 if ($item) {
                     return $item->delete();
                 }

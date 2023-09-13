@@ -25,7 +25,7 @@ class OrderController extends Controller
         $query = Order::query()->orderBy('id', 'DESC');
 
         // Set default period
-        $period_placeholder = Carbon::now()->subDays(30)->format('Y/m/d') . '-' . Carbon::now()->addDays(2)->format('Y/m/d');
+        $period_placeholder = Carbon::now()->subDays(30)->format('Y/m/d').'-'.Carbon::now()->addDays(2)->format('Y/m/d');
 
         // Get period
         $period = $request->period == '0' ? [] : explode('-', urldecode($request->get('period', $period_placeholder)));
@@ -56,6 +56,7 @@ class OrderController extends Controller
     public function show(Order $order)
     {
         \Gate::authorize('usable', 'orders');
+
         return (new OrderResource($order))->additional([
             'status' => 'success',
             'response_code' => HttpStatus::OK,
