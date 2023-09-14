@@ -196,6 +196,7 @@ class DeliverableNotificationController extends Controller
                 'message' => "{$count} deliverables have been deleted.",
                 'status' => 'success',
                 'response_code' => HttpStatus::OK,
+                'data' => ['items' => $request->items]
             ]);
         } else {
             $item = DeliverableNotification::whereId($id)->firstOrFail();
@@ -206,6 +207,7 @@ class DeliverableNotificationController extends Controller
                 'message' => "{$item->subject} has been deleted.",
                 'status' => 'success',
                 'response_code' => HttpStatus::OK,
+                'data' => ['items' => $id]
             ]);
         }
     }
