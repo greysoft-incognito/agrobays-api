@@ -15,6 +15,7 @@ class DeliverableNotificationResource extends JsonResource
     public function toArray($request)
     {
         $with = is_array($request->with) ? $request->with : explode(',', $request->with);
+        $count_recipients = $this->recipient_ids?->count() ?? 0;
 
         return [
             'id' => $this->id,
@@ -23,8 +24,11 @@ class DeliverableNotificationResource extends JsonResource
             'count_sent' => $this->count_sent,
             'count_failed' => $this->count_failed,
             'count_pending' => $this->count_pending,
+            'count_recipients' => $count_recipients,
             'subject' => $this->subject,
             'message' => $this->message,
+            'message_clean' => strip_tags($this->message),
+            'recipient_ids' => $this->recipient_ids,
             'user' => $this->when(in_array('user', $with), fn () => new UserBasicDataResource($this->user)),
             'recipients' => $this->when(in_array('recipients', $with), fn () => new UserBasicDataCollection($this->recipients)),
         ];

@@ -9,6 +9,7 @@ use App\Http\Resources\DeliverableNotificationResource;
 use App\Jobs\DeliverableNotificationJob;
 use App\Models\DeliverableNotification;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class DeliverableNotificationController extends Controller
 {
@@ -41,7 +42,13 @@ class DeliverableNotificationController extends Controller
     {
         $request->validate([
             'subject' => ['required', 'string', 'min:15', 'max:155'],
-            'message' => ['required', 'string', 'min:15'],
+            'message' => [
+                'required',
+                'string',
+                fn($a, $v, $f) => str($v)->stripTags()->length() < 15
+                    ? $f('Message must have at least 15 characters.')
+                    : ''
+            ],
             'type' => ['required', 'string', 'in:mail,inapp,broadcast'],
             'draft' => ['nullable', 'boolean'],
             'recipient_ids' => ['required'],
@@ -118,6 +125,7 @@ class DeliverableNotificationController extends Controller
             'message' => ['required', 'string', 'min:15'],
             'type' => ['required', 'string', 'in:mail,inapp,broadcast'],
             'draft' => ['nullable', 'boolean'],
+            'resend' => ['nullable', 'boolean'],
             'recipient_ids' => ['required_if:draft,0'],
         ]);
 
@@ -145,7 +153,10 @@ class DeliverableNotificationController extends Controller
 
         $deliverable->save();
 
-        DeliverableNotificationJob::dispatchIf(! $deliverable->draft && ! $deliverable->sent, $deliverable);
+        DeliverableNotificationJob::dispatchIf(
+            ! $deliverable->draft && ($deliverable->count_sent < 1 || $request->resend),
+            $deliverable
+        );
 
         $type_label = [
             'mail' => 'mail',

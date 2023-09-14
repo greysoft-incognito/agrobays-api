@@ -72,6 +72,20 @@ class DeliverableNotification extends Model
      *
      * @return \Illuminate\Database\Eloquent\Casts\Attribute
      */
+    public function countPending(): Attribute
+    {
+        $ridsc = $this->recipient_ids?->count() ?? 0;
+        $pending = abs($ridsc - $this->count_sent - $this->count_failed);
+        return Attribute::make(
+            get: fn () => $pending > $ridsc ? 0 : $pending
+        );
+    }
+
+    /**
+     * Get all the recipient models
+     *
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
+     */
     public function recipients(): Attribute
     {
         return Attribute::make(
