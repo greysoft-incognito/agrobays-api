@@ -14,6 +14,8 @@ class FoodResource extends JsonResource
      */
     public function toArray($request)
     {
+        $isAdmin = str($request->fullUrl())->contains('admin');
+
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -24,12 +26,10 @@ class FoodResource extends JsonResource
             'weight' => $this->when(
                 $request->editing,
                 $this->weight,
-                ($this->weight ?? 0).($this->unit ?? 'kg')
+                ($this->weight ?? 0) . ($this->unit ?? 'kg')
             ),
             'quantity' => $this->pivot?->quantity ?? 0,
-            'image' => $this->when($request->version < 1, $this->image_url),
-            'image' => $this->image_url,
-            // Remove this ^
+            'image' => $this->when($request->version < 1 || !$isAdmin, $this->image_url),
             'image_url' => $this->image_url,
             'responsive_images' => $this->responsive_images['image'] ?? new \stdClass(),
             'foodbags' => new FoodBagCollection($this->whenLoaded('foodbags')),
