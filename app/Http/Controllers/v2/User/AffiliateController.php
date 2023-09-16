@@ -19,12 +19,13 @@ class AffiliateController extends Controller
      */
     public function index(Request $request)
     {
-        $query = $request->user()->affiliates();
+        $user = $request->user();
+        $query = $user->affiliates();
 
         $affiliates = $query->paginate($request->get('limit', 15));
 
         return (new UserBasicDataCollection($affiliates))->additional([
-            'referrer' => new UserBasicDataResource($request->user()->referrer),
+            'referrer' => $user->referrer ? new UserBasicDataResource($request->user()->referrer) : null,
             'message' => HttpStatus::message(HttpStatus::OK),
             'status' => 'success',
             'response_code' => HttpStatus::OK,

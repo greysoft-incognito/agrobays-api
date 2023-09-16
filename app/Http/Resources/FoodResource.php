@@ -14,6 +14,8 @@ class FoodResource extends JsonResource
      */
     public function toArray($request)
     {
+        // Remove this line and the functionality it supports
+        // (Added for backwards compatibility | food.image in app should be replaced by food.image_url)
         $isAdmin = str($request->fullUrl())->contains('admin');
 
         return [
