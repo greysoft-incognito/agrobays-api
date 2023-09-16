@@ -18,7 +18,9 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('account')->name('account.')->middleware(['auth:sanctum'])
 ->group(function () {
     // Account Routes
-    Route::apiResource('/', AccountController::class)->only(['index', 'update', 'store'])->parameter('', 'user');
+    Route::apiResource('/', AccountController::class)
+        ->only(['index', 'update', 'store', 'destroy'])
+        ->parameter('', 'user');
     Route::get('ping', [AccountController::class, 'ping'])->name('ping');
     Route::get('dashboard', [AccountController::class, 'dashboard'])->name('dashboard');
 

@@ -6,6 +6,7 @@ use App\Actions\Greysoft\Charts;
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -85,7 +86,7 @@ class AccountController extends Controller
                 $vals .= '|min:8|confirmed';
             }
             if (is_array($filled[$field])) {
-                return [$field.'.*' => 'required'];
+                return [$field . '.*' => 'required'];
             }
 
             return [$field => "required|$vals"];
@@ -195,6 +196,44 @@ class AccountController extends Controller
                 'bar' => (new Charts())->getBar('user'),
                 'transactions' => (new Charts())->totalTransactions('user', 'all'),
             ],
+        ]);
+    }
+
+    /**
+     * Destroy an authenticated session.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Request $request)
+    {
+        $this->validate($request, [
+            'reason' => ['required', 'string', 'min:15'],
+        ], [
+            'reason.required' => 'We would really love to know why you are leaving.'
+        ]);
+
+        if (
+            $request->user()->cooperatives()->whereHas('subscriptions', function ($q) {
+                $q->whereStatus('active');
+                $q->orWhereHas('dispatch', function ($q) {
+                    $q->whereNot('status', 'delivered');
+                });
+            })->exists() || $request->user()->role !== 'user'
+        ) {
+            return $this->responseBuilder([
+                'message' => 'Your account cannot be deleted at the moment, please contact support.',
+                'status' => 'error',
+                'response_code' => HttpStatus::UNPROCESSABLE_ENTITY,
+            ]);
+        }
+
+        User::whereId($request->user()->id)->delete();
+
+        return $this->responseBuilder([
+            'message' => 'Your account has now been deleted successfully.',
+            'status' => 'success',
+            'response_code' => HttpStatus::ACCEPTED,
         ]);
     }
 }

@@ -56,7 +56,6 @@ class Handler extends ExceptionHandler
     {
         $this->request = $request;
 
-        return parent::render($request, $e);
         if (config('app.testing', false) === false) {
             if ($request->isXmlHttpRequest() || request()->is('api/*')) {
                 $line = method_exists($e, 'getFile') ? ' in ' . $e->getFile() : '';
