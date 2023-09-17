@@ -24,7 +24,7 @@ class DeliverableNotificationSent
      */
     public function handle(NotificationSending $event)
     {
-        if ($event->notification->deliverable) {
+        if (isset($event->notification->deliverable)) {
             $event->notification->deliverable->count_sent++;
             $event->notification->deliverable->saveQuietly();
         }

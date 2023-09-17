@@ -12,6 +12,9 @@ class SubStatus extends Notification //implements ShouldQueue
 {
     use Queueable;
 
+    public $item;
+    public $action;
+
     /**
      * Create a new notification instance.
      *

@@ -27,7 +27,7 @@ class BroadcastNotification
         // $event->channel
         // $event->notifiable
         // $event->notification
-        if ($event->channel == 'database' && ! $event->notification->deliverable) {
+        if ($event->channel == 'database' && ! isset($event->notification->deliverable)) {
             $data = $event->notification->toArray(true);
             $notification = [
                 'id' => $event->notification->id ?? null,

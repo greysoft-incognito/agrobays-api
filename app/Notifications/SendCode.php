@@ -13,6 +13,9 @@ class SendCode extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    public $type;
+    public $token;
+
     /**
      * Create a new notification instance.
      *
@@ -99,7 +102,7 @@ class SendCode extends Notification implements ShouldQueue
         ];
 
         if (isset($message[$this->type])) {
-            $message = __('Hi :0, ', [$n->firstname]).$message[$this->type];
+            $message = __('Hi :0, ', [$n->firstname]) . $message[$this->type];
 
             return (new TwilioSmsMessage())
                 ->content($message);

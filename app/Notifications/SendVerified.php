@@ -12,6 +12,8 @@ class SendVerified extends Notification //implements ShouldQueue
 {
     use Queueable;
 
+    public $type;
+
     /**
      * Create a new notification instance.
      *
@@ -44,14 +46,15 @@ class SendVerified extends Notification //implements ShouldQueue
     {
         $message = [
             'name' => $notifiable->firstname,
-            'message_line1' => 'You are receiving this email because you just verified your at account '.config('settings.site_name').' and we want to use this medium to welcome you into our community',
-            'close_greeting' => 'Regards, <br/>'.config('settings.site_name'),
+            'message_line1' => 'You are receiving this email because you just verified your at account ' . config('settings.site_name') . ' and we want to use this medium to welcome you into our community',
+            'close_greeting' => 'Regards, <br/>' . config('settings.site_name'),
         ];
 
-        return (new MailMessage)->view(
-            ['email', 'email-plain'], $message
+        return (new MailMessage())->view(
+            ['email', 'email-plain'],
+            $message
         )
-        ->subject('Welcome to the '.config('settings.site_name').' community.');
+        ->subject('Welcome to the ' . config('settings.site_name') . ' community.');
     }
 
     /**
@@ -64,7 +67,7 @@ class SendVerified extends Notification //implements ShouldQueue
     {
         $message = __('Your :0 account has been verified successfully, welcome to our community.', [config('settings.site_name')]);
 
-        $message = __('Hi :0, ', [$n->firstname]).$message;
+        $message = __('Hi :0, ', [$n->firstname]) . $message;
 
         return (new TwilioSmsMessage())
             ->content($message);
