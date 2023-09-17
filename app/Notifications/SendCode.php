@@ -108,15 +108,4 @@ class SendCode extends Notification implements ShouldQueue
                 ->content($message);
         }
     }
-
-    /**
-     * Get the database representation of the notification.
-     *
-     * @param  mixed  $n    notifiable
-     * @return array
-     */
-    public function toArray($n)
-    {
-        return [];
-    }
 }
