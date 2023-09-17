@@ -26,7 +26,7 @@ return [
     'slack_logger' => false,
     'verify_email' => false,
     'verify_phone' => false,
-    'token_lifespan' => 1,
+    'token_lifespan' => 30,
     'shipping_fee' => 5000,
     'paid_shipping' => false,
     'feedback_system' => true,
