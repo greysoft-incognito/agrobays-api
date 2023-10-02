@@ -17,6 +17,13 @@ use Illuminate\Support\Str;
 
 class FruitBayController extends Controller
 {
+    public function __construct(Request $request)
+    {
+        if (!str($request->route()->getAction('uses'))->afterLast('@')->contains(['index', 'show'])) {
+            $this->middleware('auth:sanctum');
+        }
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -84,7 +91,9 @@ class FruitBayController extends Controller
             'cart.*.item_id' => ';',
         ]);
 
+        /** @var \App\Models\User */
         $user = $request->user();
+
         $items = collect($request->cart)->map(fn ($k) => collect($k)->except('qty'))->flatten()->all();
         $method = $request->get('payment_method', 'paystack');
         $cartItems = FruitBay::whereIn('id', $items)->get();
@@ -124,17 +133,17 @@ class FruitBayController extends Controller
                 $shipping_fees = $cart->sum('total_fees') + $globalSshippingFee;
                 $due = $cart->sum('total');
                 $amount = round($due + $shipping_fees, 2);
-                $reference = config('settings.trx_prefix', 'AGB-').Str::random(15);
+                $reference = config('settings.trx_prefix', 'AGB-') . Str::random(15);
 
                 try {
                     if ($method === 'wallet') {
-                        if ($request->user()->wallet_balance >= $amount) {
+                        if ($user->wallet_balance >= $amount) {
                             $tranx = [
                                 'reference' => $reference,
                                 'method' => 'wallet',
                             ];
 
-                            $transaction = $request->user()->wallet()->create([
+                            $transaction = $user->wallet()->create([
                                 'reference' => $reference,
                                 'amount' => $amount,
                                 'type' => 'debit',
@@ -395,7 +404,9 @@ class FruitBayController extends Controller
      */
     public function destroy(Request $request, $reference)
     {
+        /** @var \App\Models\User */
         $user = $request->user();
+
         $transaction = $user->transactions()->whereStatus('pending')->whereReference($reference)->first();
         ! $transaction && abort(404, 'We are unable to find this transaction.');
 

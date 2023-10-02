@@ -20,7 +20,7 @@ return new class extends Migration
                 $table->text('description')->fulltext()->change();
             }
             if (! Schema::hasColumn('fruit_bays', 'weight')) {
-                $table->integer('weight')->default(1)->after('fees');
+                $table->float('protein')->nullable()->default(0.1)->after('fees');
             }
             if (! Schema::hasColumn('fruit_bays', 'unit')) {
                 $table->string('unit')->default('kg')->after('weight');

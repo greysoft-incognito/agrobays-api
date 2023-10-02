@@ -26,10 +26,10 @@ if (file_exists(base_path('routes/api'))) {
     });
 }
 
-Route::middleware(['auth:sanctum'])
-    ->group(function () {
-        // Plans Route
-        Route::apiResource('fruitbay/categories', FruitBayCategoryController::class)->only(['index', 'show']);
-        Route::apiResource('fruitbay', FruitBayController::class);
-        Route::apiResource('plans', PlanController::class)->only(['index', 'show', 'store']);
-    });
+Route::apiResource('fruitbay/categories', FruitBayCategoryController::class)->only(['index', 'show']);
+Route::apiResource('fruitbay', FruitBayController::class);
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    // Plans Route
+    Route::apiResource('plans', PlanController::class)->only(['index', 'show', 'store']);
+});
