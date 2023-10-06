@@ -137,6 +137,7 @@ class Charts
         }
 
         return (float) (($for === 'user') ? Auth::user()->transactions() : Transaction::query())
+            ->where('status', 'complete')
             ->when($period !== 'all', function ($q) use ($start, $end) {
                 $q->whereBetween('created_at', [$start, $end]);
             })->sum('amount');
@@ -175,6 +176,7 @@ class Charts
         }
 
         return (float) (($for === 'user') ? Auth::user()->transactions() : Transaction::query())
+            ->where('status', 'complete')
             ->when($period !== 'all', function ($q) use ($start, $end) {
                 $q->whereBetween('created_at', [$start, $end]);
             })->sum('amount');
@@ -249,6 +251,7 @@ class Charts
                 $end = Carbon::now()->month($get)->endOfMonth();
 
                 return (($for === 'user') ? Auth::user()->transactions() : Transaction::query())
+                    ->where('status', 'complete')
                     ->whereBetween('created_at', [$start, $end])->sum('amount');
             })->toArray(),
             'subscriptions' => collect(range(1, 12))->map(function ($get) use ($for) {
