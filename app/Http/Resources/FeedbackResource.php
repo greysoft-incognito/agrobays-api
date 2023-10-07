@@ -45,6 +45,6 @@ class FeedbackResource extends JsonResource
 
     public function with($request)
     {
-        \App\Services\AppInfo::api();
+        return \App\Services\AppInfo::api();
     }
 }

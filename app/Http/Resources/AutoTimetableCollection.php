@@ -19,6 +19,6 @@ class AutoTimetableCollection extends ResourceCollection
 
     public function with($request)
     {
-        \App\Services\AppInfo::api();
+        return \App\Services\AppInfo::api();
     }
 }
