@@ -61,6 +61,6 @@ class UserResource extends JsonResource
 
     public function with($request)
     {
-        [\App\Services\AppInfo::api()];
+        [];
     }
 }
