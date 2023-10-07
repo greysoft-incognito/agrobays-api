@@ -5,8 +5,9 @@ namespace App\Http\Controllers\v2;
 use App\Http\Controllers\Controller;
 use App\Models\Saving;
 use App\Models\Transaction;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+
+// use Illuminate\Http\Request;
+// use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
@@ -46,7 +47,7 @@ class PaymentController extends Controller
             $reference = $event->obj->data->reference;
             $transaction = Transaction::whereReference($reference)->first();
 
-            if ($transaction) {
+            if ($transaction?->status === 'pending') {
                 $transactable = $transaction->transactable;
 
                 // Process orders
@@ -103,10 +104,12 @@ class PaymentController extends Controller
                     }
                 }
 
-                // Set the transaction status
-                $transaction->status = 'complete';
-
+                // Save the transactable
                 $transactable->save();
+
+                // Set the transaction status, webhook data and save
+                $transaction->webhook = $event->obj;
+                $transaction->status = 'complete';
                 $transaction->save();
             }
         }

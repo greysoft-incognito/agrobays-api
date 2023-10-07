@@ -246,7 +246,10 @@ class FruitBayController extends Controller
         /** @var \App\Models\User */
         $user = $request->user();
 
-        $transaction = Transaction::where('reference', $reference)->where('status', 'pending')->first();
+        $transaction = Transaction::where('reference', $reference)->where(function ($q) {
+            $q->where('status', 'pending');
+            $q->orWhere('webhook->data->status', 'success');
+        })->first();
         ! $transaction && abort(404, 'We are unable to find this transaction.');
 
         // Set the payment info
@@ -362,7 +365,8 @@ class FruitBayController extends Controller
                 $msg = 'Your order has been placed successfully, you will be notified whenever it is ready for pickup or delivery.';
 
                 $canPayRef = in_array(config('settings.referral_mode', 2), [1, 3]) &&
-                    config('settings.referral_system', false);
+                    config('settings.referral_system', false) &&
+                    !isset($transaction?->webhook['data']['status']);
 
                 $countUserOrders = $order->user->orders()->paymentStatus('complete')->count();
 
@@ -379,9 +383,12 @@ class FruitBayController extends Controller
                 $order->status = 'rejected';
                 $transaction->status = 'rejected';
             }
+
+            if (!isset($transaction?->webhook['data']['status'])) {
+                $order->save();
+                $transaction->save();
+            }
             $code = HttpStatus::ACCEPTED;
-            $order->save();
-            $transaction->save();
             $status = 'success';
         }
 

@@ -62,7 +62,7 @@ class SavingController extends Controller
         );
 
         // Set default period
-        $period_placeholder = Carbon::now()->subDays(30)->format('Y/m/d').'-'.Carbon::now()->addDays(2)->format('Y/m/d');
+        $period_placeholder = Carbon::now()->subDays(30)->format('Y/m/d') . '-' . Carbon::now()->addDays(2)->format('Y/m/d');
 
         // Get period
         $period = $request->period == '0' ? [] : explode('-', urldecode($request->get('period', $period_placeholder)));
@@ -128,7 +128,7 @@ class SavingController extends Controller
 
         // Validate this request
         $this->validate($request, [
-            'days' => ['required', 'numeric', 'min:1', 'max:'.$subscription->days_left],
+            'days' => ['required', 'numeric', 'min:1', 'max:' . $subscription->days_left],
             'payment_method' => 'nullable|in:wallet,paystack',
         ], [
             'days.min' => 'You have to save for at least 1 day.',
@@ -144,7 +144,7 @@ class SavingController extends Controller
         $due = round(($subscription->plan->amount / $subscription->plan->duration) * $request->days, 2);
         $fees = round(($subscription->bag->fees / $subscription->plan->duration) * $request->days, 2);
         $amount = round($due + $fees, 2);
-        $reference = config('settings.trx_prefix', 'AGB-').\Str::random(15);
+        $reference = config('settings.trx_prefix', 'AGB-') . \Str::random(15);
 
         // Pay with wallet
         if ($method === 'wallet') {
@@ -175,7 +175,7 @@ class SavingController extends Controller
             } else {
                 return $this->responseBuilder([
                     'message' => __(':0 not have enough funds in :1 wallet', [
-                        $request->cooperative_id ? $handler->name.' does' : 'You do',
+                        $request->cooperative_id ? $handler->name . ' does' : 'You do',
                         $request->cooperative_id ? 'the cooperative' : 'your',
                     ]),
                     'status' => 'error',
@@ -266,9 +266,11 @@ class SavingController extends Controller
 
         /** @var \App\Models\User */
         $user = $request->user();
-
-        $transaction = Transaction::where('reference', $reference)->where('status', 'pending')->first();
-        ! $transaction && abort(404, 'We are unable to find this transaction.');
+        $transaction = Transaction::where('reference', $reference)->where(function ($q) {
+            $q->where('status', 'pending');
+            $q->orWhere('webhook->data->status', 'success');
+        })->first();
+        ! $transaction && abort(404, 'We are unable to find this transaction, it may have already been verfied.');
 
         // Set the payment info
         $method = strtolower($transaction->method ?? 'wallet');
@@ -387,12 +389,20 @@ class SavingController extends Controller
             $saving = $transaction->transactable;
 
             // $saving = Saving::where('payment_ref', $request->reference)->where('status', 'pending')->first();
-            if ($saving && $saving->status === 'pending') {
+
+            if (
+                $saving &&
+                $saving->status === 'pending' ||
+                (
+                    isset($transaction?->webhook['data']['status']) &&
+                    $transaction?->webhook['data']['status'] === 'success'
+                )
+            ) {
                 if ($request->cooperative_id) {
                     /** @var \App\Models\Subscription */
                     $subscription = Cooperative::findOrFail($request->cooperative_id)
-                    ->subscriptions()
-                    ->find($saving->subscription_id);
+                        ->subscriptions()
+                        ->find($saving->subscription_id);
                 } else {
                     /** @var \App\Models\Subscription */
                     $subscription = $saving->user->subscriptions()->find($saving->subscription_id);
@@ -411,7 +421,8 @@ class SavingController extends Controller
                     $transaction->status = 'complete';
 
                     $canPayRef = in_array(config('settings.referral_mode', 2), [1, 2]) &&
-                        config('settings.referral_system', false);
+                        config('settings.referral_system', false) &&
+                        !isset($transaction?->webhook['data']['status']);
 
                     if ($canPayRef && $saving->user->referrer && $saving->days < 1) {
                         $saving->user->referrer->wallet()->create([
@@ -427,7 +438,7 @@ class SavingController extends Controller
                         $msg = 'You have completed the saving circle for this subscription, you would be notified when your food bag is ready for pickup or delivery.';
                     } else {
                         $subscription->status = 'active';
-                        $plantitle = $subscription->plan->title.(stripos($subscription->plan->title, 'plan') !== false ? '' : ' plan');
+                        $plantitle = $subscription->plan->title . (stripos($subscription->plan->title, 'plan') !== false ? '' : ' plan');
                         $msg = __(
                             'You have successfully made :days day(s) savings of :amount for the :plan, you now have only :left days left to save up.',
                             [
@@ -442,15 +453,17 @@ class SavingController extends Controller
                     $subscription->fees_paid += $transaction->fees;
                     $subscription->next_date = $subscription->setDateByInterval(Carbon::parse(now()));
 
-                    $subscription->save();
+                    !isset($transaction?->webhook['data']['status']) && $subscription->save();
                     $code = HttpStatus::ACCEPTED;
                 } else {
                     $saving->status = 'rejected';
                     $transaction->status = 'rejected';
                 }
 
-                $saving->save();
-                $transaction->save();
+                if (!isset($transaction?->webhook['data']['status'])) {
+                    $saving->save();
+                    $transaction->save();
+                }
                 $status = 'success';
             }
         }

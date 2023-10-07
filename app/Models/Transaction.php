@@ -41,6 +41,7 @@ class Transaction extends Model
         'due' => 'float',
         'fees' => 'float',
         'amount' => 'float',
+        'webhook' => 'collection',
     ];
 
     /**
