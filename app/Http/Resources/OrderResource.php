@@ -43,7 +43,7 @@ class OrderResource extends JsonResource
             'version' => config('api.api_version'),
             'app_version' => config('api.app_version'),
             'author' => 'Greysoft Limited',
-            'updated' => now(),
+            'updated' => \App\Services\AppInfo::api(),
         ]];
     }
 }

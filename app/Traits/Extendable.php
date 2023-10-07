@@ -23,13 +23,7 @@ trait Extendable
         $errors = $data['errors'] ?? null;
         $token = $data['token'] ?? null;
         $info = [
-            'api' => [
-                'name' => 'Agrobays',
-                'version' => config('api.api_version'),
-                'app_version' => config('api.app_version'),
-                'author' => 'Greysoft Technologies Limited',
-                'updated' => now(),
-            ],
+            'api' => \App\Services\AppInfo::basic(),
             'message' => $data['message'] ?? HttpStatus::message(HttpStatus::OK),
             'status' => $data['status'] ?? 'success',
             'response_code' => $data['response_code'] ?? HttpStatus::OK,
@@ -87,13 +81,7 @@ trait Extendable
         unset($data['message'], $data['response_code'], $data['status'], $data['errors'], $data['token'], $data['response_data']);
 
         $response = [
-            'api' => [
-                'name' => 'Agrobays',
-                'version' => config('api.api_version'),
-                'app_version' => config('api.app_version'),
-                'author' => 'Greysoft Limited',
-                'updated' => now(),
-            ],
+            'api' => \App\Services\AppInfo::basic(),
             'message' => $message,
             'status' => $status,
             'response_code' => $code,
@@ -182,7 +170,7 @@ trait Extendable
                 $info = $user->access_data;
             } else {
                 if (config('settings.system.ipinfo.access_token') && config('settings.collect_user_data', true)) {
-                    $ipInfo = \Illuminate\Support\Facades\Http::get('ipinfo.io/'.$this->ip(), [
+                    $ipInfo = \Illuminate\Support\Facades\Http::get('ipinfo.io/' . $this->ip(), [
                         'token' => config('settings.system.ipinfo.access_token'),
                     ]);
                     if ($ipInfo->status() === 200) {

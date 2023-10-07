@@ -250,7 +250,7 @@ class FruitBayController extends Controller
             $q->where('status', 'pending');
             $q->orWhere('webhook->data->status', 'success');
         })->first();
-        ! $transaction && abort(404, 'We are unable to find this transaction.');
+        ! $transaction && abort(404, 'We are unable to find this transaction, it may have previously been verified.');
 
         // Set the payment info
         $method = strtolower($transaction->method ?? 'wallet');
@@ -361,7 +361,7 @@ class FruitBayController extends Controller
         if ($order && $order->payment === 'pending') {
             if ('success' === $tranx->data->status) {
                 $order->payment = 'complete';
-                $transaction->status = 'complete';
+                $transaction->status = 'complete';//
                 $msg = 'Your order has been placed successfully, you will be notified whenever it is ready for pickup or delivery.';
 
                 $canPayRef = in_array(config('settings.referral_mode', 2), [1, 3]) &&

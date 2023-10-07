@@ -270,7 +270,7 @@ class SavingController extends Controller
             $q->where('status', 'pending');
             $q->orWhere('webhook->data->status', 'success');
         })->first();
-        ! $transaction && abort(404, 'We are unable to find this transaction, it may have already been verfied.');
+        ! $transaction && abort(404, 'We are unable to find this transaction, it may have previously been verified.');
 
         // Set the payment info
         $method = strtolower($transaction->method ?? 'wallet');

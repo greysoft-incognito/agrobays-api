@@ -16,7 +16,7 @@ if (! function_exists('get_domain')) {
         }
 
         if (! preg_match('/^http/', $url)) {
-            $url = 'http://'.$url;
+            $url = 'http://' . $url;
         }
 
         if ($url[strlen($url) - 1] != '/') {
@@ -69,17 +69,17 @@ if (! function_exists('img')) {
 
         if ($image && Storage::exists($image)) {
             $image = Str::of($image)->replace('public', '')->trim('/')->__toString();
-            $fpath = preg_match("/^(media\/|home\/){1,2}\w+/", $image) ? $image : 'media/'.$image;
+            $fpath = preg_match("/^(media\/|home\/){1,2}\w+/", $image) ? $image : 'media/' . $image;
             $photo = asset((config('filesystems.default') === 'local' ? $fpath : Storage::url($image)));
         } else {
             if ($no_default === true) {
                 return null;
             }
             $photo = asset((config('filesystems.default') === 'local'
-                ? env('default_'.$type, 'media/'.$type.(in_array($type, ['logo', 'avatar']) ? '.svg' : '.png'))
-                : Storage::url(env('default_'.$type, 'media/'.$type.(in_array($type, ['logo', 'avatar']) ? '.svg' : '.png')))));
+                ? env('default_' . $type, 'media/' . $type . (in_array($type, ['logo', 'avatar']) ? '.svg' : '.png'))
+                : Storage::url(env('default_' . $type, 'media/' . $type . (in_array($type, ['logo', 'avatar']) ? '.svg' : '.png')))));
 
-            $photo = config('settings.default_'.$type, $photo);
+            $photo = config('settings.default_' . $type, $photo);
         }
 
         if (($cache = config('imagecache.route')) && ! Str::contains($photo, ['.svg'])) {
@@ -91,7 +91,7 @@ if (! function_exists('img')) {
         $file_scheme = parse_url($photo, PHP_URL_SCHEME);
         $site_scheme = parse_url(config('app.url'), PHP_URL_SCHEME);
 
-        return Str::of($photo)->replace($file_scheme.'://', $site_scheme.'://');
+        return Str::of($photo)->replace($file_scheme . '://', $site_scheme . '://');
     }
 }
 
@@ -119,7 +119,7 @@ if (! function_exists('money')) {
      */
     function money($number, $abbrev = false)
     {
-        return config('settings.currency_symbol').($abbrev === false
+        return config('settings.currency_symbol') . ($abbrev === false
             ? number_format($number, 2)
             : numberAbbr($number)
         );
@@ -164,11 +164,11 @@ if (! function_exists('numberAbbr')) {
         // Remove unecessary zeroes after decimal. "1.0" -> "1"; "1.00" -> "1"
         // Intentionally does not affect partials, eg "1.50" -> "1.50"
         if ($precision > 0) {
-            $dotzero = '.'.str_repeat('0', $precision);
+            $dotzero = '.' . str_repeat('0', $precision);
             $n_format = str_replace($dotzero, '', $n_format);
         }
 
-        return $n_format.$suffix;
+        return $n_format . $suffix;
     }
 }
 
@@ -228,7 +228,7 @@ if (! function_exists('linkORroute')) {
             return $absolute ? $string : parse_url($string, PHP_URL_PATH);
         } elseif (Str::containsAll($string, ['.', '/'])) {
             $route = Str::of($string)->beforeLast('/')->rtrim('.')->__toString();
-            $pre_seg = Str::remove(Str::of($route)->explode('.')->last().'/', Str::of($string)->explode('.')->last());
+            $pre_seg = Str::remove(Str::of($route)->explode('.')->last() . '/', Str::of($string)->explode('.')->last());
             $segment = Str::of($pre_seg)->explode('/');
 
             return route($route, $segment->toArray(), $absolute);
