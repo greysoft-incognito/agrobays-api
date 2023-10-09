@@ -8,6 +8,7 @@ class Permissions
 {
     protected $allowed = [
         'admin' => [
+            'users',
             'users.user',
             'users.dispatch',
             'users.manager',
@@ -38,6 +39,7 @@ class Permissions
             'cooperatives.wallet',
         ],
         'manager' => [
+            'users',
             'users.user',
             'users.dispatch',
             'dashboard',

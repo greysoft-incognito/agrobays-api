@@ -14,6 +14,8 @@ class UserSlimResource extends JsonResource
      */
     public function toArray($request)
     {
+        $with = collect(is_array($request->with) ? $request->with : str($request->with)->remove(' ')->explode(','));
+
         return [
             'id' => $this->id,
             'email' => $this->email,
@@ -36,10 +38,17 @@ class UserSlimResource extends JsonResource
             'country' => $this->country,
             'address' => $this->address,
             'role' => $this->role,
+            'stats' => $this->when($with->contains('stats'), fn () => $this->stats),
             'permissions' => $this->permissions,
             'email_verified_at' => $this->email_verified_at,
             'phone_verified_at' => $this->phone_verified_at,
             'last_seen' => $this->last_seen ?? $this->created_at,
+            $this->mergeWhen($this->pen_code, function () {
+                return [
+                    'pen_code' => $this->pen_code,
+                    'pen_code_u' => $this->pen_code_u,
+                ];
+            }),
             'referral_code' => $this->referral_code,
             'referrer_id' => $this->referrer_id,
             'created_at' => $this->created_at,

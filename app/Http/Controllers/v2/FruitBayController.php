@@ -19,7 +19,7 @@ class FruitBayController extends Controller
 {
     public function __construct(Request $request)
     {
-        if (!str($request->route()->getAction('uses'))->afterLast('@')->contains(['index', 'show'])) {
+        if (!str($request->route()?->getAction('uses'))->afterLast('@')->contains(['index', 'show'])) {
             $this->middleware('auth:sanctum');
         }
     }

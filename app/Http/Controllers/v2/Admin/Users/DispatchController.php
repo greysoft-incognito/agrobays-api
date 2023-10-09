@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\v2\User;
+namespace App\Http\Controllers\v2\Admin\Users;
 
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
@@ -9,6 +9,7 @@ use App\Http\Resources\DispatchResource;
 use App\Models\Dispatch;
 use App\Models\Order;
 use App\Models\Subscription;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -18,13 +19,11 @@ class DispatchController extends Controller
      * Display a listing of all dispatches based on the status.
      *
      * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request, User $user)
     {
-        /** @var \App\Models\User $user */
-        $user = $request->user();
-
         $query = Dispatch::whereHasMorph(
             'dispatchable',
             [Order::class, Subscription::class],
@@ -34,7 +33,7 @@ class DispatchController extends Controller
         )->orderBy('id', 'DESC');
 
         // Set default period
-        $period_placeholder = Carbon::now()->subDays(30)->format('Y/m/d').'-'.Carbon::now()->addDays(2)->format('Y/m/d');
+        $period_placeholder = Carbon::now()->subDays(30)->format('Y/m/d') . '-' . Carbon::now()->addDays(2)->format('Y/m/d');
 
         // Get period
         $period = $request->period == '0' ? [] : explode('-', urldecode($request->get('period', $period_placeholder)));
@@ -57,13 +56,12 @@ class DispatchController extends Controller
      * Get a particular dispatched item.
      *
      * @param  Request  $request
+     * @param  \App\Models\User  $user
      * @param  string  $id
      * @return void
      */
-    public function show(Request $request, $id)
+    public function show(Request $request, User $user, $id)
     {
-        $user = $request->user();
-
         $dispatch = Dispatch::whereHasMorph(
             'dispatchable',
             [Order::class, Subscription::class],

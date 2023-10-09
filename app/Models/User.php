@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Actions\Greysoft\Charts;
 use App\Events\ActionComplete;
 use App\Notifications\SendCode;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -115,15 +116,24 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->fileableLoader('image', 'avatar', 'default', true, true);
     }
 
+    protected static function genUsername($string)
+    {
+        $username = str($string)->slug('_', 'en', ['@' => 'at', '.' => '_'])->toString();
+
+        if (User::where('username', $username)->exists()) {
+            return self::genUsername($string . rand(100, 999));
+        }
+
+        return $username;
+    }
+
     public static function registerEvents()
     {
         static::creating(function ($user) {
             if (! $user->username) {
-                $u = str($user->email
-                    ? str($user->email)->explode('@')->first()
-                    : str($user->name ?? $user->firstname)->slug())->replace('.', '_')->toString();
-
-                $user->username = User::where('username', $u)->exists() ? $u.rand(100, 999) : $u;
+                $user->username = self::genUsername(
+                    $user->name ?? $user->firstname ?? str($user->email ?? '')->explode('@')->first()
+                );
             }
         });
 
@@ -142,7 +152,7 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Get the URL to the fruit bay category's photo.
      *
-     * @return string
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
      */
     protected function imageUrl(): Attribute
     {
@@ -152,9 +162,50 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Format the pen code.
+     *
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
+     */
+    protected function penCodeU(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => str($this->pen_code ?? '')->whenNotEmpty(function ($str) {
+                $parts = str_split($str, 4);
+                $result = array_slice($parts, 0, 3);
+                return implode('-', $result);
+            }),
+        );
+    }
+
+    /**
+     * Generate the user stats
+     *
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
+     */
+    protected function stats(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => [
+                'pie' => (new Charts())->getPie('user', $this->id),
+                'bar' => (new Charts())->getBar('user', $this->id),
+                'summary' => [
+                    'orders' => (new Charts())->sales('user', 'all', $this->id),
+                    'savings' => (new Charts())->savings('user', 'all', $this->id),
+                    'transactions' => (new Charts())->totalTransactions('user', 'all', $this->id),
+                    'subscriptions' => (new Charts())->subscriptions('user', 'all', $this->id),
+                    'count_orders' => (new Charts())->sales('user', 'all', $this->id, true),
+                    'count_savings' => (new Charts())->savings('user', 'all', $this->id, true),
+                    'count_transactions' => (new Charts())->totalTransactions('user', 'all', $this->id, true),
+                    'count_subscriptions' => (new Charts())->subscriptions('user', 'all', $this->id, true),
+                ]
+            ]
+        );
+    }
+
+    /**
      * Get the URL to the user's photo.
      *
-     * @return string
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
      */
     protected function avatar(): Attribute
     {
@@ -163,10 +214,15 @@ class User extends Authenticatable implements MustVerifyEmail
         );
     }
 
+    /**
+     * Get the URL to the user's fullname.
+     *
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
+     */
     public function fullname(): Attribute
     {
         $name = isset($this->firstname) ? ucfirst($this->firstname) : '';
-        $name .= isset($this->lastname) ? ' '.ucfirst($this->lastname) : '';
+        $name .= isset($this->lastname) ? ' ' . ucfirst($this->lastname) : '';
         $name .= ! isset($this->lastname) && ! isset($this->firstname) && isset($this->username) ? ucfirst($this->username) : '';
 
         return new Attribute(

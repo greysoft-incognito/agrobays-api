@@ -14,6 +14,8 @@ class UserResource extends JsonResource
      */
     public function toArray($request)
     {
+        $with = collect(is_array($request->with) ? $request->with : str($request->with)->remove(' ')->explode(','));
+
         return [
             'id' => $this->id,
             'email' => $this->email,
@@ -40,6 +42,7 @@ class UserResource extends JsonResource
             // "phone_verify_code" => $this->phone_verify_code,
             'role' => $this->role,
             'permissions' => $this->permissions,
+            'stats' => $this->when($with->contains('stats'), fn () => $this->stats),
             'subscription' => new SubscriptionResource($this->subscription),
             'email_verified_at' => $this->email_verified_at,
             'phone_verified_at' => $this->phone_verified_at,
@@ -51,6 +54,12 @@ class UserResource extends JsonResource
                 'exp_year' => $this->data['payment_method']['exp_year'] ?? null,
                 'auth_date' => $this->data['payment_method']['auth_date'] ?? null,
             ]),
+            $this->mergeWhen($this->pen_code, function () {
+                return [
+                    'pen_code' => $this->pen_code,
+                    'pen_code_u' => $this->pen_code_u,
+                ];
+            }),
             'last_seen' => $this->last_seen ?? $this->created_at,
             'referral_code' => $this->referral_code,
             'referrer_id' => $this->referrer_id,

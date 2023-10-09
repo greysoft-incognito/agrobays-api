@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\v2\User;
+namespace App\Http\Controllers\v2\Admin\Users;
 
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
@@ -8,10 +8,10 @@ use App\Http\Resources\SubscriptionCollection;
 use App\Http\Resources\SubscriptionResource;
 use App\Models\Cooperative;
 use App\Models\Subscription;
+use App\Models\User;
 use App\Notifications\SubStatus;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class SubscriptionController extends Controller
 {
@@ -19,10 +19,13 @@ class SubscriptionController extends Controller
      * Display a listing of the resource.
      *
      * @param  \Illuminate\Http\Request  $request
+     * @param \App\Models\User $user
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request, User $user)
     {
+        $this->authorize('usable', 'users');
+
         $cooperative = null;
 
         if ($request->cooperative_id) {
@@ -31,7 +34,7 @@ class SubscriptionController extends Controller
                 ->firstOrFail();
             $query = $cooperative->subscriptions()->orderBy('id', 'DESC');
         } else {
-            $query = Auth::user()->subscriptions()->orderBy('id', 'DESC');
+            $query = $user->subscriptions()->orderBy('id', 'DESC');
         }
 
         // Filter by status
@@ -72,10 +75,13 @@ class SubscriptionController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
+     * @param \App\Models\User $user
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, User $user)
     {
+        $this->authorize('usable', 'users');
+
         //
     }
 
@@ -83,11 +89,14 @@ class SubscriptionController extends Controller
      * Display the specified resource.
      *
      * @param  \Illuminate\Http\Request  $request
+     * @param \App\Models\User $user
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Request $request, $id)
+    public function show(Request $request, User $user, $id)
     {
+        $this->authorize('usable', 'users');
+
         if ($request->cooperative_id) {
             $subscription = Cooperative::whereId($request->cooperative_id)
                 ->orWhere('slug', $request->cooperative_id)
@@ -95,7 +104,7 @@ class SubscriptionController extends Controller
                 ->subscriptions()
                 ->findOrfail($id);
         } else {
-            $subscription = Auth::user()->subscriptions()->findOrfail($id);
+            $subscription = $user->subscriptions()->findOrfail($id);
         }
 
         return (new SubscriptionResource($subscription))
@@ -110,11 +119,14 @@ class SubscriptionController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
+     * @param \App\Models\User $user
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, User $user, $id)
     {
+        $this->authorize('usable', 'users');
+
         //
     }
 
@@ -122,17 +134,20 @@ class SubscriptionController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  \Illuminate\Http\Request  $request
+     * @param \App\Models\User $user
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request, $id)
+    public function destroy(Request $request, User $user, $id)
     {
+        $this->authorize('usable', 'users');
+
         /** @var Subscription */
         $subscription = Subscription::find($id);
 
         if (! $subscription) {
             return $this->responseBuilder([
-                'message' => 'You are not subscribed to this plan.',
+                'message' => __('0: is not subscribed to this plan.', [$user->fullname]),
                 'status' => 'error',
                 'response_code' => HttpStatus::NOT_FOUND,
             ]);
@@ -148,8 +163,6 @@ class SubscriptionController extends Controller
                 'status' => 'error',
                 'response_code' => HttpStatus::UNPROCESSABLE_ENTITY,
             ]);
-        } else {
-            $this->authorize('be-owner', [$subscription->user_id]);
         }
 
         // Check if this is a withdrawal request

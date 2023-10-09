@@ -39,7 +39,7 @@ class TransactionController extends Controller
             })
             ->addColumn('action', function (Transaction $item) {
                 return implode([
-                    Html::el('a', ['onclick' => "hotLink('/transactions/invoice/".$item->id."')", 'href' => 'javascript:void(0)'])->title(__('View Invoice'))->setHtml(Html::el('i')->class('ri-file-list-2-fill ri-2x text-primary')),
+                    Html::el('a', ['onclick' => "hotLink('/transactions/invoice/" . $item->id . "')", 'href' => 'javascript:void(0)'])->title(__('View Invoice'))->setHtml(Html::el('i')->class('ri-file-list-2-fill ri-2x text-primary')),
                 ]);
             })
             ->removeColumn('updated_at')->toJson();
@@ -90,7 +90,7 @@ class TransactionController extends Controller
 
         $msg = $transactions->isEmpty() ? 'You have not made any transactions.' : 'OK';
         $_period = $transactions->isNotEmpty()
-            ? ($transactions->last()->created_at->format('Y/m/d').'-'.$transactions->first()->created_at->format('Y/m/d'))
+            ? ($transactions->last()->created_at->format('Y/m/d') . '-' . $transactions->first()->created_at->format('Y/m/d'))
             : '';
 
         return $this->buildResponse([
