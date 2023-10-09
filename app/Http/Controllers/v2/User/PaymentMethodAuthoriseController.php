@@ -138,7 +138,11 @@ class PaymentMethodAuthoriseController extends Controller
                 $userData['payment_method']->type = 'paystack';
                 $userData['payment_method']->email = $tranx->data->customer->email;
                 $userData['payment_method']->auth_date = now()->toDateTimeString();
-                $user->wallet()->firstOrNew()->topup('Refunds', $tranx->data->amount, 'Card Authorization Refund');
+                $user->wallet()->firstOrNew()->topup(
+                    'Refunds',
+                    $tranx->data->amount / 100,
+                    'Card Authorization Refund'
+                );
 
                 $msg = __('Your card ending with :0 has been authorized for automatic payments.', [
                     $tranx->data->authorization->last4,
