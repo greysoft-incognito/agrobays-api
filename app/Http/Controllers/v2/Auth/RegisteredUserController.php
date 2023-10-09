@@ -53,19 +53,22 @@ class RegisteredUserController extends Controller
         $user->password = Hash::make($request->password);
 
         // Assign a referral code to the user
-        /** @var \App\Models\User $referrer */
-        $referrer = User::where('referral_code', $request->referral_code)->first();
-        // Add the referrer id to the user
-        if ($referrer && config('settings.referral_system', false)) {
-            $user->referrer_id = $referrer->id;
+        if ($request->referral_code) {
+            /** @var \App\Models\User $referrer */
+            $referrer = User::where('referral_code', $request->referral_code)->first();
 
-            if (config('settings.referral_mode', 2) == 0) {
-                $referrer->wallet()->create([
-                    'amount' => config('settings.referral_bonus', 1),
-                    'type' => 'credit',
-                    'source' => 'Referral Bonus',
-                    'detail' => __('Referral bonus for :0\'s registration.', [$user->fullname]),
-                ]);
+            // Add the referrer id to the user
+            if ($referrer && config('settings.referral_system', false)) {
+                $user->referrer_id = $referrer->id;
+
+                if (config('settings.referral_mode', 2) == 0) {
+                    $referrer->wallet()->create([
+                        'amount' => config('settings.referral_bonus', 1),
+                        'type' => 'credit',
+                        'source' => 'Referral Bonus',
+                        'detail' => __('Referral bonus for :0\'s registration.', [$user->fullname]),
+                    ]);
+                }
             }
         }
         $user->save();
@@ -73,7 +76,7 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
 
         $dev = new DeviceDetector($request->userAgent());
-        $device = $dev->getBrandName() ? ($dev->getBrandName().$dev->getDeviceName()) : $request->userAgent();
+        $device = $dev->getBrandName() ? ($dev->getBrandName() . $dev->getDeviceName()) : $request->userAgent();
 
         $token = $user->createToken($device)->plainTextToken;
 
