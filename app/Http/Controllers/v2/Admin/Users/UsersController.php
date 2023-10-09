@@ -36,6 +36,7 @@ class UsersController extends Controller
             // Search and filter columns
             $q->where(function (Builder $query) use ($request) {
                 $query->where('username', $request->search)
+                    ->orWhere('email', 'like', "%$request->search%")
                     ->orWhere('pen_code', str($request->search)->remove('-'))
                     ->orWhereRaw("CONCAT_WS(' ', firstname, lastname) LIKE '%$request->search%'")
                     ->orWhere('address->home', 'like', "%$request->search%")
