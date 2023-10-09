@@ -50,6 +50,7 @@ class UserSlimResource extends JsonResource
                 ];
             }),
             'referral_code' => $this->referral_code,
+            'referrer_code' => $this->referrer->referral_code,
             'referrer_id' => $this->referrer_id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
