@@ -38,6 +38,8 @@ class UsersController extends Controller
                 $query->where('username', $request->search)
                     ->orWhere('email', 'like', "%$request->search%")
                     ->orWhere('pen_code', str($request->search)->remove('-'))
+                    ->orWhere('firstname', 'like', "%$request->search%")
+                    ->orWhere('lastname', 'like', "%$request->search%")
                     ->orWhereRaw("CONCAT_WS(' ', firstname, lastname) LIKE '%$request->search%'")
                     ->orWhere('address->home', 'like', "%$request->search%")
                     ->orWhere('address->shipping', 'like', "%$request->search%")
