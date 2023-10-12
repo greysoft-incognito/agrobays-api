@@ -104,6 +104,9 @@ class FruitBayController extends Controller
                 if ($item) {
                     $item->total = $item->price * $value['qty'];
                     $item->total_fees = $item->fees * $value['qty'];
+                    if ($item->no_fees) {
+                        $item->total_fees = 0;
+                    }
                     $item->qty = $value['qty'];
                 }
 
@@ -131,6 +134,11 @@ class FruitBayController extends Controller
                 ], HttpStatus::UNPROCESSABLE_ENTITY);
             } else {
                 $shipping_fees = $cart->sum('total_fees') + $globalSshippingFee;
+
+                // If there is only one item that does not require fees, empty the fees.
+                if ($cart->count() === 1 && $cart->first()->no_fees === true) {
+                    $shipping_fees = 0;
+                }
                 $due = $cart->sum('total');
                 $amount = round($due + $shipping_fees, 2);
                 $reference = config('settings.trx_prefix', 'AGB-') . Str::random(15);
