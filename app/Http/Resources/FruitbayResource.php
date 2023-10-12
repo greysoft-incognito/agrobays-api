@@ -25,6 +25,7 @@ class FruitbayResource extends JsonResource
             'weight' => $this->weight,
             'image_url' => $this->media_file,
             'responsive_images' => $this->responsive_images['image'] ?? new \stdClass(),
+            'no_fees' => $this->no_fees,
             'available' => $this->available,
             'description' => $this->description,
             'fruit_bay_category_id' => $this->fruit_bay_category_id,
