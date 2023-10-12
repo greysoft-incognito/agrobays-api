@@ -23,7 +23,7 @@ class FruitBayController extends Controller
                 'name' => 'required|min:3|max:25',
                 'price' => 'required|numeric|min:1',
                 'weight' => 'nullable|numeric|min:0',
-                'description' => 'nullable|min:10|max:550',
+                'description' => 'required|min:10|max:550',
                 'category_id' => 'required|exists:fruit_bay_categories,id',
                 'available' => 'nullable|boolean',
             ], $rules),
