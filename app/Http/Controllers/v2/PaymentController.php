@@ -5,16 +5,18 @@ namespace App\Http\Controllers\v2;
 use App\Http\Controllers\Controller;
 use App\Models\Saving;
 use App\Models\Transaction;
+use Illuminate\Http\Response;
+use Illuminate\Support\Carbon;
 
 // use Illuminate\Http\Request;
 // use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
-    public function paystackWebhook()
+    public function paystackWebhook(Response $response)
     {
+        $statusCode = 200;
         $event = \Yabacon\Paystack\Event::capture();
-        http_response_code(200);
 
         // Log::channel('paystack')->info('Paystack Webhook Recieved', [
         //     'event' => $event->obj->event,
@@ -40,79 +42,107 @@ class PaymentController extends Controller
 
         if (! $owner) {
             // None of the keys matched the event's signature
-            exit();
+            return $response->setStatusCode(200);
         }
 
-        if ($event->obj->event === 'charge.success' && 'success' === $event->obj->data->status) {
-            $reference = $event->obj->data->reference;
-            $transaction = Transaction::whereReference($reference)->first();
+        if ('success' === $event->obj->data->status) {
+            switch ($event->obj->event) {
+                case 'charge.success':
+                    $reference = $event->obj->data->reference;
+                    $transaction = Transaction::whereReference($reference)->first();
 
-            if ($transaction?->status === 'pending') {
-                $transactable = $transaction->transactable;
+                    if ($transaction?->status === 'pending') {
+                        $transactable = $transaction->transactable;
 
-                // Process orders
-                if ($transactable instanceof Order) {
-                    // Referal Payouts system
-                    $canPayRef = in_array(config('settings.referral_mode', 2), [1, 3]) &&
-                    config('settings.referral_system', false);
+                        // Process orders
+                        if ($transactable instanceof Order) {
+                            // Referal Payouts system
+                            $canPayRef = in_array(config('settings.referral_mode', 2), [1, 3]) &&
+                            config('settings.referral_system', false);
 
-                    $countUserOrders = $transactable->user->orders()->paymentStatus('complete')->count();
+                            $countUserOrders = $transactable->user->orders()->paymentStatus('complete')->count();
 
-                    if ($canPayRef && $transactable->user->referrer && $countUserOrders < 1) {
-                        $transactable->user->referrer->wallet()->create([
-                            'amount' => config('settings.referral_bonus', 1),
-                            'type' => 'credit',
-                            'source' => 'Referral Bonus',
-                            'detail' => __('Referral bonus for :0\'s first order.', [$transactable->user->fullname]),
-                        ]);
-                    }
-
-                    $transactable->payment = 'complete';
-
-                // Process subscriptions
-                } elseif ($transactable instanceof Saving) {
-                    $subscription = $transactable->subscription;
-
-                    if ($subscription) {
-                        $_left = $subscription->days_left - $transactable->days;
-
-                        // Referal Payouts system
-                        $canPayRef = in_array(config('settings.referral_mode', 2), [1, 2]) &&
-                        config('settings.referral_system', false);
-
-                        if ($canPayRef && $transactable->user->referrer && $transactable->days < 1) {
-                            $transactable->user->referrer->wallet()->create([
+                            if ($canPayRef && $transactable->user->referrer && $countUserOrders < 1) {
+                                $transactable->user->referrer->wallet()->create([
                                 'amount' => config('settings.referral_bonus', 1),
                                 'type' => 'credit',
                                 'source' => 'Referral Bonus',
-                                'detail' => __('Referral bonus for :0\'s first saving.', [$transactable->user->fullname]),
-                            ]);
+                                'detail' => __('Referral bonus for :0\'s first order.', [$transactable->user->fullname]),
+                                ]);
+                            }
+
+                            $transactable->payment = 'complete';
+
+                            // Process subscriptions
+                        } elseif ($transactable instanceof Saving) {
+                            $subscription = $transactable->subscription;
+
+                            if ($subscription) {
+                                $_left = $subscription->days_left - $transactable->days;
+
+                                // Referal Payouts system
+                                $canPayRef = in_array(config('settings.referral_mode', 2), [1, 2]) &&
+                                config('settings.referral_system', false);
+
+                                if ($canPayRef && $transactable->user->referrer && $transactable->days < 1) {
+                                    $transactable->user->referrer->wallet()->create([
+                                    'amount' => config('settings.referral_bonus', 1),
+                                    'type' => 'credit',
+                                    'source' => 'Referral Bonus',
+                                    'detail' => __('Referral bonus for :0\'s first saving.', [$transactable->user->fullname]),
+                                    ]);
+                                }
+
+                                if ($_left <= 1) {
+                                    $subscription->status = 'complete';
+                                } else {
+                                    $subscription->status = 'active';
+                                }
+
+                                $subscription->fees_paid += $transaction->fees;
+                                $subscription->next_date = $subscription->setDateByInterval(Carbon::parse(now()));
+                                $subscription->save();
+
+                                $transactable->status = 'complete';
+                                $transactable->save();
+                            }
                         }
 
-                        if ($_left <= 1) {
-                            $subscription->status = 'complete';
-                        } else {
-                            $subscription->status = 'active';
-                        }
-
-                        $subscription->fees_paid += $transaction->fees;
-                        $subscription->next_date = $subscription->setDateByInterval(Carbon::parse(now()));
-                        $subscription->save();
-
-                        $transactable->status = 'complete';
+                        // Save the transactable
                         $transactable->save();
+
+                        // Set the transaction status, webhook data and save
+                        $transaction->webhook = $event->obj;
+                        $transaction->status = 'complete';
+                        $transaction->save();
                     }
-                }
+                    break;
+            }
+        } else {
+            // The transaction has failed so let's update all related models as required.
+            $reference = $event->obj->data->reference ?? 'definitly-not-found-reference-' . time();
+            $transaction = Transaction::whereReference($reference)->first();
 
-                // Save the transactable
-                $transactable->save();
-
+            if ($transaction) {
                 // Set the transaction status, webhook data and save
                 $transaction->webhook = $event->obj;
-                $transaction->status = 'complete';
+                $transaction->status = 'rejected';
                 $transaction->save();
+
+                $transactable = $transaction->transactable;
+
+                if ($transactable instanceof Order) {
+                    // Process failed orders
+                    $transactable->payment = 'rejected';
+                } elseif ($transactable instanceof Saving) {
+                    // Process failed subscriptions
+                    $transactable->status = 'rejected';
+                }
+                $transactable->save();
             }
         }
+
+        return $response->setStatusCode($statusCode);
     }
 
     protected function testSign($data)

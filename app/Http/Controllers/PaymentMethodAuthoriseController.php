@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\UserResource;
+use App\Services\Payment\PaystackDeauth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -30,11 +31,25 @@ class PaymentMethodAuthoriseController extends Controller
         try {
             $reference = config('settings.trx_prefix', 'AGB-') . Str::random(15);
             if ($deauth) {
+                if (
+                    isset($userData['payment_method']['type'], $userData['payment_method']['authorization_code']) &&
+                    $userData['payment_method']['type'] === 'paystack'
+                ) {
+                    // Remove Paystack Authorization
+                    $paystack = new Paystack(env('PAYSTACK_SECRET_KEY'));
+                    $paystack->useRoutes(["deauth" => PaystackDeauth::class]);
+                    $resp = $paystack->deauth->deactivateAuthorization([
+                        'authorization_code' => $userData['payment_method']['authorization_code'],
+                    ]);
+                }
+
                 // Remove the payment method
                 $userData['payment_method'] = [];
                 $msg = __('Your :0:1 has been deauthorized from processing automatic payments.', [
                     $user->data['payment_method']['channel'] ?? 'wallet',
-                    isset($user->data['payment_method']['last4']) ? ' ending in ' . $user->data['payment_method']['last4'] : '',
+                    isset($user->data['payment_method']['last4'])
+                        ? ' ending in ' . $user->data['payment_method']['last4']
+                        : '',
                 ]);
             } elseif ($request->get('method', $method) === 'wallet') {
                 // Authorize the wallet

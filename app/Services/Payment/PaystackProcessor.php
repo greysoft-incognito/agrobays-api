@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Yabacon\Paystack;
 use Yabacon\Paystack\Exception\ApiException;
+use Yabacon\Paystack\MetadataBuilder;
 
 class PaystackProcessor
 {
@@ -47,7 +48,7 @@ class PaystackProcessor
         $due = $amount;
         $msg = 'Transaction Failed';
 
-        $reference = config('settings.trx_prefix', 'TRX-').$this->generateString(20, 3);
+        $reference = config('settings.trx_prefix', 'TRX-') . $this->generateString(20, 3);
         $real_due = round($due * 100, 2);
 
         $response = new \stdClass();
@@ -62,14 +63,29 @@ class PaystackProcessor
                     'data' => ['reference' => $reference],
                 ];
             } else {
+                $builder = new MetadataBuilder();
+                $builder->withCustomField('Name', $user->fullname);
+                $builder->withCustomField('Phone Number', $user->phone);
+
+                if ($this->request->get('redirect_cancel')) {
+                    $builder->withCancelAction($this->request->get('redirect_cancel'));
+                }
+
+                if ($this->request->get('recurring')) {
+                    $builder->withCustomFilters([
+                        'recurring' => true,
+                    ]);
+                }
+
                 $tranx = $paystack->transaction->initialize([
                     'amount' => $real_due,       // in kobo
                     'email' => $user->email,     // unique to customers
                     'reference' => $reference,   // unique to transactions
+                    'metadata' => $builder->build(),
                     'callback_url' => $this->request->get(
                         'redirect',
                         config('settings.frontend_link')
-                            ? config('settings.frontend_link').'/payment/verify'
+                            ? config('settings.frontend_link') . '/payment/verify'
                             : config('settings.payment_verify_url', route('payment.paystack.verify'))
                     ),
                 ]);
@@ -98,11 +114,13 @@ class PaystackProcessor
             }
         }
 
-        $response->amount = $due;
-        $response->message = $msg;
-        $response->payload = $tranx;
-        $response->reference = $reference;
-        $response->status_code = $code;
+        if (!$error_callback && !$callback) {
+            $response->amount = $due;
+            $response->message = $msg;
+            $response->payload = $tranx;
+            $response->reference = $reference;
+            $response->status_code = $code;
+        }
 
         // Return the response as a collection
         return $response;
@@ -115,42 +133,21 @@ class PaystackProcessor
      * @param  callable  $callback
      * @param  callable  $error_callback  The callback function to call when an error occurs
      * @param  bool  $respond  Whether to return the callback response or not
-     * @return \Illuminate\Support\Collection
+     * @return \stdClass
      */
     public function verify(
         callable $callback = null,
         callable $error_callback = null,
         bool $respond = false
     ) {
+        $response = new \stdClass();
         $code = HttpStatus::BAD_REQUEST;
         $msg = 'Transaction Failed';
 
+
         if (! $this->request->reference) {
             $msg = 'No transaction reference supplied';
-        }
-
-        $response = new \stdClass();
-
-        try {
-            $paystack = new Paystack(env('PAYSTACK_SECRET_KEY'));
-            $tranx = $paystack->transaction->verify([
-                'reference' => $this->request->reference,   // unique to transactions
-            ]);
-
-            $code = HttpStatus::OK;
-            $msg = 'Transaction verified';
-
-            // Call the callback function
-            if ($callback) {
-                $response = $callback($this->request->reference, $tranx, $msg, $code);
-                if ($respond) {
-                    return $response;
-                }
-            }
-        } catch (ApiException | \InvalidArgumentException | \ErrorException $e) {
-            $tranx = $e instanceof ApiException ? $e->getResponseObject() : new \stdClass();
-            $code = HttpStatus::UNPROCESSABLE_ENTITY;
-            $msg = $e->getMessage();
+            $tranx = $response;
 
             // Call the error callback function
             if ($error_callback) {
@@ -159,21 +156,105 @@ class PaystackProcessor
                     return $response;
                 }
             }
+        } else {
+            try {
+                $paystack = new Paystack(env('PAYSTACK_SECRET_KEY'));
+                $tranx = $paystack->transaction->verify([
+                    'reference' => $this->request->reference,   // unique to transactions
+                ]);
+
+                $code = HttpStatus::OK;
+                $msg = 'Transaction verified';
+
+                // Call the callback function
+                if ($callback) {
+                    $response = $callback($this->request->reference, $tranx, $msg, $code);
+                    if ($respond) {
+                        return $response;
+                    }
+                }
+            } catch (ApiException | \InvalidArgumentException | \ErrorException $e) {
+                $tranx = $e instanceof ApiException ? $e->getResponseObject() : new \stdClass();
+                $code = HttpStatus::UNPROCESSABLE_ENTITY;
+                $msg = $e->getMessage();
+
+                // Call the error callback function
+                if ($error_callback) {
+                    $response = $error_callback($msg, $code, $tranx);
+                    if ($respond) {
+                        return $response;
+                    }
+                }
+            }
         }
 
-        $response->message = $msg;
-        $response->payload = $tranx;
-        $response->status_code = $code;
+        if (!$error_callback && !$callback) {
+            $response->message = $msg;
+            $response->payload = $tranx;
+            $response->status_code = $code;
+        }
 
-        // Return the response as a collection
-        return collect($response);
+        return $response;
+    }
+
+    /**
+     * Verify a transaction payment
+     *
+     * @param  Request  $request
+     * @param  callable  $callback
+     * @param  callable  $error_callback  The callback function to call when an error occurs
+     * @param  bool  $respond  Whether to return the callback response or not
+     * @return \stdClass
+     */
+    public function deauthorize(
+        string $authorization_code,
+        callable $callback = null,
+        callable $error_callback = null,
+        bool $respond = false
+    ) {
+        $response = new \stdClass();
+        $code = HttpStatus::BAD_REQUEST;
+        $msg = 'Transaction Failed';
+
+        if (! $authorization_code) {
+            $msg = 'No authorization code supplied';
+            $tranx = $response;
+        } else {
+            try {
+                $paystack = new Paystack(env('PAYSTACK_SECRET_KEY'));
+                $paystack->useRoutes(["deauth" => PaystackDeauth::class]);
+                $tranx = $paystack->deauth->deactivateAuthorization([
+                    'authorization_code' => $authorization_code,
+                ]);
+            } catch (ApiException | \InvalidArgumentException | \ErrorException $e) {
+                $tranx = $e instanceof ApiException ? $e->getResponseObject() : new \stdClass();
+                $code = HttpStatus::UNPROCESSABLE_ENTITY;
+                $msg = $e->getMessage();
+
+                // Call the error callback function
+                if ($error_callback) {
+                    $response = $error_callback($msg, $code, $tranx);
+                    if ($respond) {
+                        return $response;
+                    }
+                }
+            }
+        }
+
+        if (!$error_callback && !$callback) {
+            $response->message = $msg;
+            $response->payload = $tranx;
+            $response->status_code = $code;
+        }
+
+        return $response;
     }
 
     protected function generateString($strength = 16, $group = 0, $input = null)
     {
         $groups = [
-            '0123456789abcdefghi'.md5(time()).'jklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.time().rand(),
-            '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.time().rand(),
+            '0123456789abcdefghi' . md5(time()) . 'jklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' . time() . rand(),
+            '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' . time() . rand(),
             '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
             '01234567890123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
         ];

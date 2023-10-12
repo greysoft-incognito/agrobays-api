@@ -20,6 +20,10 @@ Once all dependencies have been installed run `php artisan migrate` to run migra
 
 Create a cron job with the following command to run all scheduled task: `* * * * * cd /path-to-your-project && php artisan schedule:run >> /dev/null 2>&1`
 
+### Test Webhooks
+
+ngrok http --domain=bluegill-loving-strictly.ngrok-free.app 80
+
 ## API Documentation
 
 [https://documenter.getpostman.com/view/19266444/UVsEVUx2](https://documenter.getpostman.com/view/19266444/UVsEVUx2 "API Documentation")
