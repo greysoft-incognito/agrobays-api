@@ -23,6 +23,7 @@ class FruitBayController extends Controller
                 'name' => 'required|min:3|max:25',
                 'price' => 'required|numeric|min:1',
                 'weight' => 'nullable|numeric|min:0',
+                'no_fees' => 'nullable|boolean',
                 'description' => 'required|min:10|max:550',
                 'category_id' => 'required|exists:fruit_bay_categories,id',
                 'available' => 'nullable|boolean',
@@ -105,6 +106,7 @@ class FruitBayController extends Controller
         $fruitbay->unit = $request->unit ?? 'kg';
         $fruitbay->price = $request->price;
         $fruitbay->weight = $request->weight ?? 0.00;
+        $fruitbay->no_fees = $request->no_fees ?? false;
         $fruitbay->available = $request->available ?? true;
         $fruitbay->description = $request->description;
         $fruitbay->fruit_bay_category_id = $request->category_id;
@@ -156,6 +158,7 @@ class FruitBayController extends Controller
         $fruitbay->unit = $request->unit ?? $fruitbay->unit;
         $fruitbay->price = $request->price ?? $fruitbay->price;
         $fruitbay->weight = $request->weight ?? $fruitbay->weight;
+        $fruitbay->no_fees = $request->no_fees ?? $fruitbay->no_fees;
         $fruitbay->available = $request->available ?? $fruitbay->available;
         $fruitbay->description = $request->description ?? $fruitbay->description;
         $fruitbay->fruit_bay_category_id = $request->category_id ?? $fruitbay->fruit_bay_category_id;

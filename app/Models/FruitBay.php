@@ -32,6 +32,7 @@ class FruitBay extends Model
         'fees' => 'double',
         'price' => 'double',
         'weight' => 'double',
+        'no_fees' => 'boolean',
         'available' => 'boolean',
     ];
 
@@ -45,6 +46,8 @@ class FruitBay extends Model
         'fees' => 0.00,
         'weight' => 0.00,
         'unit' => 'kg',
+        'no_fees' => false,
+        'available' => true,
     ];
 
     /**

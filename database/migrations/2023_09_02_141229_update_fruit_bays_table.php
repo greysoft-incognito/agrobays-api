@@ -28,6 +28,9 @@ return new class extends Migration
             if (! Schema::hasColumn('fruit_bays', 'available')) {
                 $table->boolean('available')->default(true)->after('unit');
             }
+            if (! Schema::hasColumn('fruit_bays', 'no_fees')) {
+                $table->boolean('no_fees')->default(false)->after('available');
+            }
         });
     }
 
@@ -47,6 +50,9 @@ return new class extends Migration
             }
             if (Schema::hasColumn('fruit_bays', 'available')) {
                 $table->dropColumn('available');
+            }
+            if (Schema::hasColumn('fruit_bays', 'no_fees')) {
+                $table->dropColumn('no_fees');
             }
             if (DB::select("SHOW INDEX FROM fruit_bays WHERE Key_name = 'fruit_bays_description_fulltext'")) {
                 $table->dropIndex('fruit_bays_description_fulltext');
