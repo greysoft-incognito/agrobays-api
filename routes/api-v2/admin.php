@@ -33,8 +33,10 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->name('admin.')->g
         // Orders Route
         Route::apiResource('orders', UserOrderController::class)->only(['index', 'show']);
         Route::apiResource('dispatched', UserDispatchController::class)->only(['index', 'show']);
+
         // Transactions Route
         Route::apiResource('transactions', TransactionsController::class)->only(['index', 'show']);
+
         // Subscription And Savings Routes
         Route::apiResource('subscriptions', SubscriptionController::class);
         Route::apiResource('subscriptions/{subscription}/savings', SavingController::class);

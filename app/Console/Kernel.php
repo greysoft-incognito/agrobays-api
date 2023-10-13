@@ -20,7 +20,13 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // Clear transactions
-        $schedule->command(HandleTransactions::class, ['abandoned', '--action clear', '--source paystack', '--perpage 100', '--persistent'])
+        $schedule->command(HandleTransactions::class, [
+                'abandoned',
+                '--action clear',
+                '--source paystack',
+                '--perpage 100',
+                '--persistent'
+            ])
             // ->twiceDaily(1, 13)
             // ->everyMinute()
             ->everyThirtyMinutes()
@@ -51,7 +57,7 @@ class Kernel extends ConsoleKernel
      */
     protected function commands()
     {
-        $this->load(__DIR__.'/Commands');
+        $this->load(__DIR__ . '/Commands');
 
         require base_path('routes/console.php');
     }

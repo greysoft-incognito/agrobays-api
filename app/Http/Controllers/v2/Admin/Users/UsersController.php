@@ -157,7 +157,7 @@ class UsersController extends Controller
     public function show(User $user)
     {
         return (new UserResource($user))->additional([
-            'message' => str($user->fullname)->append(' Has been updated!'),
+            'message' => HttpStatus::message(HttpStatus::OK),
             'status' => 'success',
             'response_code' => HttpStatus::OK,
         ]);

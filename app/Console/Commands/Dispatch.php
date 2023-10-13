@@ -58,7 +58,7 @@ class Dispatch extends Command
             $savings->each(function ($saving) {
                 $dispatch = new ModelsDispatch();
                 $dispatch->code = mt_rand(100000, 999999);
-                $dispatch->reference = config('settings.trx_prefix', 'AGB-').Str::random(12);
+                $dispatch->reference = config('settings.trx_prefix', 'AGB-') . Str::random(12);
                 $saving->dispatch()->save($dispatch);
                 $saving->user->notify(new Dispatched($saving->dispatch));
                 $this->info("Saving with ID of {$saving->id} has been dispatced for proccessing.");
@@ -73,7 +73,7 @@ class Dispatch extends Command
             $orders->each(function ($order) {
                 $dispatch = new ModelsDispatch();
                 $dispatch->code = mt_rand(100000, 999999);
-                $dispatch->reference = config('settings.trx_prefix', 'AGB-').Str::random(12);
+                $dispatch->reference = config('settings.trx_prefix', 'AGB-') . Str::random(12);
                 $order->dispatch()->save($dispatch);
                 $order->user->notify(new Dispatched($order->dispatch));
                 $this->info("Order with ID of {$order->id} has been dispatced for proccessing.");
@@ -112,7 +112,10 @@ class Dispatch extends Command
                 $query->whereJsonContains('data->payment_method->type', 'paystack');
                 $query->orWhereJsonContains('data->payment_method->type', 'wallet');
             })->whereDoesntHave('allSavings', function ($query) {
-                $query->whereRaw('created_at >= subscriptions.next_date');
+                $query->whereRaw('created_at >= subscriptions.next_date')
+                    ->orWhereHas('transaction', function ($query) {
+                        $query->whereNotNull('webhook');
+                    });
             });
 
         $query->where(function ($query) use ($interval) {
@@ -121,7 +124,7 @@ class Dispatch extends Command
                 if ($interval == 'daily') {
                     $query->whereDate('subscriptions.next_date', '<=', now());
                 } elseif ($interval == 'weekly') {
-                    $query->whereRaw('WEEK(`next_date`) = '.now()->weekOfYear);
+                    $query->whereRaw('WEEK(`next_date`) = ' . now()->weekOfYear);
                     $query->whereMonth('subscriptions.next_date', '<=', now());
                 } elseif ($interval == 'monthly') {
                     $query->whereMonth('subscriptions.next_date', '<=', now());
@@ -153,7 +156,7 @@ class Dispatch extends Command
                 if ($user->data['payment_method']['type'] == 'paystack') {
                     $paystack = new Paystack(env('PAYSTACK_SECRET_KEY'));
 
-                    $reference = config('settings.trx_prefix', 'AGB-').Str::random(15);
+                    $reference = config('settings.trx_prefix', 'AGB-') . Str::random(15);
                     $tranx = $paystack->transaction->charge([
                         'amount' => $due * 100,       // in kobo
                         'email' => $user->data['payment_method']['email'] ?? $user->email,

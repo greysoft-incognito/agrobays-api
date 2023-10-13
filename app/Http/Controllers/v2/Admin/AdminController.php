@@ -51,8 +51,13 @@ class AdminController extends Controller
                 'bar' => (new Charts())->getBar('admin'),
                 'transactions' => (new Charts())->totalTransactions('admin', 'month'),
                 'customers' => (new Charts())->customers('admin', 'month'),
+                'users' => (new Charts())->customers('admin', 'all'),
                 'income' => (new Charts())->income('admin', 'month'),
                 'sales' => (new Charts())->sales('admin', 'week'),
+                'total_sales' => (new Charts())->sales('admin', 'all'),
+                'total_income' => (new Charts())->income('admin', 'all'),
+                'total_subscribers' => (new Charts())->subscriptions('admin', 'all', null, true),
+                'monthly_subscribers' => (new Charts())->subscriptions('admin', 'month', null, true),
                 'subscriptions' => [
                     'all' => Subscription::count(),
                     'pending' => Subscription::whereStatus('pending')->count(),

@@ -214,13 +214,15 @@ class Charts
         }
 
         $query = (($for === 'user') ? $user->subscriptions() : Subscription::query())
-            ->withSum('savings', 'amount')
             ->whereHas('savings', fn ($q) => $q->where('status', 'complete'))
+            ->when(!$count, function ($q) {
+                $q->withSum('savings', 'amount');
+            })
             ->when($period !== 'all', function ($q) use ($start, $end) {
                 $q->whereBetween('created_at', [$start, $end]);
             });
 
-        return $count ? $query->count('id') : (float) $query->get()->sum('savings_sum_saved_amount');
+        return $count ? $query->count('id') : (float) $query->get()->sum('savings_sum_amount');
     }
 
     public function income($for = 'user', $period = 'year', $user_id = null)
@@ -324,7 +326,7 @@ class Charts
                 return (($for === 'user') ? $user->subscriptions() : Subscription::query())
                     ->withSum('savings', 'amount')
                     ->whereHas('savings', fn ($q) => $q->where('status', 'complete'))
-                    ->whereBetween('created_at', [$start, $end])->get()->sum('savings_sum_saved_amount');
+                    ->whereBetween('created_at', [$start, $end])->get()->sum('savings_sum_amount');
             })->toArray(),
             'fruit_orders' => collect(range(1, 12))->map(function ($get) use ($for, $user) {
                 $start = Carbon::now()->month($get)->startOfMonth();

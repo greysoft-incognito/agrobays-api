@@ -22,7 +22,7 @@ Create a cron job with the following command to run all scheduled task: `* * * *
 
 ### Test Webhooks
 
-ngrok http --domain=bluegill-loving-strictly.ngrok-free.app 80
+ngrok http --domain=bluegill-loving-strictly.ngrok-free.app 127.0.0.1:8000
 
 ## API Documentation
 
