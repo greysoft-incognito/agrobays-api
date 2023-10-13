@@ -50,18 +50,23 @@ class Dispatch extends Command
         }
 
         // Dispatch all savings that are due for delivery
-        $savings = Subscription::where([
-            ['status', '!=', 'closed'],
-        ])->whereRelation('allSavings', 'status', 'complete')->with(['user', 'bag'])
-            ->doesntHave('dispatch')->get()->filter(fn ($s) => $s->days_left <= 0);
-        if ($savings->isNotEmpty()) {
-            $savings->each(function ($saving) {
+        $query = Subscription::query();
+        $query->where([ ['status', '!=', 'closed'] ])
+            ->whereRelation('allSavings', 'status', 'complete')->with(['user', 'bag'])
+            ->doesntHave('dispatch');
+
+        /** @var \App\Models\Subscription  $subscriptions */
+        $subscriptions = $query->get()->filter(fn ($s) => $s->days_left <= 0);
+
+        if ($subscriptions->isNotEmpty()) {
+            $subscriptions->each(function (\App\Models\Subscription $subscription) {
                 $dispatch = new ModelsDispatch();
                 $dispatch->code = mt_rand(100000, 999999);
                 $dispatch->reference = config('settings.trx_prefix', 'AGB-') . Str::random(12);
-                $saving->dispatch()->save($dispatch);
-                $saving->user->notify(new Dispatched($saving->dispatch));
-                $this->info("Saving with ID of {$saving->id} has been dispatced for proccessing.");
+                $subscription->dispatch()->save($dispatch);
+
+                $subscription->user->notify(new Dispatched($subscription->dispatch));
+                $this->info("Saving with ID of {$subscription->id} has been dispatced for proccessing.");
             });
         } else {
             $this->error('No savings to dispatch.');
@@ -140,10 +145,11 @@ class Dispatch extends Command
             // });
         });
 
-        $savings = $query->get();
+        /** @var \App\Models\Subscription  $subscriptions */
+        $subscriptions = $query->get();
 
-        if ($savings->isNotEmpty()) {
-            $savings->each(function ($sub) use ($days, $interval) {
+        if ($subscriptions->isNotEmpty()) {
+            $subscriptions->each(function (\App\Models\Subscription $sub) use ($days, $interval) {
                 $this->info("Now processing {$interval} savings for user with ID of {$sub->user_id}.");
 
                 /**
@@ -164,6 +170,8 @@ class Dispatch extends Command
                         'reference' => $reference,
                         // 'queue' => true,
                     ]);
+
+                    // Payment was successfull
                     if ($tranx->data->status == 'success') {
                         $saving = $sub->savings()->save(
                             new Saving([
@@ -206,6 +214,14 @@ class Dispatch extends Command
 
                         $this->info("Saving with ID of {$saving->id} has been processed.");
                     } else {
+                        // Let's disable the automatic payments.
+                        $data = $user->data;
+                        $data['payment_method']['type'] = '!paystack';
+
+                        // Save the user data to disable the automatic payments.
+                        $user->data = $data;
+                        $user->save();
+
                         $user->notify(new AutoSavingsMade($sub, 'failed'));
                         $this->error("Unable to process saving for user with ID of {$user->id}.");
                     }
