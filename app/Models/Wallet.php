@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
 class Wallet extends Model
@@ -19,6 +20,7 @@ class Wallet extends Model
     protected $fillable = [
         'user_id',
         'reference',
+        'sender_id',
         'amount',
         'source',
         'detail',
@@ -36,7 +38,7 @@ class Wallet extends Model
 
         static::creating(function (Wallet $wallet) {
             if (! $wallet->reference) {
-                $reference = config('settings.trx_prefix', 'AGB-').Str::random(12);
+                $reference = config('settings.trx_prefix', 'AGB-') . Str::random(12);
                 $wallet->reference = $reference;
             }
         });
@@ -44,7 +46,7 @@ class Wallet extends Model
 
     public function topup($source, $amount, $detail = null): self
     {
-        $reference = config('settings.trx_prefix', 'TRX-').Str::random(12);
+        $reference = config('settings.trx_prefix', 'TRX-') . Str::random(12);
 
         return $this->create([
             'user_id' => $this->user_id,
@@ -54,5 +56,15 @@ class Wallet extends Model
             'detail' => $detail,
             'type' => 'credit',
         ]);
+    }
+
+    /**
+     * Get the user that sent the funds if available
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function sender(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

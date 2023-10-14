@@ -14,6 +14,10 @@ class UserBasicDataResource extends JsonResource
      */
     public function toArray($request)
     {
+        $user = $request->user();
+        $prived = in_array($request->role ?? $user?->role, ['admin', 'manager']) || $user?->id === $this->id;
+        $dispatch = in_array('dispatch', [$user?->role, $request->role]);
+
         return [
             'id' => $this->id,
             'username' => $this->username,
@@ -32,7 +36,8 @@ class UserBasicDataResource extends JsonResource
             'last_seen' => $this->last_seen,
             'referral_code' => $this->referral_code,
             'permissions' => $this->when($request->withPermissions, $this->permissions),
-            'dispatches' => $this->when($request->role === 'dispatch', $this->dispatches),
+            'dispatches' => $this->when($dispatch, $this->dispatches),
+            'wallet_balance' => $this->when($prived, $this->wallet_balance),
         ];
     }
 

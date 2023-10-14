@@ -10,6 +10,7 @@ use App\Http\Resources\SubscriptionResource;
 use App\Models\FoodBag;
 use App\Models\Plan;
 use App\Models\Subscription;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
@@ -48,7 +49,8 @@ class PlanController extends Controller
         ]);
 
         /** @var \App\Models\User */
-        $user = $request->user();
+        $user = $request->user_id ? User::find($request->user_id) : $request->user();
+        !$user && abort(404, 'User not found');
 
         /** @var \App\Models\Plan */
         $plan = Plan::find($request->plan_id);
@@ -112,7 +114,7 @@ class PlanController extends Controller
             ->additional([
                 'message' => __('You have successfully subscribed to the :0:1', [
                     $plan->title,
-                    $request->cooperative_id ? ' for '.$subscription->cooperative->name.'.' : null,
+                    $request->cooperative_id ? ' for ' . $subscription->cooperative->name . '.' : null,
                 ]),
                 'status' => 'success',
                 'response_code' => HttpStatus::CREATED,

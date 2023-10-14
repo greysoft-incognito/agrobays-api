@@ -24,8 +24,14 @@ return new class extends Migration
 
         Schema::table('wallets', function (Blueprint $table) {
             $table
-                ->foreignId('cooperative_id')
+                ->foreignId('sender_id')
                 ->after('user_id')
+                ->nullable()
+                ->constrained()
+                ->onDelete('cascade');
+            $table
+                ->foreignId('cooperative_id')
+                ->after('sender_id')
                 ->nullable()
                 ->constrained()
                 ->onDelete('cascade');

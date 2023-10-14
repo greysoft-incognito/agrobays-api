@@ -14,7 +14,9 @@ class UserSlimResource extends JsonResource
      */
     public function toArray($request)
     {
+        $user = $request->user();
         $with = collect(is_array($request->with) ? $request->with : str($request->with)->remove(' ')->explode(','));
+        $prived = in_array($request->role ?? $user?->role, ['admin', 'manager']) || $user?->id === $this->id;
 
         return [
             'id' => $this->id,
@@ -26,7 +28,7 @@ class UserSlimResource extends JsonResource
             'fullname' => $this->fullname,
             'avatar' => $this->avatar,
             'image_url' => $this->image_url,
-            'wallet_balance' => $this->wallet_balance,
+            'wallet_balance' => $this->when($prived, $this->wallet_balance),
             'bank' => $this->bank,
             // "image" => $this->image,
             'gender' => $this->gender,

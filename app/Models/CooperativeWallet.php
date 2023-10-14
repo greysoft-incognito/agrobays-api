@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
 class CooperativeWallet extends Model
@@ -43,7 +44,7 @@ class CooperativeWallet extends Model
         });
 
         static::creating(function (CooperativeWallet $wallet) {
-            $reference = config('settings.trx_prefix', 'AGB-').Str::random(12);
+            $reference = config('settings.trx_prefix', 'AGB-') . Str::random(12);
             if (! $wallet->reference) {
                 $wallet->reference = $reference;
             }
@@ -52,7 +53,7 @@ class CooperativeWallet extends Model
 
     public function topup($source, $amount, $detail = null): self
     {
-        $reference = config('settings.trx_prefix', 'TRX-').Str::random(12);
+        $reference = config('settings.trx_prefix', 'TRX-') . Str::random(12);
 
         return $this->create([
             'cooperative_id' => $this->cooperative_id,
@@ -63,5 +64,15 @@ class CooperativeWallet extends Model
             'detail' => $detail,
             'type' => 'credit',
         ]);
+    }
+
+    /**
+     * Get the user that sent the funds if available
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function sender(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

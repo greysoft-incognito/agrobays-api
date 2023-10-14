@@ -236,7 +236,42 @@ class UsersController extends Controller
         return (new UserResource($user))->additional([
             'message' => str($user->fullname)->append($msg),
             'status' => 'success',
-            'response_code' => HttpStatus::OK,
+            'response_code' => HttpStatus::ACCEPTED,
+        ]);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\User $user
+     * @return \Illuminate\Http\Response
+     */
+    public function fund(Request $request, User $user)
+    {
+        $this->authorize('usable', 'users');
+
+        $this->validate($request, [
+            'amount' => ['required', 'numeric', 'min:1']
+        ]);
+
+        $user->wallet()->create([
+            'amount' => $request->amount,
+            'type' => 'credit',
+            'source' => 'Direct Funding',
+            'sender_id' => $request->user()->id,
+            'detail' => __('Direct Funding from admin.', [$user->id]),
+        ]);
+
+        $user->refresh();
+
+        return (new UserResource($user))->additional([
+            'message' => __('You have successfully sent :0 to :1', [
+                money($request->amount),
+                $user->fullname
+            ]),
+            'status' => 'success',
+            'response_code' => HttpStatus::ACCEPTED,
         ]);
     }
 

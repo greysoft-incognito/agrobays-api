@@ -127,7 +127,36 @@ class SubscriptionController extends Controller
     {
         $this->authorize('usable', 'users');
 
-        //
+        $this->validate($request, [
+            'foodbag_id' => ['required']
+        ]);
+
+        /** @var \App\Models\Subscription */
+        $sub = $user->subscriptions()->findOrFail($id);
+
+        /** @var \App\Models\Foodbag */
+        $bag = $sub->plan->bags()->find($request->foodbag_id);
+
+        if (! $bag) {
+            abort(404, 'The requested food bag is no longer available.');
+        }
+
+        // Update the user's current subscription's food bag
+        if ($bag) {
+            $sub->food_bag_id = $bag->id;
+            $sub->delivery_method = $request->delivery_method ?? 'delivery';
+            $sub->save();
+        }
+
+        return (new SubscriptionResource($sub))
+            ->additional([
+                'message' => __('You have successfully activated the ":0" food bag for :1', [
+                    $bag->title,
+                    $user->fullname
+                ]),
+                'status' => $status ?? 'success',
+                'response_code' => HttpStatus::ACCEPTED,
+            ]);
     }
 
     /**
@@ -147,7 +176,7 @@ class SubscriptionController extends Controller
 
         if (! $subscription) {
             return $this->responseBuilder([
-                'message' => __('0: is not subscribed to this plan.', [$user->fullname]),
+                'message' => __(':0 is not subscribed to this plan.', [$user->fullname]),
                 'status' => 'error',
                 'response_code' => HttpStatus::NOT_FOUND,
             ]);

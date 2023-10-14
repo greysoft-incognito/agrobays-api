@@ -30,6 +30,8 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->name('admin.')->g
     // Users Routes
     Route::apiResource('users', UsersController::class);
     Route::prefix('users/{user}')->name('users.')->group(function () {
+        Route::put('wallet', [UsersController::class, 'fund']);
+
         // Orders Route
         Route::apiResource('orders', UserOrderController::class)->only(['index', 'show']);
         Route::apiResource('dispatched', UserDispatchController::class)->only(['index', 'show']);
