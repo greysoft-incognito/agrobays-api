@@ -17,10 +17,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('account')->name('account.')->middleware(['auth:sanctum'])
 ->group(function () {
-    // Account Routes
-    Route::apiResource('/', AccountController::class)
-        ->only(['index', 'update', 'store', 'destroy'])
-        ->parameter('', 'user');
     Route::get('ping', [AccountController::class, 'ping'])->name('ping');
     Route::get('dashboard', [AccountController::class, 'dashboard'])->name('dashboard');
 
@@ -45,4 +41,9 @@ Route::prefix('account')->name('account.')->middleware(['auth:sanctum'])
     // Orders Route
     Route::apiResource('orders', OrderController::class)->only(['index', 'show']);
     Route::apiResource('dispatched', DispatchController::class)->only(['index', 'show']);
+
+    // Account Routes
+    Route::apiResource('/', AccountController::class)
+        ->only(['index', 'update', 'store', 'destroy'])
+        ->parameter('', 'user');
 });
