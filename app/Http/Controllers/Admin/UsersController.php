@@ -119,7 +119,7 @@ class UsersController extends Controller
             'nextofkin_relationship' => ['nullable', 'string', 'max:255'],
             'nextofkin_phone' => ['nullable', 'string', 'max:255'],
             'address.*' => ['nullable', 'string', 'max:255'],
-            'country.*' => ['nullable', 'string', 'max:255'],
+            'country.*' => ['nullable', 'max:255'],
             'state.*' => ['nullable', 'string', 'max:255'],
             'city.*' => ['nullable', 'string', 'max:255'],
         ], [], [
