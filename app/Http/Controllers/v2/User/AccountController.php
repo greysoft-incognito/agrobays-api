@@ -109,11 +109,11 @@ class AccountController extends Controller
                     $_field = current(explode(':image', (string) $_field));
                 }
 
-                if ('password' === $_field) {
-                    $user->password = Hash::make($request->password);
-                } else {
-                    $user->{$_field} = $request->{$_field};
+                if ($_field !== 'password') {
                     $updated[$_field] = $request->{$_field};
+                    $user->{$_field} = $request->{$_field};
+                } else {
+                    $user->password = Hash::make($request->password);
                 }
             }
         }
