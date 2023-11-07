@@ -9,6 +9,7 @@ use App\Models\Saving;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -140,7 +141,7 @@ class AccountController extends Controller
                 $vals .= '|min:8|confirmed';
             }
             if (is_array($filled[$field])) {
-                return [$field.'.*' => 'required'];
+                return [$field . '.*' => 'required'];
             }
 
             return [$field => "required|$vals"];
@@ -173,8 +174,10 @@ class AccountController extends Controller
 
                 if ($_field !== 'password') {
                     $updated[$_field] = $request->{$_field};
+                    $user->{$_field} = $request->{$_field};
+                } else {
+                    $user->password = Hash::make($request->password);
                 }
-                $user->{$_field} = $request->{$_field};
             }
         }
 
