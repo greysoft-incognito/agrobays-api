@@ -37,7 +37,7 @@ class Transaction extends Model
     ];
 
     protected $casts = [
-        'taxq1' => 'float',
+        'tax' => 'float',
         'due' => 'float',
         'fees' => 'float',
         'amount' => 'float',

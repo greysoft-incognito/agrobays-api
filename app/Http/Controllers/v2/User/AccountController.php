@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -108,10 +109,12 @@ class AccountController extends Controller
                     $_field = current(explode(':image', (string) $_field));
                 }
 
-                if ($_field !== 'password') {
+                if ('password' === $_field) {
+                    $user->password = Hash::make($request->password);
+                } else {
+                    $user->{$_field} = $request->{$_field};
                     $updated[$_field] = $request->{$_field};
                 }
-                $user->{$_field} = $request->{$_field};
             }
         }
 
