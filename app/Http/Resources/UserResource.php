@@ -43,6 +43,7 @@ class UserResource extends JsonResource
             'role' => $this->role,
             'permissions' => $this->permissions,
             'stats' => $this->when($with->contains('stats'), fn () => $this->stats),
+            'verified' => $this->verified,
             'subscription' => new SubscriptionResource($this->subscription),
             'email_verified_at' => $this->email_verified_at,
             'phone_verified_at' => $this->phone_verified_at,
