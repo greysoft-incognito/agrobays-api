@@ -48,7 +48,7 @@ class UserController extends Controller
             }
         })->when($request->role, function (Builder $q) use ($request) {
             if ($request->role === 'vendor') {
-                $q->whereHas('vendor', fn (Builder $q) => $q->whereNotNull('id'));
+                $q->whereHas('vendor');
             } else {
                 $q->where('role', $request->role);
             }

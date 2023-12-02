@@ -29,8 +29,12 @@ class UsersController extends Controller
         $query = User::query();
 
         $query->when($request->role !== 'all', function ($q) use ($request) {
-            $q->where('role', $request->role);
-        })->when($request->boolean('managed'), function ($q) use ($request) {
+            if ($request->role === 'vendor') {
+                $q->whereHas('vendor');
+            } else {
+                $q->where('role', $request->role);
+            }
+        })->when($request->boolean('managed'), function ($q) {
             $q->whereNotNull('pen_code');
         })->when($request->search, function (Builder $q) use ($request) {
             // Search and filter columns
