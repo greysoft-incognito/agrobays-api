@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\v2\FruitBayCategoryController;
 use App\Http\Controllers\v2\FruitBayController;
-use App\Http\Controllers\v2\PlanController;
+use App\Http\Controllers\v2\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,8 +28,16 @@ if (file_exists(base_path('routes/api'))) {
 
 Route::apiResource('fruitbay/categories', FruitBayCategoryController::class)->only(['index', 'show']);
 Route::apiResource('fruitbay', FruitBayController::class);
+Route::middleware(['auth:sanctum'])->apiResource('users', UserController::class)->only(['index', 'show']);
 
-Route::middleware(['auth:sanctum'])->group(function () {
-    // Plans Route
-    Route::apiResource('plans', PlanController::class)->only(['index', 'show', 'store']);
+Route::middleware(['auth:sanctum'])->get('track/order/{reference?}', function ($id) {
+    $dispatch = \App\Models\Dispatch::where(fn ($q) => $q->whereReference($id)->orWhere('id', $id))
+        ->where('status', '!=', 'delivered')
+        ->first();
+
+    return (new \App\Http\Resources\DispatchResource($dispatch))->additional([
+        'message' => \App\EnumsAndConsts\HttpStatus::message(\App\EnumsAndConsts\HttpStatus::OK),
+        'status' => 'success',
+        'response_code' =>  \App\EnumsAndConsts\HttpStatus::OK,
+    ])->response()->setStatusCode(\App\EnumsAndConsts\HttpStatus::OK);
 });

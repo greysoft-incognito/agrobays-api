@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('food_bag_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('food_bag_id')->constrained();
-            $table->foreignId('food_id')->constrained();
+            $table->foreignId('food_bag_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('food_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->integer('quantity')->default(1);
             $table->boolean('is_active')->default(true);
             $table->timestamps();

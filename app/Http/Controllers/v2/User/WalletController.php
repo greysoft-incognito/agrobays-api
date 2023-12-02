@@ -29,7 +29,7 @@ class WalletController extends Controller
         $query = $user->wallet()->orderByDesc('id');
 
         // Set default period
-        $period_placeholder = Carbon::now()->subDays(30)->format('Y/m/d').'-'.Carbon::now()->addDay()->format('Y/m/d');
+        $period_placeholder = Carbon::now()->subDays(30)->format('Y/m/d') . '-' . Carbon::now()->addDay()->format('Y/m/d');
 
         // Get period
         $period = $request->period == '0' ? [] : explode('-', urldecode($request->get('period', $period_placeholder)));
@@ -92,17 +92,18 @@ class WalletController extends Controller
             $recipient->slug;
 
         $user->wallet()->create([
-            'amount' => $request->amount,
             'type' => 'debit',
+            'amount' => $request->amount,
             'source' => 'Funds Transfer',
             'detail' => __('Completed funds transfer to :0', [$recipient_name]),
         ]);
 
         $recipient->wallet()->create([
-            'amount' => $request->amount,
             'type' => 'credit',
+            'amount' => $request->amount,
             'source' => 'Funds Transfer',
             'detail' => __(':0 transfered funds to your wallet.', [$user->fullname ?? $user->username]),
+            'sender_id' => $user->id,
         ]);
 
         return (new UserResource($user->fresh()))->additional([

@@ -14,7 +14,7 @@ class SubscriptionResource extends JsonResource
      */
     public function toArray($request)
     {
-        $with = is_array($request->with) ? $request->with : explode(',', $request->with);
+        $with = collect(is_array($request->with) ? $request->with : explode(',', $request->with));
 
         /** @var \App\Models\CooperativeMembersFoodbag */
         $cooperative_foodbag = $this->cooperative
@@ -46,23 +46,24 @@ class SubscriptionResource extends JsonResource
             'total_left' => $this->total_left,
             'total_saved' => $this->total_saved,
             'left_amount' => $this->left_amount,
-            'amount' => $this->saved_amount,
+            'amount' => $this->plan->amount,
             'saved_amount' => $this->saved_amount,
             'next_amount' => $this->next_amount,
             'fees_left' => ($this->bag?->fees ?? 0) - $this->fees_paid,
             'fees_paid' => $this->fees_paid,
             'fees_split' => $this->fees_split,
+            'custom_foodbag' => $this->custom_foodbag,
             'delivery_method' => $this->delivery_method,
-            'items' => $request->subscription
+            'items' => $request->subscription && !$with->contains('food_items')
                 ? new SavingCollection($this->savings)
                 : new FoodCollection($this->items),
             'bag' => new FoodBagResource($bag),
             'plan' => new PlanResource($this->plan),
-            'user' => $this->when(in_array('user', $with), function () {
+            'user' => $this->when($with->contains('user'), function () {
                 return new UserBasicDataResource($this->user);
             }),
             'transaction' => [
-                'reference' => str($this->plan->title)->camel().'-'.$this->id.$this->plan_id,
+                'reference' => str($this->plan->title)->camel() . '-' . $this->id . $this->plan_id,
                 'amount' => $this->saved_amount,
                 'fees' => $this->fees_paid,
                 'updated_at' => $this->updated_at,

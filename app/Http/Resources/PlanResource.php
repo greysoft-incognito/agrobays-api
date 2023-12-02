@@ -20,13 +20,14 @@ class PlanResource extends JsonResource
         return [
             'id' => $this->id,
             'slug' => $this->slug,
-            'title' => $this->title,
-            'description' => $this->description,
-            'duration' => $this->duration,
             'icon' => $this->icon,
+            'title' => $this->title,
             'amount' => $this->amount,
             'status' => $this->status,
+            'duration' => $this->duration,
             'image_url' => $this->image_url,
+            'description' => $this->description,
+            'customizable' => $this->customizable,
             $this->mergeWhen($v >= 2, [
                 'foodbags' => $this->when(in_array('foodbags', $with), function () {
                     return new FoodBagCollection($this->food_bag);

@@ -63,13 +63,13 @@ class Dispatched extends Notification
         $package = $type === 'order' ? 'fruit order' : 'food bag';
         $handler_phone = $item->user->phone ?? '';
 
-        $link = env('FRONTEND_LINK')."/track/order/{$item->reference}";
+        $link = env('FRONTEND_LINK') . "/track/order/{$item->reference}";
 
         $line1 = [
             'shipped' => "Your {$package} with REF: {$item->reference} is on it's way to you, we will let you know when it's available, you will need the code below to confirm when you receive your order.",
             'confirmed' => "Your {$package} with REF: {$item->reference} has been confirmed and will be dispatched soon. Track your package <a href=\"{$link}\">Here</a>",
             'dispatched' => "Your {$package} with REF: {$item->reference} has been dispatched and will be delivered soon, your handler will call you from {$handler_phone}, please keep your phone reachable.",
-            'delivered' => 'Congratulations, you package has been delivered, thanks for engaging our services.',
+            'delivered' => 'Congratulations, your package has been delivered, thanks for engaging our services.',
             'assigned' => "You have been assigned to deliver {$package} package with REF: {$item->reference} to {$item->dispatchable->user->fullname} ({$item->dispatchable->user->phone}), you are required to visit the dispatch facility for further instructions.",
         ];
 
@@ -115,17 +115,30 @@ class Dispatched extends Notification
         $package = $type === 'order' ? 'fruit order' : 'food bag';
         $handler_phone = $item->user->phone ?? '';
 
-        $link = env('FRONTEND_LINK')."/track/order/{$item->reference}";
+        $link = env('FRONTEND_LINK') . "/track/order/{$item->reference}";
 
         $text = [
-            'shipped' => "Your {$package} is on it's way, you will need this code {$item->code}, to confirm when you receive your order.",
-            'confirmed' => "Your {$package} is confirmed and will be dispatched soon. Track package with this link {$link}.",
-            'dispatched' => "Your {$package} has been dispatched, your handler will call you from {$handler_phone}, please keep your phone reachable.",
-            'delivered' => 'Congratulations, you package has been delivered, thanks for using our services.',
-            'assigned' => "A {$package} package with REF: {$item->reference} is assigned to you for {$item->dispatchable->user->fullname} ({$item->dispatchable->user->phone}), please visit the dispatch facility for further instructions.",
+            'shipped' => implode(' ', [
+                "Your {$package} is on it's way, you will need this code {$item->code},",
+                "to confirm when you receive your order."
+            ]),
+            'confirmed' => implode(' ', [
+                "Your {$package} is confirmed and will be dispatched soon.",
+                "Track package with this link {$link}."
+            ]),
+            'dispatched' => implode(' ', [
+                "Your {$package} has been dispatched, your handler will call you from {$handler_phone},",
+                "please keep your phone reachable."
+            ]),
+            'delivered' => 'Congratulations, your package has been delivered, thanks for using our services.',
+            'assigned' => implode(' ', [
+                "A {$package} package with REF: {$item->reference} is assigned",
+                "to you for {$item->dispatchable->user->fullname} ({$item->dispatchable->user->phone}),",
+                "please visit the dispatch facility for further instructions.
+            "]),
         ];
 
-        $message = __('Hi :0, ', [$item->dispatchable->user->firstname]).($text[$status]);
+        $message = __('Hi :0, ', [$item->dispatchable->user->firstname]) . ($text[$status]);
 
         return (new TwilioSmsMessage())
             ->content($message);
@@ -147,17 +160,28 @@ class Dispatched extends Notification
 
         $link = "/track/order/{$item->reference}";
         if ($status !== 'confirmed') {
-            // dd(ModelsNotification::where('notifiable_types', 'App\Models\Dispatch')->where('notifiable_id', $item->id)->where('data->shortUrl', '!=', NULL)->first());
-
             // (new \Cuttly)->delete($this->shortUrl);
         }
 
         $text = [
-            'shipped' => "Your {$package} is on it's way, you will need this code {$item->code}, to confirm when you receive your order.",
-            'confirmed' => "Your {$package} is confirmed and will be dispatched soon. Track package with <a href=\"{$link}\">this link</a>.",
-            'dispatched' => "Your {$package} has been dispatched, your handler will call you from {$handler_phone}, please keep your phone reachable.",
-            'delivered' => 'Congratulations, you package has been delivered, thanks for using our services.',
-            'assigned' => "A {$package} package with REF: {$item->reference} is assigned to you for {$item->dispatchable->user->fullname} ({$item->dispatchable->user->phone}), please visit the dispatch facility for further instructions.",
+            'shipped' => implode(' ', [
+                "Your {$package} is on it's way, you will need this code {$item->code},",
+                "to confirm when you receive your order."
+            ]),
+            'confirmed' => implode(' ', [
+                "Your {$package} is confirmed and will be dispatched soon.",
+                "Track package with <a href=\"{$link}\">this link</a>."
+            ]),
+            'dispatched' => implode(' ', [
+                "Your {$package} has been dispatched, your handler will call you",
+                "from {$handler_phone}, please keep your phone reachable."
+            ]),
+            'delivered' => 'Congratulations, your package has been delivered, thanks for using our services.',
+            'assigned' => implode(' ', [
+                "A {$package} package with REF: {$item->reference} is assigned to you",
+                "for {$item->dispatchable->user->fullname} ({$item->dispatchable->user->phone}),",
+                "please visit the dispatch facility for further instructions."
+            ])
         ];
 
         return [

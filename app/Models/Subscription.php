@@ -15,10 +15,11 @@ class Subscription extends Model
     use HasFactory;
 
     protected $fillable = [
-        'delivery_method',
         'interval',
         'next_date',
         'cooperative_id',
+        'custom_foodbag',
+        'delivery_method',
     ];
 
     protected $appends = [
@@ -35,12 +36,27 @@ class Subscription extends Model
     protected $casts = [
         'fees_paid' => 'float',
         'next_date' => 'datetime',
+        'custom_foodbag' => 'boolean',
     ];
 
     protected $attributes = [
         'fees_paid' => 0.00,
+        'custom_foodbag' => false,
         'delivery_method' => 'delivery',
     ];
+
+    public function __get($key)
+    {
+        if ($key === 'plan') {
+            $plan = $this->plan()->first();
+            if ($this->custom_foodbag) {
+                $plan->amount = $this->bag->price ?? 0;
+            }
+            return $plan;
+        }
+
+        return $this->getAttribute($key);
+    }
 
     /**
      * The "booted" method of the model.
@@ -78,6 +94,10 @@ class Subscription extends Model
      */
     public function bag(): HasOne
     {
+        if ($this->custom_foodbag) {
+            return $this->hasOne(CustomFoodbag::class, 'subscription_id', 'id');
+        }
+
         return $this->hasOne(FoodBag::class, 'id', 'food_bag_id');
     }
 
@@ -227,10 +247,10 @@ class Subscription extends Model
     public function feesSplit(): Attribute
     {
         // Divide the fees by the number of days left
-        $this->bag->fees = $this->bag->fees ?? 0;
+        $fees = $this->bag->fees ?? 0;
 
         return Attribute::make(
-            get: fn () => $this->bag->fees && $this->paid_days > 0 ? ($this->bag->fees / $this->paid_days) : 0
+            get: fn () => $fees && $this->paid_days > 0 ? ($fees / $this->paid_days) : 0
         );
     }
 

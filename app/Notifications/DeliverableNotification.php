@@ -47,10 +47,12 @@ class DeliverableNotification extends Notification
      */
     public function toMail($notifiable)
     {
+        $text = str($this->deliverable->message)->replaceMatches('/\{([^}]*)\}/', ":$1")->toString();
+
         $message = [
-            'name' => $notifiable->firstname,
-            'message_line1' => $this->deliverable->message,
-            'close_greeting' => 'Regards, <br/>'.config('settings.site_name'),
+            'hide_name' => true,
+            'message_line1' => __($text, $notifiable->basic_data?->toArray()),
+            'close_greeting' => 'Regards, <br/>' . config('settings.site_name'),
         ];
 
         return (new MailMessage())->view(
@@ -67,10 +69,15 @@ class DeliverableNotification extends Notification
      */
     public function toArray($notifiable)
     {
+        $text = str($this->deliverable->message)
+            ->stripTags()->replaceMatches('/\{([^}]*)\}/', ":$1")
+            ->replaceMatches('/\n\t/', " ")
+            ->toString();
+
         return [
             'type' => 'Notification',
             'title' => $this->deliverable->subject,
-            'message' => strip_tags($this->deliverable->message),
+            'message' => __($text, $notifiable->basic_data?->toArray()),
         ];
     }
 
@@ -79,11 +86,16 @@ class DeliverableNotification extends Notification
      */
     public function toBroadcast($notifiable): BroadcastMessage
     {
+        $text = str($this->deliverable->message)
+            ->stripTags()->replaceMatches('/\{([^}]*)\}/', ":$1")
+            ->replaceMatches('/\n\t/', " ")
+            ->toString();
+
         return new BroadcastMessage([
             'id' => null,
             'type' => 'Notification',
             'title' => $this->deliverable->subject,
-            'message' => strip_tags($this->deliverable->message),
+            'message' => __($text, $notifiable->basic_data?->toArray()),
             'read_at' => null,
             'created_at' => now(),
         ]);

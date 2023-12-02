@@ -46,6 +46,8 @@ class UserResource extends JsonResource
             'subscription' => new SubscriptionResource($this->subscription),
             'email_verified_at' => $this->email_verified_at,
             'phone_verified_at' => $this->phone_verified_at,
+            'verification_data' => $this->when($with->contains('verification_data'), $this->verification_data),
+            'verification_level' => $this->verification_level,
             'payment_method' => $this->when(isset($this->data['payment_method']), [
                 'type' => $this->data['payment_method']['type'] ?? null,
                 'card_type' => $this->data['payment_method']['card_type'] ?? null,
@@ -54,6 +56,7 @@ class UserResource extends JsonResource
                 'exp_year' => $this->data['payment_method']['exp_year'] ?? null,
                 'auth_date' => $this->data['payment_method']['auth_date'] ?? null,
             ]),
+            'vendor_id' => $this->vendor->id,
             $this->mergeWhen($this->pen_code, function () {
                 return [
                     'pen_code' => $this->pen_code,

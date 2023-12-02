@@ -46,9 +46,17 @@ class SubscriptionController extends Controller
         // Get period
         $period = $request->period == '0' ? [] : explode('-', urldecode($request->get('period', $period_placeholder)));
 
-        $query->when(isset($period[0]), function ($query) use ($period) {
+        $query->when(isset($period[0]), function ($query) use ($period, $request) {
             // Filter by period
-            $query->whereBetween('created_at', [new Carbon($period[0]), (new Carbon($period[1]))->addDay()]);
+            $query->where(function ($query) use ($period, $request) {
+                $query->whereBetween('created_at', [new Carbon($period[0]), (new Carbon($period[1]))->addDay()]);
+                if ($request->force_status_check && $request->status) {
+                    $status = is_array($request->status) ? $request->status : explode(',', $request->status);
+                    $query->orWhere(function ($query) use ($status) {
+                        $query->currentStatus($status);
+                    });
+                }
+            });
         });
 
         $subscriptions = $query->paginate($request->get('limit', 15));

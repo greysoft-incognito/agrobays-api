@@ -8,6 +8,7 @@ use App\Models\Subscription;
 use App\Models\Transaction;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
 class Charts
@@ -139,7 +140,23 @@ class Charts
             $end = Carbon::now()->endOfWeek();
         }
 
-        $query = (($for === 'user') ? $user->transactions() : Transaction::query())
+        $query =  Transaction::query()->when($for === 'user', function (Builder $q) use ($user) {
+            $q->whereUserId($user->id);
+        })->when($for === 'vendor', function (Builder $q) use ($user) {
+            $q->whereHasMorph(
+                'transactable',
+                Saving::class,
+                function (Builder $query) use ($user) {
+                    $query->whereHas('subscription.dispatch.vendor', fn ($q) => $q->whereUserId($user->id));
+                }
+            );
+        })->whereDoesntHaveMorph(
+            'transactable',
+            Saving::class,
+            function (Builder $query, string $type) {
+                $query->whereHas('subscription', fn ($q) => $q->whereIn('status', ['closed', 'withdraw']));
+            }
+        )
             ->where('status', 'complete')
             ->when($period !== 'all', function ($q) use ($start, $end) {
                 $q->whereBetween('created_at', [$start, $end]);
@@ -163,11 +180,13 @@ class Charts
             $start = Carbon::now()->startOfWeek();
             $end = Carbon::now()->endOfWeek();
         }
-
-        $query = (($for === 'user') ? $user->orders() : Order::query())
-            ->when($period !== 'all', function ($q) use ($start, $end) {
-                $q->whereBetween('created_at', [$start, $end]);
-            });
+        $query =  Order::query()->when($for === 'user', function (Builder $q) use ($user) {
+            $q->whereUserId($user->id);
+        })->when($for === 'vendor', function (Builder $q) use ($user) {
+            $q->whereHas('dispatch.vendor', fn ($q) => $q->whereUserId($user->id));
+        })->when($period !== 'all', function ($q) use ($start, $end) {
+            $q->whereBetween('created_at', [$start, $end]);
+        });
 
         return $count ? $query->count('id') : (float) $query->sum('amount');
     }
@@ -188,8 +207,12 @@ class Charts
             $end = Carbon::now()->endOfWeek();
         }
 
-        $query = (($for === 'user') ? $user->savings() : Saving::query())
-            ->where('status', 'complete')
+        $query =  Saving::query()->when($for === 'user', function (Builder $q) use ($user) {
+            $q->whereUserId($user->id);
+        })->when($for === 'vendor', function (Builder $q) use ($user) {
+            $q->whereHas('subscription.dispatch.vendor', fn ($q) => $q->whereUserId($user->id));
+        })->where('status', 'complete')
+            ->whereDoesntHave('subscription', fn ($q) => $q->whereIn('status', ['closed', 'withdraw']))
             ->when($period !== 'all', function ($q) use ($start, $end) {
                 $q->whereBetween('created_at', [$start, $end]);
             });
@@ -213,7 +236,11 @@ class Charts
             $end = Carbon::now()->endOfWeek();
         }
 
-        $query = (($for === 'user') ? $user->subscriptions() : Subscription::query())
+        $query =  Subscription::query()->when($for === 'user', function (Builder $q) use ($user) {
+            $q->whereUserId($user->id);
+        })->when($for === 'vendor', function (Builder $q) use ($user) {
+            $q->whereHas('dispatch.vendor', fn ($q) => $q->whereUserId($user->id));
+        })->whereNotIn('status', ['closed', 'withdraw'])
             ->whereHas('savings', fn ($q) => $q->where('status', 'complete'))
             ->when(!$count, function ($q) {
                 $q->withSum('savings', 'amount');
@@ -241,15 +268,36 @@ class Charts
             $end = Carbon::now()->endOfWeek();
         }
 
-        return (float) (($for === 'user') ? $user->transactions() : Transaction::query())
+        $query =  Transaction::query()->when($for === 'user', function (Builder $q) use ($user) {
+            $q->whereUserId($user->id);
+        })->when($for === 'vendor', function (Builder $q) use ($user) {
+            $q->whereHasMorph(
+                'transactable',
+                Saving::class,
+                function (Builder $query) use ($user) {
+                    $query->whereHas('subscription.dispatch.vendor', fn ($q) => $q->whereUserId($user->id));
+                }
+            );
+        });
+
+        return (float) $query->whereDoesntHaveMorph(
+            'transactable',
+            Saving::class,
+            function (Builder $query) {
+                $query->whereHas('subscription', fn ($q) => $q->whereIn('status', ['closed', 'withdraw']));
+            }
+        )
             ->where('status', 'complete')
             ->when($period !== 'all', function ($q) use ($start, $end) {
                 $q->whereBetween('created_at', [$start, $end]);
             })->sum('amount');
     }
 
-    public function customers($for = 'user', $period = 'year')
+    public function customers($for = 'user', $period = 'year', $user_id = null)
     {
+        /** @var \App\Models\User $user */
+        $user = $user_id ? User::whereId($user_id)->orWhere('username', $user_id)-> firstOrNew() : Auth::user();
+
         if ($period === 'year') {
             $start = Carbon::now()->startOfYear();
             $end = Carbon::now()->endOfYear();
@@ -261,7 +309,13 @@ class Charts
             $end = Carbon::now()->endOfWeek();
         }
 
-        return (int) User::when($period !== 'all', function ($q) use ($start, $end) {
+        return (int) User::when($for === 'vendor', function ($q) use ($start, $end, $user) {
+            $q->whereHas('subscriptions', function ($q) use ($user) {
+                $q->whereHas('dispatch.vendor', fn ($q) => $q->whereUserId($user->id));
+            })->whereHas('orders', function ($q) use ($user) {
+                $q->whereHas('dispatch.vendor', fn ($q) => $q->whereUserId($user->id));
+            });
+        })->when($period !== 'all', function ($q) use ($start, $end) {
             $q->whereBetween('created_at', [$start, $end]);
         })->count('id');
     }
@@ -277,8 +331,17 @@ class Charts
         /** @var \App\Models\User $user */
         $user = $user_id ? User::whereId($user_id)->orWhere('username', $user_id)-> firstOrNew() : Auth::user();
 
-        $savings = (float) (($for === 'user') ? $user->savings() : Saving::query())->sum('amount');
-        $orders = (float) (($for === 'user') ? $user->orders() : Order::query())->sum('amount');
+        $orders =  Order::query()->when($for === 'user', function (Builder $q) use ($user) {
+            $q->whereUserId($user->id);
+        })->when($for === 'vendor', function (Builder $q) use ($user) {
+            $q->whereHas('dispatch.vendor', fn ($q) => $q->whereUserId($user->id));
+        })->sum('amount');
+
+        $savings =  Saving::query()->when($for === 'user', function (Builder $q) use ($user) {
+            $q->whereUserId($user->id);
+        })->when($for === 'vendor', function (Builder $q) use ($user) {
+            $q->whereHas('subscription.dispatch.vendor', fn ($q) => $q->whereUserId($user->id));
+        })->sum('amount');
 
         return $this->pie([
             'legend' => [
@@ -315,7 +378,23 @@ class Charts
                 $start = Carbon::now()->month($get)->startOfMonth();
                 $end = Carbon::now()->month($get)->endOfMonth();
 
-                return (($for === 'user') ? $user->transactions() : Transaction::query())
+                return Transaction::query()->when($for === 'user', function (Builder $q) use ($user) {
+                    $q->whereUserId($user->id);
+                })->when($for === 'vendor', function (Builder $q) use ($user) {
+                    $q->whereHasMorph(
+                        'transactable',
+                        Saving::class,
+                        function (Builder $query) use ($user) {
+                            $query->whereHas('subscription.dispatch.vendor', fn ($q) => $q->whereUserId($user->id));
+                        }
+                    );
+                })->whereDoesntHaveMorph(
+                    'transactable',
+                    Saving::class,
+                    function (Builder $query) {
+                        $query->whereHas('subscription', fn ($q) => $q->whereIn('status', ['closed', 'withdraw']));
+                    }
+                )
                     ->where('status', 'complete')
                     ->whereBetween('created_at', [$start, $end])->sum('amount');
             })->toArray(),
@@ -323,8 +402,12 @@ class Charts
                 $start = Carbon::now()->month($get)->startOfMonth();
                 $end = Carbon::now()->month($get)->endOfMonth();
 
-                return (($for === 'user') ? $user->subscriptions() : Subscription::query())
-                    ->withSum('savings', 'amount')
+                return Subscription::query()->when($for === 'user', function (Builder $q) use ($user) {
+                    $q->whereUserId($user->id);
+                })->when($for === 'vendor', function (Builder $q) use ($user) {
+                    $q->whereHas('dispatch.vendor', fn ($q) => $q->whereUserId($user->id));
+                })->withSum('savings', 'amount')
+                    ->whereNotIn('status', ['closed', 'withdraw'])
                     ->whereHas('savings', fn ($q) => $q->where('status', 'complete'))
                     ->whereBetween('created_at', [$start, $end])->get()->sum('savings_sum_amount');
             })->toArray(),
@@ -332,16 +415,23 @@ class Charts
                 $start = Carbon::now()->month($get)->startOfMonth();
                 $end = Carbon::now()->month($get)->endOfMonth();
 
-                return (($for === 'user') ? $user->orders() : Order::query())
-                    ->whereHas('transaction', fn ($q) => $q->where('status', 'complete'))
+                Order::query()->when($for === 'user', function (Builder $q) use ($user) {
+                    $q->whereUserId($user->id);
+                })->when($for === 'vendor', function (Builder $q) use ($user) {
+                    $q->whereHas('dispatch.vendor', fn ($q) => $q->whereUserId($user->id));
+                })->whereHas('transaction', fn ($q) => $q->where('status', 'complete'))
                     ->whereBetween('created_at', [$start, $end])->sum('amount');
             })->toArray(),
             'savings' => collect(range(1, 12))->map(function ($get) use ($for, $user) {
                 $start = Carbon::now()->month($get)->startOfMonth();
                 $end = Carbon::now()->month($get)->endOfMonth();
 
-                return (($for === 'user') ? $user->savings() : Saving::query())
-                    ->where('status', 'complete')
+                Saving::query()->when($for === 'user', function (Builder $q) use ($user) {
+                    $q->whereUserId($user->id);
+                })->when($for === 'vendor', function (Builder $q) use ($user) {
+                    $q->whereHas('subscription.dispatch.vendor', fn ($q) => $q->whereUserId($user->id));
+                })->where('status', 'complete')
+                    ->whereDoesntHave('subscription', fn ($q) => $q->whereIn('status', ['closed', 'withdraw']))
                     ->whereBetween('created_at', [$start, $end])->sum('amount');
             })->toArray(),
         ], true);

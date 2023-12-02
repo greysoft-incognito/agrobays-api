@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -147,6 +148,28 @@ class User extends Authenticatable implements MustVerifyEmail
             $model->orders()->delete();
             $model->wallet()->delete();
         });
+    }
+
+    /**
+     * Get the URL to the fruit bay category's photo.
+     *
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
+     */
+    protected function basicData(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => collect($this->toArray())
+                ->except(['data','subscription','permissions','vendor','bank','address'])
+                ->merge([
+                    'home_address' => $this->address['home'] ?? '',
+                    'shipping_address' => $this->address['shipping'] ?? '',
+                ])
+                ->replace([
+                    'country' => $this->country['name'] ?? '',
+                    'state' => $this->state['name'] ?? '',
+                    'city' => $this->city['name'] ?? '',
+                ])
+        );
     }
 
     /**
@@ -415,6 +438,47 @@ class User extends Authenticatable implements MustVerifyEmail
         );
     }
 
+    /**
+     * Return the user's verified status
+     *
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
+     */
+    public function verified(): Attribute
+    {
+        return new Attribute(
+            get: fn () => (bool) $this->vendor->verified,
+        );
+    }
+
+    /**
+     * Return the user's verification data
+     *
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
+     */
+    public function verificationData(): Attribute
+    {
+        return new Attribute(
+            get: fn () => $this->vendor->exists ? $this->vendor->verification_data : null,
+        );
+    }
+
+    /**
+     * Return the user's verification level
+     *
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
+     */
+    public function verificationLevel(): Attribute
+    {
+        return new Attribute(
+            get: fn () => $this->vendor->exists
+                ? $this->vendor->verification_level
+                : ($this->verified
+                    ? 3
+                    : 0
+                )
+        );
+    }
+
     public function scopeIsOnline($query, $is_online = true)
     {
         if ($is_online) {
@@ -466,6 +530,16 @@ class User extends Authenticatable implements MustVerifyEmail
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    /**
+     * Get User vendor data
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function vendor(): HasOne
+    {
+        return $this->hasOne(Vendor::class)->withDefault(true);
     }
 
     /**

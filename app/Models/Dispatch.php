@@ -6,11 +6,20 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Notifications\Notifiable;
 
 class Dispatch extends Model
 {
-    use HasFactory, Notifiable;
+    use HasFactory;
+    use Notifiable;
+
+    protected $statusLabels = [
+        'shipped' => "Order Shipped.",
+        'confirmed' => "Order confirmed",
+        'dispatched' => "Order dispatched.",
+        'delivered' => 'Order Delivered.',
+    ];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -27,7 +36,6 @@ class Dispatch extends Model
      * @var array
      */
     protected $appends = [
-        'last_location',
         'item_type',
         'type',
     ];
@@ -38,7 +46,8 @@ class Dispatch extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'last_location' => 'array',
+        'extra_data' => 'collection',
+        'last_location' => 'collection',
     ];
 
     /**
@@ -47,40 +56,16 @@ class Dispatch extends Model
      * @var array
      */
     protected $attributes = [
-        'last_location' => '{"lon": "", "lat": ""}',
+        'extra_data' => '{"logs": []}',
+        'last_location' => '{"lon": "", "lat": "", "address": ""}',
     ];
 
     /**
      * Get the dispatch's dispatchable model (probably an order or a food bag).
      */
-    public function dispatchable()
+    public function dispatchable(): MorphTo
     {
         return $this->morphTo();
-    }
-
-    /**
-     * Interact with the dispatch's last location.
-     *
-     * @return  \Illuminate\Database\Eloquent\Casts\Attribute
-     */
-    public function lastLocation(): Attribute
-    {
-        return Attribute::make(
-            get: function ($value, $attributes) {
-                if (! $value || ! is_string($value) || is_null($val = json_decode($value))) {
-                    return [
-                        'lon' => '',
-                        'lat' => '',
-                    ];
-                }
-
-                return $val;
-            },
-            set: fn ($value) => ['last_location' => json_encode([
-                'lon' => $value->lon ?? $value['lon'] ?? '',
-                'lat' => $value->lat ?? $value['lat'] ?? '',
-            ])]
-        );
     }
 
     /**
@@ -163,5 +148,47 @@ class Dispatch extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the vendor that owns the Dispatch (Vendor)
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function vendor(): BelongsTo
+    {
+        return $this->belongsTo(Vendor::class);
+    }
+
+    public function log(string $log, $uid, $save = false)
+    {
+        $log = str($log)->wordCount() > 1 ? $log : $this->statusLabels[$log] ?? null;
+
+        if (!$log) {
+            return $this->extra_data;
+        }
+
+        $entry = [
+            'log' => $log,
+            'date' => now()->toIso8601ZuluString(),
+            'user_id' => $uid,
+        ];
+
+        if (isset($this->last_location['lat'], $this->last_location['lng'])) {
+            $entry['pos'] = [
+                'lat' => $this->last_location['lat'],
+                'lng' => $this->last_location['lng']
+            ];
+        }
+
+        $extra_data = $this->extra_data->merge([
+            'logs' => [ ...$this->extra_data['logs'] ?? [], $entry ]
+        ]);
+
+        if ($save) {
+            $this->extra_data = $extra_data;
+            $this->save();
+        }
+        return $extra_data;
     }
 }

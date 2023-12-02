@@ -34,8 +34,8 @@ if (file_exists(base_path('routes/api'))) {
 Route::apiResource('feedbacks', FeedbackController::class)
     ->middleware('auth:sanctum')->except(['destroy']);
 
-Route::get('/track/order/{reference?}', function ($reference = null) {
-    $order = Dispatch::whereReference($reference)->where('status', '!=', 'delivered')->first();
+Route::get('/track/order/{reference?}', function ($id) {
+    $order = Dispatch::whereReference($id)->orWhere('id', $id)->where('status', '!=', 'delivered')->first();
 
     return (new Controller())->buildResponse([
         'message' => $order ? 'OK' : 'Invalid tracking code',

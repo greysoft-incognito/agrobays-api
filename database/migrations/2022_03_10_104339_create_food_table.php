@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('food_bag_id')->constrained('food_bags')->onUpdate('cascade')->onDelete('cascade');
             $table->string('name');
-            $table->string('description');
+            $table->string('description')->fulltext();
             $table->string('weight');
             $table->string('image', 520)->nullable();
             $table->timestamps();

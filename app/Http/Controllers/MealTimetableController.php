@@ -22,6 +22,7 @@ class MealTimetableController extends Controller
             return $this->autoTimetable($request);
         }
 
+        /** @var \App\Models\User */
         $user = $request->user();
 
         $query = $user->mealTimetable();

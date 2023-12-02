@@ -13,8 +13,21 @@ class Plan extends Model
     use HasFactory;
 
     public $appends = [
-        'food_bag',
-        'image_url',
+        // 'food_bag',
+        // 'image_url',
+    ];
+
+    protected $casts = [
+        'customizable' => 'boolean',
+    ];
+
+    /**
+     * The model's attributes.
+     *
+     * @var array<string, any>
+     */
+    protected $attributes = [
+        'customizable' => true,
     ];
 
     public static function boot()
@@ -56,7 +69,7 @@ class Plan extends Model
     {
         $image = $this->image
             ? img($this->image, 'banner', 'large')
-            : 'https://loremflickr.com/320/320/'.urlencode($this->title ?? 'fruit');
+            : 'https://loremflickr.com/320/320/' . urlencode($this->title ?? 'fruit');
 
         return Attribute::make(
             get: fn () => $image,

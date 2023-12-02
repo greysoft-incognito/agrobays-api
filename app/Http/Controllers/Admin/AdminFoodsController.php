@@ -68,6 +68,7 @@ class AdminFoodsController extends Controller
             'unit' => 'required|in:kg,g,lb,oz,ml,l',
             'image' => 'nullable|mimes:jpg,jpeg,png',
             'description' => 'nullable|min:10|max:550',
+            'available' => 'nullable|boolean',
         ], [], [
             'food_bag_id' => 'Food Bag',
         ]);
@@ -88,6 +89,7 @@ class AdminFoodsController extends Controller
         $food->unit = $request->unit ?? $food->unit ?? 'kg';
         $food->price = $request->price ?? $food->price ?? 1;
         $food->description = $request->description;
+        $food->available = $request->boolean('available');
 
         $food->save();
 

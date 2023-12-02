@@ -30,6 +30,16 @@ class Food extends Model
     protected $casts = [
         'weight' => 'float',
         'price' => 'float',
+        'available' => 'boolean',
+    ];
+
+    /**
+     * The model's attributes.
+     *
+     * @var array<string, any>
+     */
+    protected $attributes = [
+        'available' => true,
     ];
 
     public function registerFileable()

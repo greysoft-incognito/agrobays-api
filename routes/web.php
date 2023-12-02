@@ -4,7 +4,9 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Response as FacadesResponse;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
 
@@ -33,8 +35,8 @@ Route::get('/', function () {
 
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('downloads/secure/{filename?}', function ($filename = '') {
-        if (file_exists(storage_path('app/backup/'.$filename))) {
-            return response()->download(storage_path('app/secure/'.$filename));
+        if (file_exists(storage_path('app/backup/' . $filename))) {
+            return response()->download(storage_path('app/secure/' . $filename));
         }
 
         return abort(404, 'File not found');
@@ -62,6 +64,27 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
 
         return view('web-user', compact('user', 'errors', 'code', 'action'));
     });
+});
+
+Route::get('face-models/{filename?}', function ($filename = '') {
+    if (Storage::disk('local')->exists('face-models/' . $filename)) {
+        // Set the mime type and content length
+        $file = Storage::disk('local')->get('face-models/' . $filename);
+        $type = Storage::disk('local')->mimeType('face-models/' . $filename);
+        $size = Storage::disk('local')->size('face-models/' . $filename);
+
+        $response = FacadesResponse::make($file, 200);
+        $response->header('Content-Type', $type);
+        $response->header('Content-Length', $size);
+
+        // Set cors headers
+        $response->header('Access-Control-Allow-Origin', '*');
+        $response->header('Access-Control-Allow-Methods', 'GET');
+
+        return $response;
+    }
+
+    return abort(404, 'File not found');
 });
 
 Route::get('/web/user', [AuthenticatedSessionController::class, 'index'])

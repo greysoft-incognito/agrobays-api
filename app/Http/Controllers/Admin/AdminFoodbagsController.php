@@ -78,7 +78,7 @@ class AdminFoodbagsController extends Controller
     {
         \Gate::authorize('usable', 'foodbags');
         $validator = Validator::make($request->all(), [
-            'food_id' => 'required|numeric|exists:food,id|unique:food_bag_items,food_id,NULL,id,food_bag_id,'.$item,
+            'food_id' => 'required|numeric|exists:food,id|unique:food_bag_items,food_id,NULL,id,food_bag_id,' . $item,
             'quantity' => 'nullable|numeric|min:1|max:100',
             'is_active' => 'nullable|boolean',
         ], [
@@ -159,7 +159,7 @@ class AdminFoodbagsController extends Controller
             ]);
         }
 
-        $bag = FoodBag::find($item) ?? new FoodBag;
+        $bag = FoodBag::find($item) ?? new FoodBag();
 
         $bag->fees = $request->fees;
         $bag->title = $request->title;

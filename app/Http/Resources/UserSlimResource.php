@@ -44,6 +44,9 @@ class UserSlimResource extends JsonResource
             'permissions' => $this->permissions,
             'email_verified_at' => $this->email_verified_at,
             'phone_verified_at' => $this->phone_verified_at,
+            'verified' => $this->verified,
+            'verification_data' => $this->when($with->contains('verification_data'), $this->verification_data),
+            'verification_level' => $this->verification_level,
             'last_seen' => $this->last_seen ?? $this->created_at,
             $this->mergeWhen($this->pen_code, function () {
                 return [

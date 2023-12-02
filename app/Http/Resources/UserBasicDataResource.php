@@ -17,6 +17,7 @@ class UserBasicDataResource extends JsonResource
         $user = $request->user();
         $prived = in_array($request->role ?? $user?->role, ['admin', 'manager']) || $user?->id === $this->id;
         $dispatch = in_array('dispatch', [$user?->role, $request->role]);
+        $with = collect(is_array($request->with) ? $request->with : str($request->with)->remove(' ')->explode(','));
 
         return [
             'id' => $this->id,
@@ -38,6 +39,14 @@ class UserBasicDataResource extends JsonResource
             'permissions' => $this->when($request->withPermissions, $this->permissions),
             'dispatches' => $this->when($dispatch, $this->dispatches),
             'wallet_balance' => $this->when($prived, $this->wallet_balance),
+            'verification_data' => $this->when($with->contains('verification_data'), $this->verification_data),
+            'verification_level' => $this->verification_level,
+            $this->mergeWhen($this->pen_code && $prived, function () {
+                return [
+                    'pen_code' => $this->pen_code,
+                    'pen_code_u' => $this->pen_code_u,
+                ];
+            }),
         ];
     }
 

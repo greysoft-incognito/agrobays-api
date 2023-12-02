@@ -17,23 +17,28 @@ class FoodResource extends JsonResource
         // Remove this line and the functionality it supports
         // (Added for backwards compatibility | food.image in app should be replaced by food.image_url)
         $isAdmin = str($request->fullUrl())->contains('admin');
+        // ================================================= //
+
+        $quantity = $this->whenNotNull($this->quantity, $this->pivot?->quantity ?? 0);
+        $without = str($request->without)->remove(' ')->explode(',');
 
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'description' => $this->description,
-            'price' => $this->price ?? 0,
-            'price_total' => (float) ($this->price ?? 0) * ($this->pivot?->quantity ?? 0),
             'unit' => $this->when($request->editing, $this->unit),
-            'weight' => $this->when(
-                $request->editing,
-                $this->weight,
-                ($this->weight ?? 0) . ($this->unit ?? 'kg')
-            ),
-            'quantity' => $this->pivot?->quantity ?? 0,
+            'price' => $this->price ?? 0,
+            'type' => str(get_class($this->resource))->afterLast('\\'),
             'image' => $this->when($request->version < 1 || !$isAdmin, $this->image_url),
+            'weight' => $this->when($request->editing, $this->weight, ($this->weight ?? 0) . ($this->unit ?? 'kg')),
+            'quantity' => $quantity,
             'image_url' => $this->image_url,
-            'responsive_images' => $this->responsive_images['image'] ?? new \stdClass(),
+            'available' => $this->available,
+            'price_total' => round((float) ($this->price ?? 0) * ($quantity ? $quantity : 1), 2),
+            'description' => $this->description,
+            'responsive_images' => $this->when(
+                !$without->contains('responsive_images'),
+                $this->responsive_images['image'] ?? new \stdClass()
+            ),
             'foodbags' => new FoodBagCollection($this->whenLoaded('foodbags')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

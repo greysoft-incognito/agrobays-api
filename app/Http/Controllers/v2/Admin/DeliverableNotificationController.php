@@ -21,7 +21,7 @@ class DeliverableNotificationController extends Controller
      */
     public function index(Request $request)
     {
-        $query = DeliverableNotification::query();
+        $query = DeliverableNotification::query()->latest();
 
         $deliverables = $query->paginate($request->get('liimit', 15));
 
@@ -49,7 +49,7 @@ class DeliverableNotificationController extends Controller
                     ? $f('Message must have at least 15 characters.')
                     : ''
             ],
-            'type' => ['required', 'string', 'in:mail,inapp,broadcast'],
+            'type' => ['required', 'string', 'in:mail,email,inapp,broadcast'],
             'draft' => ['nullable', 'boolean'],
             'recipient_ids' => ['required'],
         ]);
@@ -83,6 +83,7 @@ class DeliverableNotificationController extends Controller
 
         $type_label = [
             'mail' => 'mail',
+            'email' => 'mail',
             'inapp' => 'in-app notification',
             'broadcast' => 'broadcast notification',
         ][$request->type];
@@ -123,7 +124,7 @@ class DeliverableNotificationController extends Controller
         $request->validate([
             'subject' => ['required', 'string', 'min:15', 'max:155'],
             'message' => ['required', 'string', 'min:15'],
-            'type' => ['required', 'string', 'in:mail,inapp,broadcast'],
+            'type' => ['required', 'string', 'in:mail,email,inapp,broadcast'],
             'draft' => ['nullable', 'boolean'],
             'resend' => ['nullable', 'boolean'],
             'recipient_ids' => ['required_if:draft,0'],
@@ -160,6 +161,7 @@ class DeliverableNotificationController extends Controller
 
         $type_label = [
             'mail' => 'mail',
+            'email' => 'mail',
             'inapp' => 'in-app notification',
             'broadcast' => 'broadcast notification',
         ][$request->type];

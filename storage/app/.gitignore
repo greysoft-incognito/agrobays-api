@@ -2,4 +2,5 @@
 !public/
 !backup/
 !secure/
+!face-models/
 !.gitignore
