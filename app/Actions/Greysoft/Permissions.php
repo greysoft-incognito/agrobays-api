@@ -10,9 +10,10 @@ class Permissions
         'admin' => [
             'users',
             'users.user',
-            'users.dispatch',
-            'users.manager',
             'users.admin',
+            'users.vendor',
+            'users.manager',
+            'users.dispatch',
             'dashboard',
             'content',
             'fruitbay',
@@ -41,6 +42,7 @@ class Permissions
         'manager' => [
             'users',
             'users.user',
+            'users.vendor',
             'users.dispatch',
             'dashboard',
             'fruitbay',
