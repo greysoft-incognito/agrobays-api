@@ -60,6 +60,7 @@ class VendorController extends Controller
 
         $vendor->blocked = $request->boolean('blocked');
         $vendor->verified = $request->boolean('verified');
+        $vendor->save();
 
         return (new VendorResource($vendor))->additional([
             'message' => __(':0\'s vendor status has been updated successfully.', [
