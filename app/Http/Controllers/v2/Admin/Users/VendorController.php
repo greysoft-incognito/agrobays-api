@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\v2\Admin\Users;
 
+use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\VendorResource;
 use App\Models\Vendor;
@@ -38,7 +39,7 @@ class VendorController extends Controller
             'message' => HttpStatus::message(HttpStatus::OK),
             'status' => 'success',
             'response_code' => HttpStatus::OK,
-        ]);
+        ])->response()->setStatusCode(HttpStatus::OK);
     }
 
     /**
@@ -65,8 +66,8 @@ class VendorController extends Controller
                 $vendor->user->fullname,
             ]),
             'status' => 'success',
-            'response_code' => HttpStatus::OK,
-        ]);
+            'response_code' => HttpStatus::ACCEPTED,
+        ])->response()->setStatusCode(HttpStatus::ACCEPTED);
     }
 
     /**
@@ -84,7 +85,7 @@ class VendorController extends Controller
         return (new VendorResource($vendor))->additional([
             'message' => __(':0 has been removed from the vendor programme.', [$vendor->user->fullname]),
             'status' => 'success',
-            'response_code' => HttpStatus::OK,
-        ]);
+            'response_code' => HttpStatus::ACCEPTED,
+        ])->response()->setStatusCode(HttpStatus::ACCEPTED);
     }
 }

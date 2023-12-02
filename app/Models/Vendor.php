@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Extendable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,6 +14,7 @@ class Vendor extends Model
 {
     use HasFactory;
     use Fileable;
+    use Extendable;
 
     /**
      * The attributes that should be cast.
@@ -64,6 +66,10 @@ class Vendor extends Model
     {
         static::deleting(function (Vendor $model) {
             $model->dispatches()->update(['vendor_id' => nul]);
+        });
+
+        static::creating(function (Vendor $model) {
+            $model->username = $model->makeSlug($model->company_name ?? $model->user->fullname);
         });
     }
 

@@ -182,4 +182,40 @@ trait Extendable
 
         return $key ? ($info[$key] ?? '') : $info;
     }
+
+    public static function generateString($strength = 16, $group = 0, $input = null)
+    {
+        $groups = [
+            '0123456789abcdefghi' . md5(time()) . 'jklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' . time() . rand(),
+            '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' . time() . rand(),
+            '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+            '01234567890123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        ];
+        $input = $input ?? $groups[$group] ?? $groups[2];
+
+        $input_length = strlen($input);
+        $random_string = '';
+        for ($i = 0; $i < $strength; $i++) {
+            $random_character = $input[mt_rand(0, $input_length - 1)];
+            $random_string .= $random_character;
+        }
+
+        return $random_string;
+    }
+
+    private static function makeSlug($string = null)
+    {
+        $slug = $string
+            ? str($string)->slug()->toString()
+            : self::generateString(32);
+
+        if (self::whereSlug($slug)->exists()) {
+            if ($string) {
+                $string .= rand();
+            }
+            return self::makeSlug($string);
+        }
+
+        return $slug;
+    }
 }

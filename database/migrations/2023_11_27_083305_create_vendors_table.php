@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
             $table->string('image')->nullable();
+            $table->string('username')->unique();
             $table->string('reg_image')->nullable();
             $table->string('id_image')->nullable();
             $table->string('id_type')->nullable()->default('passport');
