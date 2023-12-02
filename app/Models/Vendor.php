@@ -60,6 +60,13 @@ class Vendor extends Model
         ], true);
     }
 
+    public static function registerEvents()
+    {
+        static::deleting(function (Vendor $model) {
+            $model->dispatches()->update(['vendor_id' => nul]);
+        });
+    }
+
     /**
      * Get the user that owns the Subscription
      *

@@ -14,6 +14,7 @@ use App\Http\Controllers\v2\Admin\Users\SavingController;
 use App\Http\Controllers\v2\Admin\Users\TransactionsController;
 use App\Http\Controllers\v2\Admin\Users\OrderController as UserOrderController;
 use App\Http\Controllers\v2\Admin\Users\DispatchController as UserDispatchController;
+use App\Http\Controllers\v2\Admin\Users\VendorController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -47,4 +48,7 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->name('admin.')->g
         Route::apiResource('subscriptions', SubscriptionController::class);
         Route::apiResource('subscriptions/{subscription}/savings', SavingController::class);
     });
+
+    // Vendor Routes
+    Route::apiResource('vendor', VendorController::class)->except(['store']);
 });

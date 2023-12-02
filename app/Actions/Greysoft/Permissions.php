@@ -12,6 +12,7 @@ class Permissions
             'users.user',
             'users.admin',
             'users.vendor',
+            'users.vendor.delete',
             'users.manager',
             'users.dispatch',
             'dashboard',
