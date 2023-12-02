@@ -21,6 +21,7 @@ class VendorResource extends JsonResource
             'user_id' => $this->user_id,
             'blocked' => $this->blocked,
             'id_type' => $this->id_type,
+            'username' => $this->username,
             'verified' => $this->verified,
             'business_name' => $this->business_name,
             'business_email' => $this->business_email,
