@@ -64,6 +64,7 @@ class Dispatch extends Command
                 $dispatch->code = mt_rand(100000, 999999);
                 $dispatch->reference = config('settings.trx_prefix', 'AGB-') . Str::random(12);
                 $subscription->dispatch()->save($dispatch);
+                $subscription->touch();
 
                 $subscription->user->notify(new Dispatched($subscription->dispatch));
                 $this->info("Saving with ID of {$subscription->id} has been dispatced for proccessing.");
@@ -75,11 +76,12 @@ class Dispatch extends Command
         // Dispatch all orders that are due for delivery
         $orders = Order::whereRelation('transaction', 'status', 'complete')->doesntHave('dispatch')->get();
         if ($orders->isNotEmpty()) {
-            $orders->each(function ($order) {
+            $orders->each(function (Order $order) {
                 $dispatch = new ModelsDispatch();
                 $dispatch->code = mt_rand(100000, 999999);
                 $dispatch->reference = config('settings.trx_prefix', 'AGB-') . Str::random(12);
                 $order->dispatch()->save($dispatch);
+                $order->touch();
                 $order->user->notify(new Dispatched($order->dispatch));
                 $this->info("Order with ID of {$order->id} has been dispatced for proccessing.");
             });

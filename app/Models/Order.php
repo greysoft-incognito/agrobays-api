@@ -17,6 +17,7 @@ class Order extends Model
         'fees' => 'float',
         'items' => 'collection',
         'amount' => 'float',
+        'express_delivery' => 'boolean',
     ];
 
     protected $fillable = [
@@ -29,6 +30,7 @@ class Order extends Model
         'payment',
         'reference',
         'delivery_method',
+        'express_delivery',
     ];
 
     protected $attributes = [
@@ -37,6 +39,7 @@ class Order extends Model
         'fees' => 0.00,
         'amount' => 0.00,
         'delivery_method' => 'delivery',
+        'express_delivery' => false,
     ];
 
     /**

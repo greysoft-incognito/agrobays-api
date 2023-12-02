@@ -25,6 +25,7 @@ return [
     'show_foodbag_item_price' => false,
     'custom_foodbag_shipping_fee' => 100.0,
     'custom_foodbag_item_shipping_fee' => 10.0,
+    'express_shipping_fee' => 2000.0,
     'slack_debug' => false,
     'slack_logger' => false,
     'verify_email' => false,
@@ -50,7 +51,7 @@ return [
     'contact_email' => 'hi@greysoft.ng',
     'contact_address' => '31 Gwari Avenue, Barnawa, Kaduna',
     'office_address' => '31 Gwari Avenue, Barnawa, Kaduna',
-    'last_setting_time' => '2023-11-27 20:39:13',
+    'last_setting_time' => '2023-12-02 11:07:09',
     'permissions' => [
         'manage_guests' => 'View, manage and get notifications for guest and bootcamp registrations',
         'manage_users' => 'Create, view, manage and get notifications for user access',

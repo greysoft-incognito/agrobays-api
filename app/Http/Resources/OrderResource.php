@@ -14,7 +14,8 @@ class OrderResource extends JsonResource
      */
     public function toArray($request)
     {
-        $with = is_array($request->with) ? $request->with : explode(',', $request->with);
+        $with = collect(is_array($request->with) ? $request->with : explode(',', $request->with));
+        $without = collect(is_array($request->without) ? $request->without : explode(',', $request->without));
 
         return [
             'id' => $this->id,
@@ -22,15 +23,16 @@ class OrderResource extends JsonResource
             'due' => $this->due,
             'tax' => $this->tax,
             'fees' => $this->fees,
+            'model' => 'order',
             'amount' => $this->amount,
             'status' => $this->status,
             'payment' => $this->payment,
             'reference' => $this->reference,
             'delivery_method' => $this->delivery_method,
-            'transaction' => new TransactionResource($this->transaction),
+            'express_delivery' => $this->express_delivery,
+            'user' => $this->when($with->contains('user'), new UserBasicDataResource($this->user)),
             'items' => $this->items,
-            'user' => $this->when(in_array('user', $with), new UserBasicDataResource($this->user)),
-            'model' => 'order',
+            'transaction' => $this->when(!$without->contains('transaction'), new TransactionResource($this->transaction)),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

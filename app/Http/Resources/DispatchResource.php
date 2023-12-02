@@ -22,12 +22,11 @@ class DispatchResource extends JsonResource
 
         return [
             'id' => $this->id,
-            'created_at' => $this->created_at,
             'reference' => $this->reference,
             'status' => $this->status,
             'type' => $this->type,
             'item_type' => $this->item_type,
-            'code' => $this->code,
+            'code' => $this->when(in_array('admin', [$request->user()->role, $request->restrict]), $this->code),
             'last_location' => $this->last_location,
             'extra_data' => $this->when($with->contains('extra_data'), $this->extra_data),
             $this->mergeWhen($v < 2, function () {
@@ -64,6 +63,8 @@ class DispatchResource extends JsonResource
 
                 return $data;
             }),
+            'placed_at' => $this->placed_at,
+            'created_at' => $this->created_at,
         ];
     }
 

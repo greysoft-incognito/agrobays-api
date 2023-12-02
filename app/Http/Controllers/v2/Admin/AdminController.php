@@ -29,6 +29,7 @@ class AdminController extends Controller
         'shipping_fee' => 'integer',
         'paid_shipping' => 'boolean',
         'vendor_system' => 'boolean',
+        'express_shipping_fee' => 'decimal',
         'show_foodbag_item_price' => 'boolean',
         'custom_foodbag_shipping_fee' => 'decimal',
         'custom_foodbag_item_shipping_fee' => 'decimal',

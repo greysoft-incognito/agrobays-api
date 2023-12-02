@@ -32,7 +32,7 @@ class DispatchController extends Controller
 
         \Gate::authorize('usable', 'dispatch.' . $status);
 
-        $query = Dispatch::orderBy('id', 'DESC');
+        $query = Dispatch::query();
 
         // Set default period
         $period_placeholder = Carbon::now()->subDays(30)->format('Y/m/d') . '-' . Carbon::now()->addDays(2)->format('Y/m/d');
@@ -42,17 +42,17 @@ class DispatchController extends Controller
 
         $query->when(isset($period[0]), function ($query) use ($period) {
             // Filter by period
-            $query->whereBetween('created_at', [new Carbon($period[0]), (new Carbon($period[1]))->addDay()]);
+            $query->whereBetween('dispatches.created_at', [new Carbon($period[0]), (new Carbon($period[1]))->addDay()]);
         });
 
         $query->when($user->role === 'dispatch' || $request->restrict === 'dispatch', function ($query) use ($user) {
             // Filter by handler
-            $query->where('user_id', $user->id);
+            $query->where('dispatches.user_id', $user->id);
         });
 
         // Set the dispatch Status
         if (in_array($status, ['pending', 'confirmed', 'dispatched', 'delivered'])) {
-            $query->whereStatus($status);
+            $query->where('dispatches.status', $status);
         }
 
         // Search For an dispatched order
@@ -70,7 +70,7 @@ class DispatchController extends Controller
             });
         });
 
-        $dispatches = $query->latest()->paginate($request->get('limit', 30));
+        $dispatches = $query->latest('placed_at')->paginate($request->get('limit', 30));
 
         return (new DispatchCollection($dispatches))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),

@@ -46,6 +46,7 @@ class Dispatch extends Model
      * @var array<string, string>
      */
     protected $casts = [
+        'placed_at' => 'datetime',
         'extra_data' => 'collection',
         'last_location' => 'collection',
     ];
@@ -59,6 +60,14 @@ class Dispatch extends Model
         'extra_data' => '{"logs": []}',
         'last_location' => '{"lon": "", "lat": "", "address": ""}',
     ];
+
+    public static function boot(): void
+    {
+        parent::boot();
+        static::creating(function (Dispatch $model) {
+            $model->placed_at = $model->dispatchable->created_at ?? now();
+        });
+    }
 
     /**
      * Get the dispatch's dispatchable model (probably an order or a food bag).

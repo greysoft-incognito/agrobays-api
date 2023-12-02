@@ -87,6 +87,7 @@ class FruitBayController extends Controller
             'address' => ['nullable', 'string', 'max:255'],
             'inline' => ['nullable', 'boolean'],
             'payment_method' => ['nullable', 'string', 'in:wallet,paystack'],
+            'express_delivery' => ['nullable', 'boolean'],
         ], [], [
             'cart.*.item_id' => ';',
         ]);
@@ -118,6 +119,9 @@ class FruitBayController extends Controller
             $globalSshippingFee = config('settings.paid_shipping', false) || $delivery_method == 'delivery'
                 ? config('settings.shipping_fee', 0)
                 : 0;
+            if ($request->boolean('express_delivery')) {
+                $globalSshippingFee += config('settings.express_shipping_fee', 0);
+            }
 
             if ($request->address && $request->address !== ($user->address['shipping'] ?? '')) {
                 $address = $user->address;
@@ -337,6 +341,7 @@ class FruitBayController extends Controller
             'payment' => 'pending',
             'reference' => $reference,
             'delivery_method' => $request->delivery_method,
+            'express_delivery' => $request->boolean('express_delivery'),
         ]);
 
         $transaction = $order->transaction();
