@@ -69,7 +69,7 @@ class Vendor extends Model
         });
 
         static::creating(function (Vendor $model) {
-            $model->username = $model->makeSlug($model->company_name ?? $model->user->fullname);
+            $model->username = $model->makeSlug($model->company_name ?? $model->user->fullname, 'username');
         });
     }
 

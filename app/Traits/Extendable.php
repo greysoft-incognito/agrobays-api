@@ -203,13 +203,13 @@ trait Extendable
         return $random_string;
     }
 
-    private static function makeSlug($string = null)
+    private static function makeSlug($string = null, $field = 'slug')
     {
         $slug = $string
             ? str($string)->slug()->toString()
             : self::generateString(32);
 
-        if (self::whereSlug($slug)->exists()) {
+        if (self::where($field, $slug)->exists()) {
             if ($string) {
                 $string .= rand();
             }
