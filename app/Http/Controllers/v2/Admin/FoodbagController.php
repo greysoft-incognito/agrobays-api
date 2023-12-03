@@ -157,7 +157,7 @@ class FoodbagController extends Controller
         });
 
         return (new FoodBagCollection($items))->additional([
-            'message' => __(':0 food items have been deleted.', [$items->count()]),
+            'message' => __(':0 food bags have been deleted.', [$items->count()]),
             'status' => 'success',
             'response_code' => HttpStatus::ACCEPTED,
         ])->response()->setStatusCode(HttpStatus::ACCEPTED);
