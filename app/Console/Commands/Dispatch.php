@@ -218,7 +218,7 @@ class Dispatch extends Command
                     } else {
                         // Let's disable the automatic payments.
                         $data = $user->data;
-                        $data['payment_method']['type'] = '!paystack';
+                        $data['payment_method'] = [...$data['payment_method'], 'type' => '!paystack'];
 
                         // Save the user data to disable the automatic payments.
                         $user->data = $data;
