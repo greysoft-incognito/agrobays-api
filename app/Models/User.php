@@ -158,8 +158,8 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function basicData(): Attribute
     {
         return Attribute::make(
-            get: fn () => collect($this->toArray())
-                ->except(['data','subscription','permissions','vendor','bank','address'])
+            get: fn() => collect($this->toArray())
+                ->except(['data', 'subscription', 'permissions', 'vendor', 'bank', 'address'])
                 ->merge([
                     'home_address' => $this->address['home'] ?? '',
                     'shipping_address' => $this->address['shipping'] ?? '',
@@ -172,6 +172,27 @@ class User extends Authenticatable implements MustVerifyEmail
         );
     }
 
+    protected function country(): Attribute
+    {
+        return Attribute::make(
+            set: fn($val) => is_scalar($val) ? ['country' => json_encode(['name' => $val])] : $val,
+        );
+    }
+
+    protected function state(): Attribute
+    {
+        return Attribute::make(
+            set: fn($val) => is_scalar($val) ? ['state' => json_encode(['name' => $val])] : $val,
+        );
+    }
+
+    protected function city(): Attribute
+    {
+        return Attribute::make(
+            set: fn($val) => is_scalar($val) ? ['city' => json_encode(['name' => $val])] : $val,
+        );
+    }
+
     /**
      * Get the URL to the fruit bay category's photo.
      *
@@ -180,7 +201,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function imageUrl(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->media_file,
+            get: fn() => $this->media_file,
         );
     }
 
@@ -192,7 +213,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function penCodeU(): Attribute
     {
         return Attribute::make(
-            get: fn () => str($this->pen_code ?? '')->whenNotEmpty(function ($str) {
+            get: fn() => str($this->pen_code ?? '')->whenNotEmpty(function ($str) {
                 $parts = str_split($str, 4);
                 $result = array_slice($parts, 0, 3);
                 return implode('-', $result);
@@ -208,7 +229,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function stats(): Attribute
     {
         return Attribute::make(
-            get: fn () => [
+            get: fn() => [
                 'pie' => (new Charts())->getPie('user', $this->id),
                 'bar' => (new Charts())->getBar('user', $this->id),
                 'summary' => [
@@ -233,7 +254,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function avatar(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->media_file,
+            get: fn() => $this->media_file,
         );
     }
 
@@ -249,7 +270,7 @@ class User extends Authenticatable implements MustVerifyEmail
         $name .= ! isset($this->lastname) && ! isset($this->firstname) && isset($this->username) ? ucfirst($this->username) : '';
 
         return new Attribute(
-            get: fn () => $name,
+            get: fn() => $name,
         );
     }
 
@@ -283,9 +304,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Cooperative::class);
     }
 
-    public function hasRequestedToJoin($model)
-    {
-    }
+    public function hasRequestedToJoin($model) {}
 
     /**
      * Interact with the user's permissions.
@@ -295,7 +314,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function permissions(): Attribute
     {
         return Attribute::make(
-            get: fn () => \Permission::getPermissions($this),
+            get: fn() => \Permission::getPermissions($this),
         );
     }
 
@@ -434,7 +453,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function onlinestatus(): Attribute
     {
         return new Attribute(
-            get: fn () => ($this->last_seen ?? now()->subMinutes(6))->gt(now()->subMinutes(5)) ? 'online' : 'offline',
+            get: fn() => ($this->last_seen ?? now()->subMinutes(6))->gt(now()->subMinutes(5)) ? 'online' : 'offline',
         );
     }
 
@@ -446,7 +465,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function verified(): Attribute
     {
         return new Attribute(
-            get: fn () => (bool) $this->vendor->verified,
+            get: fn() => (bool) $this->vendor->verified,
         );
     }
 
@@ -458,7 +477,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function verificationData(): Attribute
     {
         return new Attribute(
-            get: fn () => $this->vendor->exists ? $this->vendor->verification_data : null,
+            get: fn() => $this->vendor->exists ? $this->vendor->verification_data : null,
         );
     }
 
@@ -470,7 +489,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function verificationLevel(): Attribute
     {
         return new Attribute(
-            get: fn () => $this->vendor->exists
+            get: fn() => $this->vendor->exists
                 ? $this->vendor->verification_level
                 : ($this->verified
                     ? 3
@@ -508,7 +527,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function subscription(): Attribute
     {
         return new Attribute(
-            get: fn () => $this->subscriptions()->where('status', '!=', 'complete')->latest()->first(),
+            get: fn() => $this->subscriptions()->where('status', '!=', 'complete')->latest()->first(),
         );
     }
 
@@ -556,7 +575,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         // Sum wallet credit transactions and subtract wallet debit transactions
         return new Attribute(
-            get: fn () => (float) $this->wallet()
+            get: fn() => (float) $this->wallet()
                 ->selectRaw('sum(case when type = "credit" then amount else -amount end) as balance')
                 ->value('balance'),
         );

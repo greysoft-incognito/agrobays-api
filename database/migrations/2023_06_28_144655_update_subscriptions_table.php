@@ -25,6 +25,7 @@ return new class extends Migration
         Schema::table('wallets', function (Blueprint $table) {
             $table
                 ->foreignId('sender_id')
+                ->constrained('users')
                 ->after('user_id')
                 ->nullable()
                 ->constrained()
